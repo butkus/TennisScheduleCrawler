@@ -1,5 +1,7 @@
 package com.butkus.tenniscrawler;
 
+import lombok.Getter;
+import org.javatuples.Pair;
 import org.openqa.selenium.WebElement;
 
 import java.time.LocalDate;
@@ -8,6 +10,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.butkus.tenniscrawler.Colors.ORANGE;
+import static com.butkus.tenniscrawler.Colors.WHITE;
 import static java.util.stream.Collectors.toList;
 
 public class TimeTable {
@@ -16,12 +20,6 @@ public class TimeTable {
     private static final String YELLOW_CLASS = "ex_sal";  // yellow -- for sale, not reserve
     private static final String ORANGE_CLASS = "ex_car";  // orange -- YOUR reserved (and paid for) time
     private static final String GREEN_CLASS = "ex_res";   // green  -- slot in cart
-
-    private static final Integer WHITE = 1;
-    private static final Integer GREY = 2;
-    private static final Integer YELLOW = 3;
-    private static final Integer ORANGE = 4;
-    private static final Integer GREEN = 5;
 
     public static final String CLASS = "class";
     public static final String COURT = "data-court";
@@ -37,22 +35,26 @@ public class TimeTable {
 
     private final List<Slot> slots;
     private final LocalDate date;
+    private final Integer courtId;
     private String courtName;
+
+    @Getter
     private List<Integer> aggregatedCourts;
 
-    public TimeTable(List<WebElement> webElements, String date, int placeId) {
+    public TimeTable(List<WebElement> webElements, String date, int courtId) {
         this.slots = resolveSlots(webElements);
         getAggregatedSlotsForTheDay();
         this.date = LocalDate.parse(date);
-        if (placeId == 2) {
+        this.courtId = courtId;
+        if (courtId == 2) {
             this.courtName = "Kieta danga";
-        } else if (placeId == 8) {
+        } else if (courtId == 8) {
             this.courtName = "Kilimas";
         }
     }
 
     public boolean isOfferFound() {
-        boolean hasReserved = slots.stream().anyMatch(e -> e.getClasses().contains(ORANGE_CLASS));      // todo replace with check in aggregated slots
+        boolean hasReserved = aggregatedCourts.stream().anyMatch(ORANGE::equals);
 
         if (!hasReserved) {
             for (int i=0; i<5; i++) {
@@ -79,16 +81,16 @@ public class TimeTable {
                 .distinct()
                 .collect(toList());
 
-        List<Integer> aggregatedCourts = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0));
+        List<Integer> aggregatedCourtsBuilder = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0));
 
         for (String court : courts) {
             List<Slot> courtSlots = slots.stream()
                     .filter(e -> court.equals(e.getCourt()))
                     .collect(toList());
             List<Integer> aggregatedCourt = aggregateCourt(courtSlots);
-            coalesceCourts(aggregatedCourts, aggregatedCourt);
+            coalesceCourts(aggregatedCourtsBuilder, aggregatedCourt);
         }
-        this.aggregatedCourts = aggregatedCourts;       // todo unify naming
+        this.aggregatedCourts = aggregatedCourtsBuilder;       // todo unify naming
     }
 
     public String getReadableAggregatedCourt() {
@@ -152,7 +154,7 @@ public class TimeTable {
 
     private static void coalesceCourts(List<Integer> aggregatedCourts, List<Integer> newCourt) {
         for (int i=0; i<6; i++) {
-            if (newCourt.get(i).equals(ORANGE)) {
+            if (newCourt.get(i).equals(ORANGE)) {       // todo add green and yellow maybe
                 aggregatedCourts.set(i, ORANGE);
             } else if (newCourt.get(i).equals(WHITE)) {
                 aggregatedCourts.set(i, WHITE);
@@ -199,5 +201,12 @@ public class TimeTable {
         String court = webElement.getAttribute(COURT);
         String time = webElement.getAttribute(TIME);
         return new Slot(classes, court, time);
+    }
+
+    public void updateFromCache(Cache cache) {
+        List<Integer> cached = cache.get(Pair.with(date, courtId));
+        if (cached != null) {
+            coalesceCourts(this.aggregatedCourts, cached);
+        }
     }
 }

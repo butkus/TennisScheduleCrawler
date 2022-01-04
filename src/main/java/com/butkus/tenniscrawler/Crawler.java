@@ -4,17 +4,19 @@ import org.javatuples.Pair;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class Crawler {
@@ -24,48 +26,74 @@ public class Crawler {
 
     private final AudioPlayer audioPlayer;
     private final Page page;
+    private final Cache cache;
+    private final Random random;
+    private final Duration sleepUpTo;
 
     @Autowired
-    public Crawler(AudioPlayer audioPlayer, Page page) {
+    public Crawler(AudioPlayer audioPlayer,
+                   Page page,
+                   Cache cache,
+                   @Value("${app.sleep-up-to}") Duration sleepUpTo) throws NoSuchAlgorithmException {
         this.audioPlayer = audioPlayer;
         this.page = page;
+        this.cache = cache;
+        this.sleepUpTo = sleepUpTo;
+        this.random = SecureRandom.getInstanceStrong();
     }
 
     @Scheduled(cron = "${app.cron}")
-    public void run() {
+    public void run() throws InterruptedException {
+        sleepUpTo(sleepUpTo);
         Instant start = Instant.now();
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd EEEE,  HH:mm:ss");
-        LocalDateTime localDateTime = start.atZone(ZoneId.of("Europe/Vilnius")).toLocalDateTime();
-        String dateTime = localDateTime.format(formatter);
-        System.out.printf("-- Crawl started at %s%n", dateTime);
+        printCrawlStartTime(start);
 
         try {
-            crawlAllOnce(page);
+            crawlEverythingOnce(page);
         } finally {
             page.close();
         }
-        System.out.printf("-- Crawl took %s seconds%n", start.until(Instant.now(), ChronoUnit.SECONDS));
+        printCrawlEndTime(start);
     }
 
-    private void crawlAllOnce(Page page) {
+    private void printCrawlEndTime(Instant start) {
+        Instant end = Instant.now();
+        long jobLengthInSeconds = start.until(end, ChronoUnit.SECONDS);
 
-        // 0)  18:00-18:30
-        // 1)  18:30-19:00
-        // 2)  19:00-19:30
-        // 3)  19:30-20:00
-        // 4)  20:00-20:30
-        // 5)  20:30-21:00
+        // todo format time
+        //-- Crawl took 144 seconds and finished at 2022-01-04T19:23:30.123095400Z
+        System.out.printf("-- Crawl took %s seconds and finished at %s%n", jobLengthInSeconds, end);
+    }
+
+    private void crawlEverythingOnce(Page page) {
+
+        boolean cacheStale = cache.isStale();
+        if (cacheStale) {
+            cache.clearCache();
+            page.login(Page.UserType.REGISTERED_USER);
+            System.out.println("==== Logged in as a <<<REGISTERED USER>>> ====");
+        } else {
+            page.login(Page.UserType.ANONYMOUS_USER);
+            System.out.println("==== Logged in as an --ANONYMOUS-- USER ====");
+            System.out.printf("==== Cache will update in %s minutes ====%n", cache.durationToLive().toMinutes());
+        }
+
         List<Pair<LocalDate, Integer>> inputs = makeInputs();
         boolean foundAny = false;
-
         for (Pair<LocalDate, Integer> pair : inputs) {
-            String date = pair.getValue0().toString();
-            Integer placeId = pair.getValue1();
-            page.get(String.format("https://savitarna.tenisopasaulis.lt/rezervavimas/rezervavimas?sDate=%s&iPlaceId=%s", date, placeId));
+            LocalDate date = pair.getValue0();
+            String dateString = date.toString();
+            Integer courtId = pair.getValue1();
+            page.get(String.format("https://savitarna.tenisopasaulis.lt/rezervavimas/rezervavimas?sDate=%s&iPlaceId=%s", dateString, courtId));
 
             List<WebElement> slots = getAllTimeSlotsSeb(page);
-            TimeTable timeTable = new TimeTable(slots, date, placeId);
+            TimeTable timeTable = new TimeTable(slots, dateString, courtId);     // fixme: this step takes too long
+
+            if (page.loggedInAsRegisteredUser()) {
+                cache.addIfCacheable(date, courtId, timeTable.getAggregatedCourts());
+            } else {
+                timeTable.updateFromCache(cache);
+            }
 
             boolean foundInCurrent = false;
             if (timeTable.isOfferFound()) {
@@ -76,8 +104,24 @@ public class Crawler {
             String foundNotFoundMark = foundInCurrent ? "‹✔›" : " \uD83D\uDFA8 ";   // IntelliJ UTF-8 console output issue: https://stackoverflow.com/a/56430344
             System.out.printf("%-54s %s%n", timeTable.getReadableAggregatedCourt(), foundNotFoundMark);     // fixme replace arbitrary 54
         }
+        if (cacheStale) {      // todo rework to be less dependent on order. now before-if, withing-if, and after-if operations are interrwined to work correctly. Would be nice to have cache work independently
+            cache.setUpdated();
+        }
 
         if (foundAny) audioPlayer.playSound();
+    }
+
+    private void printCrawlStartTime(Instant start) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd EEEE,  HH:mm:ss");
+        LocalDateTime localDateTime = start.atZone(ZoneId.of("Europe/Vilnius")).toLocalDateTime();
+        String dateTime = localDateTime.format(formatter);
+        System.out.printf("-- Crawl started at %s%n", dateTime);
+    }
+
+    private void sleepUpTo(Duration duration) throws InterruptedException {
+        int sleepSeconds = random.nextInt((int) duration.toSeconds());
+        TimeUnit.SECONDS.sleep(sleepSeconds);
+        System.out.printf("-- Slept for %s seconds%n", sleepSeconds);
     }
 
     private static List<Pair<LocalDate, Integer>> makeInputs() {
@@ -88,27 +132,16 @@ public class Crawler {
         LocalDate date = LocalDate.now();
         List<Pair<LocalDate, Integer>> listHard = new ArrayList<>();
         List<Pair<LocalDate, Integer>> listCarpet = new ArrayList<>();
-//        for (int i=0; i<25; i++) {
-//            LocalDate currentDate = date.plusDays(i);
-//            if (excludedDays.contains(currentDate)) continue;
-//            Pair<LocalDate, Integer> pairHard = Pair.with(currentDate, HARD);
-//            Pair<LocalDate, Integer> pairCarpet = Pair.with(currentDate, CARPET);
-//            listHard.add(pairHard);
-//            listCarpet.add(pairCarpet);
-//        }
-//        listHard.add(Pair.with(LocalDate.parse("2022-01-05"), HARD));
-//        listHard.add(Pair.with(LocalDate.parse("2022-01-06"), HARD));
-        listHard.add(Pair.with(LocalDate.parse("2022-01-09"), HARD));           // needs better time
-//
-//        listHard.add(Pair.with(LocalDate.parse("2022-01-16"), HARD));
-//        listHard.add(Pair.with(LocalDate.parse("2022-01-30"), HARD));
-//
-//        listCarpet.add(Pair.with(LocalDate.parse("2022-01-05"), CARPET));
-//        listCarpet.add(Pair.with(LocalDate.parse("2022-01-06"), CARPET));
-//        listCarpet.add(Pair.with(LocalDate.parse("2022-01-09"), CARPET));       // needs better time
-//
-//        listCarpet.add(Pair.with(LocalDate.parse("2022-01-16"), CARPET));
-//        listCarpet.add(Pair.with(LocalDate.parse("2022-01-30"), CARPET));
+        for (int i=0; i<25; i++) {
+            LocalDate currentDate = date.plusDays(i);
+            if (excludedDays.contains(currentDate)) continue;
+            Pair<LocalDate, Integer> pairHard = Pair.with(currentDate, HARD);
+            Pair<LocalDate, Integer> pairCarpet = Pair.with(currentDate, CARPET);
+            listHard.add(pairHard);
+            listCarpet.add(pairCarpet);
+        }
+
+//        listCarpet.add(Pair.with(LocalDate.parse("2022-01-09"), CARPET));
         List<Pair<LocalDate, Integer>> list = new ArrayList<>();
         list.addAll(listHard);
         list.addAll(listCarpet);
@@ -141,9 +174,23 @@ public class Crawler {
 
     private static List<LocalDate> getUnwantedDays() {
         List<LocalDate> result = new ArrayList<>();
-        result.add(LocalDate.parse("2021-12-30"));
-        result.add(LocalDate.parse("2021-12-31"));
-        result.add(LocalDate.parse("2022-01-02"));
+        result.add(LocalDate.parse("2022-01-04"));
+        result.add(LocalDate.parse("2022-01-05"));
+
+        result.add(LocalDate.parse("2022-01-06"));      // THURSDAY -- > AREADY HAVE WEDNESDAY BOOKED
+
+        result.add(LocalDate.parse("2022-01-11"));      // 1900 secured
+
+        result.add(LocalDate.parse("2022-01-07"));      // fridays
+        result.add(LocalDate.parse("2022-01-14"));      // we generally
+        result.add(LocalDate.parse("2022-01-21"));      // avoid fridays
+
+        result.add(LocalDate.parse("2022-01-08"));      // saturdays
+        result.add(LocalDate.parse("2022-01-15"));
+        result.add(LocalDate.parse("2022-01-22"));
+        result.add(LocalDate.parse("2022-01-28"));
+        result.add(LocalDate.parse("2022-01-29"));
+
 
         return result;
     }

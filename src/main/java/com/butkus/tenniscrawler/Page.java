@@ -24,7 +24,8 @@ public class Page {
     private ChromeDriver driver;
     private WebDriverWait wait;
 
-    private boolean loggedIn;
+    private boolean loggedIn;       // todo remove
+    private UserType loggedInAs;
 
     @Autowired
     public Page(@Value("${app.chrome-driver-path}") File chromeDriverPath,
@@ -34,16 +35,21 @@ public class Page {
         this.sebUsername = sebUsername;
         this.sebPassword = sebPassword;
         loggedIn = false;
+        loggedInAs = UserType.LOGGED_OUT;
     }
 
     public void get(String url) {
         if (!loggedIn) {
-            init();
-            driver.get("https://savitarna.tenisopasaulis.lt/vartotojas/prisijungimas#anonymus-login");
-            login();
-            loggedIn = true;
+            login(UserType.ANONYMOUS_USER);
         }
         driver.get(url);
+    }
+
+    public void login(UserType userType) {
+        init();
+        driver.get("https://savitarna.tenisopasaulis.lt/vartotojas/prisijungimas#anonymus-login");
+        loginAsUser(userType);
+        loggedIn = true;
     }
 
     private void init() {
@@ -51,9 +57,14 @@ public class Page {
         this.wait = createDriverWait(driver);
     }
 
-    private void login() {
-//        authorizedLogin();      //  todo: crawl as much as possible via anonymous login;
-        anonymousLogin();
+    private void loginAsUser(UserType userType) {       // todo unify terms
+        if (userType == UserType.REGISTERED_USER) {
+            authorizedLogin();
+            loggedInAs = UserType.REGISTERED_USER;
+        } else if (userType == UserType.ANONYMOUS_USER) {
+            anonymousLogin();
+            loggedInAs = UserType.ANONYMOUS_USER;
+        }
     }
 
     public WebElement findElement(By findBy) {
@@ -107,6 +118,14 @@ public class Page {
 //        driver.close();
         driver.quit();      // todo quit driver, just close page (need to close chromedriver on app shutdown)
         loggedIn = false;
+        loggedInAs = UserType.LOGGED_OUT;
     }
 
+    public boolean loggedInAsRegisteredUser() {
+        return loggedInAs == UserType.REGISTERED_USER;
+    }
+
+    public enum UserType {
+        REGISTERED_USER, ANONYMOUS_USER, LOGGED_OUT
+    }
 }
