@@ -1,6 +1,8 @@
 package com.butkus.tenniscrawler;
 
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -10,10 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.io.IOException;
-import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class Page {
@@ -48,7 +47,7 @@ public class Page {
 
     public void login(UserType userType) {
         init();
-        driver.get("https://savitarna.tenisopasaulis.lt/vartotojas/prisijungimas#anonymus-login");
+        driver.get("https://savitarna.tenisopasaulis.lt");
         loginAsUser(userType);
         loggedIn = true;
     }
@@ -68,20 +67,8 @@ public class Page {
         }
     }
 
-    public Optional<WebElement> findElement(By findBy) {
-        Optional<WebElement> result;
-        try {
-            wait.until(ExpectedConditions.or(
-                    ExpectedConditions.visibilityOfElementLocated(findBy)
-            ));
-            result = Optional.of(driver.findElement(findBy));
-        } catch (Exception e) {
-            result = Optional.empty();
-            String screenshotFileName = "Screenshot_" + Instant.now().toString().replace(":", "-");
-            String screenshotPathOrError = captureScreenshot(driver, screenshotFileName);
-            System.out.println("screenshotPathOrError = " + screenshotPathOrError);
-        }
-        return result;
+    public MaybeElement findElement(By findBy) {
+        return new MaybeElement(driver, wait, findBy);
     }
 
     public List<WebElement> findElements(By findBy) {
@@ -105,22 +92,24 @@ public class Page {
     }
 
     private void anonymousLogin() {
-        WebElement anonymousLoginIcon = findElement(By.xpath("//a[contains(@href, '#anonymus-login')]")).get(); // fixme can be no element
+        MaybeElement anonymousLoginIcon = findElement(By.xpath("//a[contains(@href, '#anonymus-login')]"));
+        while (!anonymousLoginIcon.isFound()) {
+            anonymousLoginIcon.saveScreenshot("anonymous-login");
+            anonymousLoginIcon.refresh();
+        }
         anonymousLoginIcon.click();
-        Optional<WebElement> boxPopclose = findElement(By.id("boxPopclose"));
-        boxPopclose.ifPresent(WebElement::click);
+
+        MaybeElement boxPopclose = findElement(By.id("boxPopclose"));
+        if (boxPopclose.isFound()) boxPopclose.click();
     }
 
     private void authorizedLogin() {
-        WebElement loginIcon = findElement(By.xpath("//a[contains(@href, '#normal-login')]")).get();
-        loginIcon.click();
-
-        WebElement usernameTextField = findElement(By.id("LoginForm_var_login")).get();
-        WebElement passwordTextField = findElement(By.id("LoginForm_var_password")).get();
+        MaybeElement usernameTextField = findElement(By.id("LoginForm_var_login"));
+        MaybeElement passwordTextField = findElement(By.id("LoginForm_var_password"));
         usernameTextField.sendKeys(sebUsername);
         passwordTextField.sendKeys(sebPassword);
 
-        WebElement loginButton = findElement(By.xpath("//form[@id='login_form']/div[4]/input")).get();
+        MaybeElement loginButton = findElement(By.xpath("//form[@id='login_form']/div[4]/input"));
         loginButton.click();
     }
 
@@ -133,22 +122,6 @@ public class Page {
 
     public boolean loggedInAsRegisteredUser() {
         return loggedInAs == UserType.REGISTERED_USER;
-    }
-
-    public static String captureScreenshot (WebDriver driver, String screenshotName){
-
-        try {
-            TakesScreenshot ts = (TakesScreenshot)driver;
-            File source = ts.getScreenshotAs(OutputType.FILE);
-            String dest = "C:\\Users\\vytas\\Downloads\\chrome screenshots\\" + screenshotName + ".png";
-            File destination = new File(dest);
-            org.apache.commons.io.FileUtils.copyFile(source, destination);
-            return dest;
-        }
-
-        catch (IOException e) {
-            return e.getMessage();
-        }
     }
 
     public enum UserType {
