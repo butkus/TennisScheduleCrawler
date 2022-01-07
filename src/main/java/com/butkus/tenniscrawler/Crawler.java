@@ -174,10 +174,9 @@ public class Crawler {
 
     private static List<LocalDate> getUnwantedDays() {
         List<LocalDate> result = new ArrayList<>();
-        result.add(LocalDate.parse("2022-01-04"));
         result.add(LocalDate.parse("2022-01-05"));
-
         result.add(LocalDate.parse("2022-01-06"));      // THURSDAY -- > AREADY HAVE WEDNESDAY BOOKED
+        result.add(LocalDate.parse("2022-01-09"));      // traded for saturday
 
         result.add(LocalDate.parse("2022-01-11"));      // 1900 secured
 
@@ -185,7 +184,8 @@ public class Crawler {
         result.add(LocalDate.parse("2022-01-14"));      // we generally
         result.add(LocalDate.parse("2022-01-21"));      // avoid fridays
 
-        result.add(LocalDate.parse("2022-01-08"));      // saturdays
+
+        result.add(LocalDate.parse("2022-01-08"));      // booked already
         result.add(LocalDate.parse("2022-01-15"));
         result.add(LocalDate.parse("2022-01-22"));
         result.add(LocalDate.parse("2022-01-28"));
