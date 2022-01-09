@@ -70,19 +70,14 @@ public class Crawler {
                     sleepSeconds, getTimeString(start), cache.durationToLive().toMinutes());
         }
 
-        List<Pair<LocalDate, Integer>> inputs = makeInputs();
         boolean foundAny = false;
-        for (Pair<LocalDate, Integer> pair : inputs) {
-            LocalDate date = pair.getValue0();
-            String dateString = date.toString();    // todo date and dateString --> leave one
-            Integer courtId = pair.getValue1();
-            page.get(String.format("https://savitarna.tenisopasaulis.lt/rezervavimas/rezervavimas?sDate=%s&iPlaceId=%s", dateString, courtId));
-
+        for (Pair<LocalDate, Integer> dayAtCourt : makeInputs()) {
+            page.loadDayAtCourt(dayAtCourt);
             List<WebElement> slots = getAllTimeSlotsSeb(page);
-            TimeTable timeTable = new TimeTable(slots, dateString, courtId);     // fixme: this step takes too long
+            TimeTable timeTable = new TimeTable(slots, dayAtCourt);     // fixme: this step takes too long
 
             if (page.loggedInAsRegisteredUser()) {
-                cache.addIfCacheable(date, courtId, timeTable.getAggregatedCourts());
+                cache.addIfCacheable(dayAtCourt, timeTable.getAggregatedCourts());
             } else {
                 timeTable.updateFromCache(cache);
             }
@@ -92,10 +87,10 @@ public class Crawler {
                 foundAny = true;
                 foundInCurrent = true;
             }
-
             String foundNotFoundMark = foundInCurrent ? "‹✔›" : " \uD83D\uDFA8 ";   // IntelliJ UTF-8 console output issue: https://stackoverflow.com/a/56430344
             System.out.printf("%-54s %s%n", timeTable.getReadableAggregatedCourt(), foundNotFoundMark);     // fixme replace arbitrary 54
         }
+
         if (cacheStale) {      // todo rework to be less dependent on order. now before-if, withing-if, and after-if operations are interrwined to work correctly. Would be nice to have cache work independently
             cache.setUpdated();
         }
@@ -167,29 +162,22 @@ public class Crawler {
 
     private static List<LocalDate> getUnwantedDays() {
         List<LocalDate> result = new ArrayList<>();
-        result.add(LocalDate.parse("2022-01-05"));
-        result.add(LocalDate.parse("2022-01-06"));      // THURSDAY -- > AREADY HAVE WEDNESDAY BOOKED
-        result.add(LocalDate.parse("2022-01-09"));      // traded for saturday
+        result.add(LocalDate.parse("2022-01-09"));
 
-        result.add(LocalDate.parse("2022-01-11"));      // 1900 secured
+//        result.add(LocalDate.parse("2022-01-11"));      // 19:30 secured
 
-        result.add(LocalDate.parse("2022-01-07"));      // fridays
         result.add(LocalDate.parse("2022-01-14"));      // we generally
         result.add(LocalDate.parse("2022-01-21"));      // avoid fridays
 
-
-        result.add(LocalDate.parse("2022-01-08"));      // booked already
-        result.add(LocalDate.parse("2022-01-15"));
         result.add(LocalDate.parse("2022-01-22"));
         result.add(LocalDate.parse("2022-01-28"));
         result.add(LocalDate.parse("2022-01-29"));
-
 
         return result;
     }
 
     private static List<WebElement> getAllTimeSlotsSeb(Page page) {
-        return page.findElements(By.id("jqReservationLink"));
+        return page.findElements(By.id("jqReservationLink"));       // fixme: `by` is seb-specific, it should be in `page`
     }
 
 }

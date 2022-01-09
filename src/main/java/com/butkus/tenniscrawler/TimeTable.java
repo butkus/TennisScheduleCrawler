@@ -41,11 +41,11 @@ public class TimeTable {
     @Getter
     private List<Integer> aggregatedCourts;
 
-    public TimeTable(List<WebElement> webElements, String date, int courtId) {
+    public TimeTable(List<WebElement> webElements, Pair<LocalDate, Integer> dayAtCourt) {
         this.slots = resolveSlots(webElements);
         getAggregatedSlotsForTheDay();
-        this.date = LocalDate.parse(date);
-        this.courtId = courtId;
+        this.date = dayAtCourt.getValue0();
+        this.courtId = dayAtCourt.getValue1();
         if (courtId == 2) {
             this.courtName = "Kieta danga";
         } else if (courtId == 8) {

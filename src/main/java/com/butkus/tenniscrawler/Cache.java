@@ -41,9 +41,9 @@ public class Cache {
         map.clear();
     }
 
-    public void addIfCacheable(LocalDate date, Integer courtId, List<Integer> aggregatedCourts) {
+    public void addIfCacheable(Pair<LocalDate, Integer> dayAtCourt, List<Integer> aggregatedCourts) {
         if (cacheable(aggregatedCourts)) {
-            map.put(Pair.with(date, courtId), aggregatedCourts);
+            map.put(dayAtCourt, aggregatedCourts);
         }
     }
 

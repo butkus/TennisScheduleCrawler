@@ -1,5 +1,6 @@
 package com.butkus.tenniscrawler;
 
+import org.javatuples.Pair;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -40,10 +42,13 @@ public class Page {
         loggedInAs = UserType.LOGGED_OUT;
     }
 
-    public void get(String url) {
+    public void loadDayAtCourt(Pair<LocalDate, Integer> dayAtCourt) {
         if (!loggedIn) {
             login(UserType.ANONYMOUS_USER);
         }
+        LocalDate date = dayAtCourt.getValue0();
+        Integer courtId = dayAtCourt.getValue1();
+        String url = String.format("https://savitarna.tenisopasaulis.lt/rezervavimas/rezervavimas?sDate=%s&iPlaceId=%s", date.toString(), courtId);
         driver.get(url);
     }
 
