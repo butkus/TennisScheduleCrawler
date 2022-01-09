@@ -44,45 +44,37 @@ public class Crawler {
 
     @Scheduled(cron = "${app.cron}")
     public void run() throws InterruptedException {
-        sleepUpTo(sleepUpTo);
-        Instant start = Instant.now();
-        printCrawlStartTime(start);
-
         try {
             crawlEverythingOnce(page);
         } finally {
             page.close();
         }
-        printCrawlEndTime(start);
     }
 
-    private void printCrawlEndTime(Instant start) {
-        Instant end = Instant.now();
-        long jobLengthInSeconds = start.until(end, ChronoUnit.SECONDS);
-
-        // todo format time
-        //-- Crawl took 144 seconds and finished at 2022-01-04T19:23:30.123095400Z
-        System.out.printf("-- Crawl took %s seconds and finished at %s%n", jobLengthInSeconds, end);
-    }
-
-    private void crawlEverythingOnce(Page page) {
+    private void crawlEverythingOnce(Page page) throws InterruptedException {
+        int sleepSeconds = random.nextInt((int) sleepUpTo.toSeconds());
+        TimeUnit.SECONDS.sleep(sleepSeconds);
+        Instant start;
 
         boolean cacheStale = cache.isStale();
         if (cacheStale) {
             cache.clearCache();
             page.login(Page.UserType.REGISTERED_USER);
-            System.out.println("==== Logged in as a <<<REGISTERED USER>>> ====");
+            start = Instant.now();
+            System.out.printf("Logged in as <<<REGISTERED USER>>> slept for %s seconds, crawl started at %s%n",
+                    sleepSeconds, getTimeString(start));
         } else {
             page.login(Page.UserType.ANONYMOUS_USER);
-            System.out.println("==== Logged in as an --ANONYMOUS-- USER ====");
-            System.out.printf("==== Cache will update in %s minutes ====%n", cache.durationToLive().toMinutes());
+            start = Instant.now();
+            System.out.printf("Logged in as <<<ANONYMOUS USER>>> slept for %s seconds, crawl started at %s. Cache expires in %s minutes%n",
+                    sleepSeconds, getTimeString(start), cache.durationToLive().toMinutes());
         }
 
         List<Pair<LocalDate, Integer>> inputs = makeInputs();
         boolean foundAny = false;
         for (Pair<LocalDate, Integer> pair : inputs) {
             LocalDate date = pair.getValue0();
-            String dateString = date.toString();
+            String dateString = date.toString();    // todo date and dateString --> leave one
             Integer courtId = pair.getValue1();
             page.get(String.format("https://savitarna.tenisopasaulis.lt/rezervavimas/rezervavimas?sDate=%s&iPlaceId=%s", dateString, courtId));
 
@@ -109,19 +101,20 @@ public class Crawler {
         }
 
         if (foundAny) audioPlayer.playSound();
+
+        printCrawlEndTime(start);
     }
 
-    private void printCrawlStartTime(Instant start) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd EEEE,  HH:mm:ss");
+    private void printCrawlEndTime(Instant start) {
+        Instant end = Instant.now();
+        long jobLengthInSeconds = start.until(end, ChronoUnit.SECONDS);
+        System.out.printf("Crawl took %s seconds and finished at %s%n", jobLengthInSeconds, getTimeString(end));
+    }
+
+    private String getTimeString(Instant start) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(" HH:mm:ss");
         LocalDateTime localDateTime = start.atZone(ZoneId.of("Europe/Vilnius")).toLocalDateTime();
-        String dateTime = localDateTime.format(formatter);
-        System.out.printf("-- Crawl started at %s%n", dateTime);
-    }
-
-    private void sleepUpTo(Duration duration) throws InterruptedException {
-        int sleepSeconds = random.nextInt((int) duration.toSeconds());
-        TimeUnit.SECONDS.sleep(sleepSeconds);
-        System.out.printf("-- Slept for %s seconds%n", sleepSeconds);
+        return localDateTime.format(formatter);
     }
 
     private static List<Pair<LocalDate, Integer>> makeInputs() {
