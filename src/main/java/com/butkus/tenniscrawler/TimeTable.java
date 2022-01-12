@@ -2,6 +2,7 @@ package com.butkus.tenniscrawler;
 
 import lombok.Getter;
 import org.javatuples.Pair;
+import org.javatuples.Triplet;
 import org.openqa.selenium.WebElement;
 
 import java.time.LocalDate;
@@ -12,6 +13,9 @@ import java.util.stream.Collectors;
 
 import static com.butkus.tenniscrawler.Colors.ORANGE;
 import static com.butkus.tenniscrawler.Colors.WHITE;
+import static com.butkus.tenniscrawler.Court.CARPET;
+import static com.butkus.tenniscrawler.Court.HARD;
+import static com.butkus.tenniscrawler.ExtensionInterest.*;
 import static java.util.stream.Collectors.toList;
 
 public class TimeTable {
@@ -36,16 +40,18 @@ public class TimeTable {
     private final List<Slot> slots;
     private final LocalDate date;
     private final Integer courtId;
+    private final ExtensionInterest extensionInterest;
     private String courtName;
 
     @Getter
     private List<Integer> aggregatedCourts;
 
-    public TimeTable(List<WebElement> webElements, Pair<LocalDate, Integer> dayAtCourt) {
+    public TimeTable(List<WebElement> webElements, Triplet<LocalDate, Integer, ExtensionInterest> dayAtCourt) {
         this.slots = resolveSlots(webElements);
         getAggregatedSlotsForTheDay();
         this.date = dayAtCourt.getValue0();
         this.courtId = dayAtCourt.getValue1();
+        this.extensionInterest = dayAtCourt.getValue2();
         if (courtId == 2) {
             this.courtName = "Kieta danga";
         } else if (courtId == 8) {
@@ -53,26 +59,125 @@ public class TimeTable {
         }
     }
 
-    public boolean isOfferFound() {
-        boolean hasReserved = aggregatedCourts.stream().anyMatch(ORANGE::equals);
+    public boolean isOfferFound(Cache cache) {
 
-        if (!hasReserved) {
-            for (int i=0; i<5; i++) {
-                // at least 2 adjacent white slots
-                if (aggregatedCourts.get(i).equals(WHITE) && aggregatedCourts.get(i + 1).equals(WHITE)) {
-                    return true;
+        if (extensionInterest == NONE) return false;
+
+        boolean doesNotHaveReservedForCurrentCourtType = aggregatedCourts.stream().noneMatch(ORANGE::equals);
+
+        if (doesNotHaveReservedForCurrentCourtType) {
+            Integer otherCourtId = courtId == HARD ? CARPET : HARD;
+            List<Integer> aggregatedCourtsOtherType = cache.get(Pair.with(date, otherCourtId));
+
+            if (extensionInterest == EARLIER) {
+                if (aggregatedCourtsOtherType == null) {        // todo use boolean hasReservationInOtherCourtType
+                    // nothing booked in other court type
+                    System.out.printf("Requested EARLIER for date=%s and court=%s (courtId=%s) but no existing booking%n", date, courtName, courtId);
+                    return false;   // lets log and carry on for now
+                    // todo: next -->  nothing booked in other court type  -->  book any (=== question is do we treat EARLIER as -any- in this case ===)
+                } else {
+                    // find 2 adjacent slots and first slot is earlier than first aggregatedCourtsOtherType ORANGE slot
+                    int firstBookedSlotPos = getFirstBookedSlotPosition(aggregatedCourtsOtherType);
+                    for (int i=0; i<5; i++) {
+                        if (aggregatedCourts.get(i).equals(WHITE) && aggregatedCourts.get(i + 1).equals(WHITE) && i < firstBookedSlotPos) {
+                            return true;
+                        }
+                    }
+                }
+            } else if (extensionInterest == LATER) {
+                if (aggregatedCourtsOtherType == null) {
+                    // nothing booked in other court type
+                    System.out.printf("Requested LATER for date=%s and court=%s (courtId=%s) but no existing booking%n", date, courtName, courtId);
+                    return false;   // lets log and carry on for now
+                    // todo: next -->  nothing booked in other court type  -->  book any (=== question is do we treat LATER as -any- in this case ===)
+                } else {
+                    // find 2 adjacent slots with latter slot being later than last aggregatedCourtsOtherType ORANGE slot
+                    int lastBookedSlotPos = getLastBookedSlotPosition(aggregatedCourtsOtherType);
+                    for (int i=0; i<5; i++) {
+                        if (aggregatedCourts.get(i).equals(WHITE) && aggregatedCourts.get(i + 1).equals(WHITE) && i+1 > lastBookedSlotPos) {
+                            return true;
+                        }
+                    }
+                }
+            } else if (extensionInterest == BOTH) {     // todo rename BOTH ot EITHER? makes more sense here
+                if (aggregatedCourtsOtherType == null) {
+                    // not booked -- find at least 2 adjacent free slots (=== we do treat BOTH as -any- in this case ===)
+                    for (int i=0; i<5; i++) {
+                        if (aggregatedCourts.get(i).equals(WHITE) && aggregatedCourts.get(i + 1).equals(WHITE)) {
+                            return true;
+                        }
+                    }
+                } else {
+                    // todo: make better and more precise wording
+                    // has booking in other court type -- find 2 adjacent free slots before or after it (combination of EARLIER and LATER algs)
+
+                    // fixme: copied from EARLIER slot
+                    // find 2 adjacent slots and first slot is earlier than first aggregatedCourtsOtherType ORANGE slot
+                    int firstBookedSlotPos = getFirstBookedSlotPosition(aggregatedCourtsOtherType);
+                    for (int i=0; i<5; i++) {
+                        if (aggregatedCourts.get(i).equals(WHITE) && aggregatedCourts.get(i + 1).equals(WHITE) && i < firstBookedSlotPos) {
+                            return true;
+                        }
+                    }
+
+                    // fixme: copied from LATER slot
+                    // find 2 adjacent slots with latter slot being later than last aggregatedCourtsOtherType ORANGE slot
+                    int lastBookedSlotPos = getLastBookedSlotPosition(aggregatedCourtsOtherType);
+                    for (int i=0; i<5; i++) {
+                        if (aggregatedCourts.get(i).equals(WHITE) && aggregatedCourts.get(i + 1).equals(WHITE) && i+1 > lastBookedSlotPos) {
+                            return true;
+                        }
+                    }
+
+
                 }
             }
         } else {
-            for (int i=1; i<5; i++) {
-                if (aggregatedCourts.get(i).equals(ORANGE)) {
-                    if (aggregatedCourts.get(i-1).equals(WHITE) || aggregatedCourts.get(i+1).equals(WHITE)) {
-                        return true;    // can extend/move booked (orange) time
+            // we DO have reserved for current court type
+            if (extensionInterest == BOTH) {
+                for (int i=1; i<5; i++) {
+                    if (aggregatedCourts.get(i).equals(ORANGE) && (aggregatedCourts.get(i-1).equals(WHITE) || aggregatedCourts.get(i+1).equals(WHITE))) {
+                        return true;
+                    }
+                }
+            } else if (extensionInterest == EARLIER) {
+                for (int i=1; i<6; i++) {
+                    if (aggregatedCourts.get(i).equals(ORANGE) && aggregatedCourts.get(i-1).equals(WHITE)) {
+                        return true;
+                    }
+                }
+            } else if (extensionInterest == LATER) {
+                for (int i=0; i<5; i++) {
+                    if (aggregatedCourts.get(i).equals(ORANGE) && aggregatedCourts.get(i+1).equals(WHITE)) {
+                        return true;
                     }
                 }
             }
+
         }
         return false;
+    }
+
+    private Integer getFirstBookedSlotPosition(List<Integer> aggregatedCourt) {     // todo what if null?
+        Integer firstBookedSlotPos = null;
+        for (int i = 0; i<aggregatedCourt.size(); i++) {
+            if (aggregatedCourt.get(i).equals(ORANGE)){
+                firstBookedSlotPos = i;
+                break;
+            }
+        }
+        return  firstBookedSlotPos;
+    }
+
+    private Integer getLastBookedSlotPosition(List<Integer> aggregatedCourt) {     // todo what if null?
+        Integer lastBookedSlotPos = null;
+        for (int i=aggregatedCourt.size()-1; i>0; i--) {
+            if (aggregatedCourt.get(i).equals(ORANGE)){
+                lastBookedSlotPos = i;
+                break;
+            }
+        }
+        return  lastBookedSlotPos;
     }
 
     private void getAggregatedSlotsForTheDay() {

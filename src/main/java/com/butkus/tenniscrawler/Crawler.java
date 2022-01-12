@@ -1,6 +1,6 @@
 package com.butkus.tenniscrawler;
 
-import org.javatuples.Pair;
+import org.javatuples.Triplet;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +17,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static com.butkus.tenniscrawler.Court.CARPET;
+import static com.butkus.tenniscrawler.Court.HARD;
+import static com.butkus.tenniscrawler.ExtensionInterest.*;
 
 @Component
 public class Crawler {
-
-    public static final int HARD = 2;
-    public static final int CARPET = 8;
 
     private final AudioPlayer audioPlayer;
     private final Page page;
@@ -71,7 +73,7 @@ public class Crawler {
         }
 
         boolean foundAny = false;
-        for (Pair<LocalDate, Integer> dayAtCourt : makeInputs()) {
+        for (Triplet<LocalDate, Integer, ExtensionInterest> dayAtCourt : makeInputs()) {
             page.loadDayAtCourt(dayAtCourt);
             List<WebElement> slots = getAllTimeSlotsSeb(page);
             TimeTable timeTable = new TimeTable(slots, dayAtCourt);     // fixme: this step takes too long
@@ -83,7 +85,7 @@ public class Crawler {
             }
 
             boolean foundInCurrent = false;
-            if (timeTable.isOfferFound()) {
+            if (timeTable.isOfferFound(cache)) {        // todo isOfferFound() to return enum(X for free new time, LATER for later found, EARIEL for earlier found, etc... (so that to later log out if specific improvement found or not)
                 foundAny = true;
                 foundInCurrent = true;
             }
@@ -112,68 +114,89 @@ public class Crawler {
         return localDateTime.format(formatter);
     }
 
-    private static List<Pair<LocalDate, Integer>> makeInputs() {
-        List<LocalDate> excludedDays = new ArrayList<>();
-        excludedDays.addAll(getHolidays());
-        excludedDays.addAll(getUnwantedDays());
+    private static List<Triplet<LocalDate, Integer, ExtensionInterest>> makeInputs() {        // todo: input: same as now + ExtensionInterest(EarlierThanBooked, LaterThanBooked, Both)
+        List<Triplet<LocalDate, Integer, ExtensionInterest>> specialDays = new ArrayList<>();
+        specialDays.addAll(getHolidays());
+        specialDays.addAll(getExceptionDays());
 
         LocalDate date = LocalDate.now();
-        List<Pair<LocalDate, Integer>> listHard = new ArrayList<>();
-        List<Pair<LocalDate, Integer>> listCarpet = new ArrayList<>();
+        List<Triplet<LocalDate, Integer, ExtensionInterest>> listHard = new ArrayList<>();
+        List<Triplet<LocalDate, Integer, ExtensionInterest>> listCarpet = new ArrayList<>();
         for (int i=0; i<25; i++) {
             LocalDate currentDate = date.plusDays(i);
-            if (excludedDays.contains(currentDate)) continue;
-            Pair<LocalDate, Integer> pairHard = Pair.with(currentDate, HARD);
-            Pair<LocalDate, Integer> pairCarpet = Pair.with(currentDate, CARPET);
-            listHard.add(pairHard);
-            listCarpet.add(pairCarpet);
+            boolean currentDateInSpecialDays = specialDays.stream().anyMatch(e -> e.getValue0().equals(currentDate));
+            if (currentDateInSpecialDays) {
+                List<Triplet<LocalDate, Integer, ExtensionInterest>> hard = specialDays.stream().filter(e -> e.getValue0().equals(currentDate)).filter(e -> e.getValue1().equals(HARD) && e.getValue2() != NONE).collect(Collectors.toList());
+                List<Triplet<LocalDate, Integer, ExtensionInterest>> carpet = specialDays.stream().filter(e -> e.getValue0().equals(currentDate)).filter(e -> e.getValue1().equals(CARPET) && e.getValue2() != NONE).collect(Collectors.toList());
+                listHard.addAll(hard);
+                listCarpet.addAll(carpet);
+            } else {
+                Triplet<LocalDate, Integer, ExtensionInterest> hard = Triplet.with(currentDate, HARD, BOTH);
+                Triplet<LocalDate, Integer, ExtensionInterest> carpet = Triplet.with(currentDate, CARPET, BOTH);
+                listHard.add(hard);
+                listCarpet.add(carpet);
+            }
         }
 
-//        listCarpet.add(Pair.with(LocalDate.parse("2022-01-09"), CARPET));
-        List<Pair<LocalDate, Integer>> list = new ArrayList<>();
+//        listCarpet.add(Triplet.with(LocalDate.parse("2022-01-30"), CARPET, BOTH));
+        List<Triplet<LocalDate, Integer, ExtensionInterest>> list = new ArrayList<>();
         list.addAll(listHard);
         list.addAll(listCarpet);
         return list;
     }
 
     // todo make year-independent
-    private static List<LocalDate> getHolidays() {
-        List<LocalDate> result = new ArrayList<>();
-        result.add(LocalDate.parse("2021-12-24"));
-        result.add(LocalDate.parse("2021-12-25"));
-        result.add(LocalDate.parse("2021-12-26"));
+    private static List<Triplet<LocalDate, Integer, ExtensionInterest>> getHolidays() {
+        List<Triplet<LocalDate, Integer, ExtensionInterest>> holidays = new ArrayList<>();
 
-        result.add(LocalDate.parse("2022-01-01"));
-        result.add(LocalDate.parse("2022-02-16"));
-        result.add(LocalDate.parse("2022-03-11"));
-        result.add(LocalDate.parse("2022-05-01"));
-        result.add(LocalDate.parse("2022-06-24"));
-        result.add(LocalDate.parse("2022-07-06"));
-        result.add(LocalDate.parse("2022-08-15"));
-        result.add(LocalDate.parse("2022-11-01"));
-        result.add(LocalDate.parse("2022-11-02"));
-        result.add(LocalDate.parse("2022-11-02"));
-        result.add(LocalDate.parse("2022-12-24"));
-        result.add(LocalDate.parse("2022-12-25"));
-        result.add(LocalDate.parse("2022-12-26"));
+        addExclusions(holidays, "2021-12-24");
+        addExclusions(holidays, "2021-12-25");
+        addExclusions(holidays, "2021-12-26");
 
-        return result;
+        addExclusions(holidays, "2022-01-01");
+        addExclusions(holidays, "2022-02-16");
+        addExclusions(holidays, "2022-03-11");
+        addExclusions(holidays, "2022-05-01");
+        addExclusions(holidays, "2022-06-24");
+        addExclusions(holidays, "2022-07-06");
+        addExclusions(holidays, "2022-08-15");
+        addExclusions(holidays, "2022-11-01");
+        addExclusions(holidays, "2022-11-02");
+        addExclusions(holidays, "2022-11-02");
+        addExclusions(holidays, "2022-12-24");
+        addExclusions(holidays, "2022-12-25");
+        addExclusions(holidays, "2022-12-26");
+
+        return holidays;
     }
 
-    private static List<LocalDate> getUnwantedDays() {
-        List<LocalDate> result = new ArrayList<>();
-        result.add(LocalDate.parse("2022-01-09"));
+    private static List<Triplet<LocalDate, Integer, ExtensionInterest>> getExceptionDays() {
+        List<Triplet<LocalDate, Integer, ExtensionInterest>> exceptionDays = new ArrayList<>();
 
-//        result.add(LocalDate.parse("2022-01-11"));      // 19:30 secured
+        addExclusions(exceptionDays, "2022-01-15");        // saturday, secured, not interedted in updating
+//        exceptionDays.add(Triplet.with(LocalDate.parse("2022-01-15"), HARD, EARLIER));      // 19:30 secured
+//        exceptionDays.add(Triplet.with(LocalDate.parse("2022-01-15"), CARPET, EARLIER));      // 19:30 secured
 
-        result.add(LocalDate.parse("2022-01-14"));      // we generally
-        result.add(LocalDate.parse("2022-01-21"));      // avoid fridays
+        addExclusions(exceptionDays, "2022-01-14");        // friday
+        addExclusions(exceptionDays, "2022-01-21");        // friday
 
-        result.add(LocalDate.parse("2022-01-22"));
-        result.add(LocalDate.parse("2022-01-28"));
-        result.add(LocalDate.parse("2022-01-29"));
+        addExclusions(exceptionDays, "2022-01-22");        // saturday
+        addExclusions(exceptionDays, "2022-01-23");        // sunday, booked and happy with
+//        exceptionDays.add(Triplet.with(LocalDate.parse("2022-01-23"), HARD, BOTH));      // 19:30 secured
+//        exceptionDays.add(Triplet.with(LocalDate.parse("2022-01-23"), CARPET, BOTH));      // 19:30 secured
 
-        return result;
+        addExclusions(exceptionDays, "2022-01-28");     // dovile stand-by, already booked with Delfi
+        addExclusions(exceptionDays, "2022-01-29");        // saturday
+
+        addExclusions(exceptionDays, "2022-02-04");        // friday, booked on delfi
+        addExclusions(exceptionDays, "2022-02-05");        // saturday, not interested
+
+        return exceptionDays;
+    }
+
+    private static void addExclusions(List<Triplet<LocalDate, Integer, ExtensionInterest>> result, String date) {
+        result.add(Triplet.with(LocalDate.parse(date), HARD, NONE));
+        result.add(Triplet.with(LocalDate.parse(date), CARPET, NONE));
     }
 
     private static List<WebElement> getAllTimeSlotsSeb(Page page) {

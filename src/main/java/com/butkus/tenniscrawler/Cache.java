@@ -1,6 +1,7 @@
 package com.butkus.tenniscrawler;
 
 import org.javatuples.Pair;
+import org.javatuples.Triplet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -41,9 +42,11 @@ public class Cache {
         map.clear();
     }
 
-    public void addIfCacheable(Pair<LocalDate, Integer> dayAtCourt, List<Integer> aggregatedCourts) {
+    public void addIfCacheable(Triplet<LocalDate, Integer, ExtensionInterest> dayAtCourt, List<Integer> aggregatedCourts) {
         if (cacheable(aggregatedCourts)) {
-            map.put(dayAtCourt, aggregatedCourts);
+            LocalDate date = dayAtCourt.getValue0();
+            Integer court = dayAtCourt.getValue1();
+            map.put(Pair.with(date, court), aggregatedCourts);
         }
     }
 

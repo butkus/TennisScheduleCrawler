@@ -1,6 +1,6 @@
 package com.butkus.tenniscrawler;
 
-import org.javatuples.Pair;
+import org.javatuples.Triplet;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -42,7 +42,7 @@ public class Page {
         loggedInAs = UserType.LOGGED_OUT;
     }
 
-    public void loadDayAtCourt(Pair<LocalDate, Integer> dayAtCourt) {
+    public void loadDayAtCourt(Triplet<LocalDate, Integer, ExtensionInterest> dayAtCourt) {
         if (!loggedIn) {
             login(UserType.ANONYMOUS_USER);
         }
