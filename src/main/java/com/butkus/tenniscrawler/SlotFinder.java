@@ -45,7 +45,7 @@ public class SlotFinder {
                     System.out.printf("Requested %s for date=%s and court=%s (courtId=%s) but no existing booking%n", extensionInterest, date, courtName, courtId);
                     return false;   // lets log and carry on for now
                 } else {
-                    if (find2EarlierSlotsThanReserved()) return true;
+                    if (found2EarlierSlotsThanReservedIn(aggregatedCourtsOtherType)) return true;
                 }
             } else if (extensionInterest == LATER) {
                 if (aggregatedCourtsOtherType == null) {
@@ -53,7 +53,7 @@ public class SlotFinder {
                     System.out.printf("Requested %s for date=%s and court=%s (courtId=%s) but no existing booking%n", extensionInterest, date, courtName, courtId);
                     return false;   // lets log and carry on for now
                 } else {
-                    if (find2LaterSlotsThanReserved()) return true;
+                    if (found2LaterSlotsThanReservedIn(aggregatedCourtsOtherType)) return true;
                 }
             } else if (extensionInterest == BOTH) {     // todo rename BOTH ot EITHER? makes more sense here
                 if (aggregatedCourtsOtherType == null) {
@@ -65,8 +65,8 @@ public class SlotFinder {
                     }
                 } else {
                     // has booking in other court type -- find 2 adjacent free slots before or after it
-                    if (find2EarlierSlotsThanReserved()) return true;
-                    if (find2LaterSlotsThanReserved()) return true;
+                    if (found2EarlierSlotsThanReservedIn(aggregatedCourtsOtherType)) return true;
+                    if (found2LaterSlotsThanReservedIn(aggregatedCourtsOtherType)) return true;
                 }
             }
         } else {
@@ -78,39 +78,49 @@ public class SlotFinder {
                     }
                 }
             } else if (extensionInterest == EARLIER) {
-                for (int i=1; i<6; i++) {
-                    if (aggregatedCourts.get(i).equals(ORANGE) && aggregatedCourts.get(i-1).equals(WHITE)) {
-                        return true;
-                    }
-                }
+                if (found1EarlierAdjacentSlot() || found2EarlierSlotsThanReservedIn(aggregatedCourts)) return true;   // todo rename to currenCourt and otherCourt
             } else if (extensionInterest == LATER) {
-                for (int i=0; i<5; i++) {
-                    if (aggregatedCourts.get(i).equals(ORANGE) && aggregatedCourts.get(i+1).equals(WHITE)) {
-                        return true;
-                    }
-                }
+                if (found1LaterAdjacentSlot() || found2LaterSlotsThanReservedIn(aggregatedCourts)) return true;
             }
 
         }
         return false;
     }
 
-    private boolean find2LaterSlotsThanReserved() {
-        // find 2 adjacent slots with latter slot being later than last aggregatedCourtsOtherType ORANGE slot
-        int lastBookedSlotPos = getLastBookedSlotPosition(aggregatedCourtsOtherType);
-        for (int i = 0; i < 5; i++) {
-            if (aggregatedCourts.get(i).equals(WHITE) && aggregatedCourts.get(i + 1).equals(WHITE) && i + 1 > lastBookedSlotPos) {
+    private boolean found1EarlierAdjacentSlot() {
+        for (int i=1; i<6; i++) {
+            if (aggregatedCourts.get(i).equals(ORANGE) && aggregatedCourts.get(i-1).equals(WHITE)) {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean find2EarlierSlotsThanReserved() {
-        // find 2 adjacent slots and first slot is earlier than first aggregatedCourtsOtherType ORANGE slot
-        int firstBookedSlotPos = getFirstBookedSlotPosition(aggregatedCourtsOtherType);
+    private boolean found1LaterAdjacentSlot() {
+        for (int i=0; i<5; i++) {
+            if (aggregatedCourts.get(i).equals(ORANGE) && aggregatedCourts.get(i+1).equals(WHITE)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean found2EarlierSlotsThanReservedIn(List<Integer> reservedCourt) {
+        // find 2 adjacent slots and first slot is earlier than first reservedCourt ORANGE slot
+        int firstBookedSlotPos = getFirstBookedSlotPosition(reservedCourt);
         for (int i = 0; i < 5; i++) {
             if (aggregatedCourts.get(i).equals(WHITE) && aggregatedCourts.get(i + 1).equals(WHITE) && i < firstBookedSlotPos) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean found2LaterSlotsThanReservedIn(List<Integer> reservedCourt) {
+        // find 2 adjacent slots with latter slot being later than last reservedCourt ORANGE slot
+        int lastBookedSlotPos = getLastBookedSlotPosition(reservedCourt);
+        for (int i = 0; i < 5; i++) {
+            if (aggregatedCourts.get(i).equals(WHITE) && aggregatedCourts.get(i + 1).equals(WHITE) && i + 1 > lastBookedSlotPos) {
                 return true;
             }
         }
