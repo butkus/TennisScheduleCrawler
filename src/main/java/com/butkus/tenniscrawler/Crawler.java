@@ -131,8 +131,8 @@ public class Crawler {
                 listHard.addAll(hard);
                 listCarpet.addAll(carpet);
             } else {
-                Triplet<LocalDate, Integer, ExtensionInterest> hard = Triplet.with(currentDate, HARD, BOTH);
-                Triplet<LocalDate, Integer, ExtensionInterest> carpet = Triplet.with(currentDate, CARPET, BOTH);
+                Triplet<LocalDate, Integer, ExtensionInterest> hard = Triplet.with(currentDate, HARD, ANY);
+                Triplet<LocalDate, Integer, ExtensionInterest> carpet = Triplet.with(currentDate, CARPET, ANY);
                 listHard.add(hard);
                 listCarpet.add(carpet);
             }

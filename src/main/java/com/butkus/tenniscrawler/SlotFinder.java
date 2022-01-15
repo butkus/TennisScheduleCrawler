@@ -13,74 +13,71 @@ import static com.butkus.tenniscrawler.ExtensionInterest.*;
 
 public class SlotFinder {
 
-    private final List<Integer> aggregatedCourts;
+    private final List<Integer> currentCourt;
     private final LocalDate date;
     private final Integer courtId;
     private final String courtName;
     private final ExtensionInterest extensionInterest;
 
-    private final boolean doesNotHaveReservationForCurrentCourtType;
-    private final List<Integer> aggregatedCourtsOtherType;
+    private final boolean noReservationInCurrentCourt;
+    private final List<Integer> otherCourt;
 
-    public SlotFinder(Cache cache, List<Integer> aggregatedCourts, LocalDate date, Integer courtId, String courtName, ExtensionInterest extensionInterest) {
-        this.aggregatedCourts = aggregatedCourts;
+    public SlotFinder(Cache cache, List<Integer> currentCourt, LocalDate date, Integer courtId, String courtName, ExtensionInterest extensionInterest) {
+        this.currentCourt = currentCourt;
         this.date = date;
         this.courtId = courtId;
         this.courtName = courtName;
         this.extensionInterest = extensionInterest;
 
-        this.doesNotHaveReservationForCurrentCourtType = aggregatedCourts.stream().noneMatch(ORANGE::equals);
+        this.noReservationInCurrentCourt = currentCourt.stream().noneMatch(ORANGE::equals);
         Integer otherCourtId = courtId == HARD ? CARPET : HARD;
-        this.aggregatedCourtsOtherType = cache.get(Pair.with(date, otherCourtId));
+        this.otherCourt = cache.get(Pair.with(date, otherCourtId));
     }
 
     public boolean isOfferFound() {
         if (extensionInterest == NONE) return false;
 
-        if (doesNotHaveReservationForCurrentCourtType) {
+        if (noReservationInCurrentCourt) {
 
             if (extensionInterest == EARLIER) {
-                if (aggregatedCourtsOtherType == null) {        // todo use boolean hasReservationInOtherCourtType
-                    // nothing booked in other court type
+                if (otherCourt == null) {
                     System.out.printf("Requested %s for date=%s and court=%s (courtId=%s) but no existing booking%n", extensionInterest, date, courtName, courtId);
-                    return false;   // lets log and carry on for now
+                    return false;
                 } else {
-                    if (found2EarlierSlotsThanReservedIn(aggregatedCourtsOtherType)) return true;
+                    if (found2EarlierSlotsThanReservedIn(otherCourt)) return true;
                 }
             } else if (extensionInterest == LATER) {
-                if (aggregatedCourtsOtherType == null) {
-                    // nothing booked in other court type
+                if (otherCourt == null) {
                     System.out.printf("Requested %s for date=%s and court=%s (courtId=%s) but no existing booking%n", extensionInterest, date, courtName, courtId);
-                    return false;   // lets log and carry on for now
+                    return false;
                 } else {
-                    if (found2LaterSlotsThanReservedIn(aggregatedCourtsOtherType)) return true;
+                    if (found2LaterSlotsThanReservedIn(otherCourt)) return true;
                 }
-            } else if (extensionInterest == BOTH) {     // todo rename BOTH ot EITHER? makes more sense here
-                if (aggregatedCourtsOtherType == null) {
-                    // not booked -- find at least 2 adjacent free slots (=== we do treat BOTH as -any- in this case ===)
+            } else if (extensionInterest == ANY) {
+                if (otherCourt == null) {
+                    // not booked -- find at least 2 adjacent free slots
                     for (int i=0; i<5; i++) {
-                        if (aggregatedCourts.get(i).equals(WHITE) && aggregatedCourts.get(i + 1).equals(WHITE)) {
+                        if (currentCourt.get(i).equals(WHITE) && currentCourt.get(i + 1).equals(WHITE)) {
                             return true;
                         }
                     }
                 } else {
                     // has booking in other court type -- find 2 adjacent free slots before or after it
-                    if (found2EarlierSlotsThanReservedIn(aggregatedCourtsOtherType)) return true;
-                    if (found2LaterSlotsThanReservedIn(aggregatedCourtsOtherType)) return true;
+                    if (found2EarlierSlotsThanReservedIn(otherCourt) || found2LaterSlotsThanReservedIn(otherCourt)) return true;
                 }
             }
         } else {
             // we DO have reserved for current court type
-            if (extensionInterest == BOTH) {
+            if (extensionInterest == ANY) {
                 for (int i=1; i<5; i++) {
-                    if (aggregatedCourts.get(i).equals(ORANGE) && (aggregatedCourts.get(i-1).equals(WHITE) || aggregatedCourts.get(i+1).equals(WHITE))) {
+                    if (currentCourt.get(i).equals(ORANGE) && (currentCourt.get(i-1).equals(WHITE) || currentCourt.get(i+1).equals(WHITE))) {
                         return true;
                     }
                 }
             } else if (extensionInterest == EARLIER) {
-                if (found1EarlierAdjacentSlot() || found2EarlierSlotsThanReservedIn(aggregatedCourts)) return true;   // todo rename to currenCourt and otherCourt
+                if (found1EarlierAdjacentSlot() || found2EarlierSlotsThanReservedIn(currentCourt)) return true;
             } else if (extensionInterest == LATER) {
-                if (found1LaterAdjacentSlot() || found2LaterSlotsThanReservedIn(aggregatedCourts)) return true;
+                if (found1LaterAdjacentSlot() || found2LaterSlotsThanReservedIn(currentCourt)) return true;
             }
 
         }
@@ -89,7 +86,7 @@ public class SlotFinder {
 
     private boolean found1EarlierAdjacentSlot() {
         for (int i=1; i<6; i++) {
-            if (aggregatedCourts.get(i).equals(ORANGE) && aggregatedCourts.get(i-1).equals(WHITE)) {
+            if (currentCourt.get(i).equals(ORANGE) && currentCourt.get(i-1).equals(WHITE)) {
                 return true;
             }
         }
@@ -98,7 +95,7 @@ public class SlotFinder {
 
     private boolean found1LaterAdjacentSlot() {
         for (int i=0; i<5; i++) {
-            if (aggregatedCourts.get(i).equals(ORANGE) && aggregatedCourts.get(i+1).equals(WHITE)) {
+            if (currentCourt.get(i).equals(ORANGE) && currentCourt.get(i+1).equals(WHITE)) {
                 return true;
             }
         }
@@ -109,7 +106,7 @@ public class SlotFinder {
         // find 2 adjacent slots and first slot is earlier than first reservedCourt ORANGE slot
         int firstBookedSlotPos = getFirstBookedSlotPosition(reservedCourt);
         for (int i = 0; i < 5; i++) {
-            if (aggregatedCourts.get(i).equals(WHITE) && aggregatedCourts.get(i + 1).equals(WHITE) && i < firstBookedSlotPos) {
+            if (currentCourt.get(i).equals(WHITE) && currentCourt.get(i + 1).equals(WHITE) && i < firstBookedSlotPos) {
                 return true;
             }
         }
@@ -120,7 +117,7 @@ public class SlotFinder {
         // find 2 adjacent slots with latter slot being later than last reservedCourt ORANGE slot
         int lastBookedSlotPos = getLastBookedSlotPosition(reservedCourt);
         for (int i = 0; i < 5; i++) {
-            if (aggregatedCourts.get(i).equals(WHITE) && aggregatedCourts.get(i + 1).equals(WHITE) && i + 1 > lastBookedSlotPos) {
+            if (currentCourt.get(i).equals(WHITE) && currentCourt.get(i + 1).equals(WHITE) && i + 1 > lastBookedSlotPos) {
                 return true;
             }
         }
