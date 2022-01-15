@@ -78,7 +78,7 @@ public class Page {
         return new MaybeElement(driver, wait, findBy);
     }
 
-    public List<WebElement> findElements(By findBy) {
+    public List<WebElement> findElements(By findBy) {       // todo add MaybeElement fnality
         wait.until(ExpectedConditions.or(
                 ExpectedConditions.visibilityOfElementLocated(findBy)
         ));
