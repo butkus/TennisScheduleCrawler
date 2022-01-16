@@ -187,6 +187,8 @@ public class Crawler {
 
         addExclusions(exceptionDays, "2022-01-22");        // saturday
         addExclusions(exceptionDays, "2022-01-23");        // sunday, booked and happy with
+        addExclusions(exceptionDays, "2022-01-24");        // monday 1830
+        addExclusions(exceptionDays, "2022-01-25");        // tuesday 1830
 //        exceptionDays.add(Triplet.with(LocalDate.parse("2022-01-23"), HARD, BOTH));      // 19:30 secured
 //        exceptionDays.add(Triplet.with(LocalDate.parse("2022-01-23"), CARPET, BOTH));      // 19:30 secured
 
