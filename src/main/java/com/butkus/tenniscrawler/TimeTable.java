@@ -41,11 +41,11 @@ public class TimeTable {
     private String courtName;
 
     @Getter
-    private List<Integer> aggregatedCourts;
+    private final List<Integer> aggregatedCourt;
 
     public TimeTable(List<WebElement> webElements, Triplet<LocalDate, Integer, ExtensionInterest> dayAtCourt) {
         this.slots = resolveSlots(webElements);
-        getAggregatedSlotsForTheDay();
+        this.aggregatedCourt = getAggregatedCourtForTheDay();
         this.date = dayAtCourt.getValue0();
         this.courtId = dayAtCourt.getValue1();
         this.extensionInterest = dayAtCourt.getValue2();
@@ -57,40 +57,41 @@ public class TimeTable {
     }
 
     public boolean isOfferFound(Cache cache) {
-        SlotFinder slotFinder = new SlotFinder(cache, aggregatedCourts, date, courtId, courtName, extensionInterest);
+        SlotFinder slotFinder = new SlotFinder(cache, aggregatedCourt, date, courtId, courtName, extensionInterest);
         return slotFinder.isOfferFound();
     }
 
-    private void getAggregatedSlotsForTheDay() {
-        List<String> courts = slots.stream()
-                .map(Slot::getCourt)
+    private List<Integer> getAggregatedCourtForTheDay() {
+        List<String> courtNumbers = slots.stream()
+                .map(Slot::getCourtNo)
                 .distinct()
                 .collect(toList());
 
-        List<Integer> aggregatedCourtsBuilder = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0));
+        List<Integer> aggregatedCourtsForTheDay = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0));
 
-        for (String court : courts) {
+        for (String courtNo : courtNumbers) {
             List<Slot> courtSlots = slots.stream()
-                    .filter(e -> court.equals(e.getCourt()))
+                    .filter(e -> courtNo.equals(e.getCourtNo()))
                     .collect(toList());
-            List<Integer> aggregatedCourt = aggregateCourt(courtSlots);
-            coalesceCourts(aggregatedCourtsBuilder, aggregatedCourt);
+            List<Integer> court = resolveCourt(courtSlots);
+            aggregateCourts(aggregatedCourtsForTheDay, court);
         }
-        this.aggregatedCourts = aggregatedCourtsBuilder;       // todo unify naming
+        return aggregatedCourtsForTheDay;
     }
 
-    public String getReadableAggregatedCourt() {
-        if (this.aggregatedCourts == null || this.aggregatedCourts.isEmpty())
+    @Override
+    public String toString() {
+        if (this.aggregatedCourt == null || this.aggregatedCourt.isEmpty())
             throw new RuntimeException("Can't get readable court info from empty court");
-        String times = aggregatedCourts.toString();
+        String times = aggregatedCourt.toString();
         String niceDate = date + ", " + date.getDayOfWeek();
         return String.format("%-21s %s  %9s", niceDate, times, courtName);       // fixme: replace arbitrary 21 and 9
     }
 
-    private static List<Integer> aggregateCourt(List<Slot> courtSlots) {
+    private static List<Integer> resolveCourt(List<Slot> courtSlots) {
         List<Slot> acceptableSlots = courtSlots.stream().filter(e -> ACCEPTABLE_TIMES.contains(e.getTime())).collect(toList());
 
-        Integer[] aggregatedSlots = new Integer[]{0, 0, 0, 0, 0, 0};
+        Integer[] court = new Integer[]{0, 0, 0, 0, 0, 0};
 
         boolean slotFree1800 = isSlotFree(acceptableSlots, S18_00);
         boolean slotFree1830 = isSlotFree(acceptableSlots, S18_30);
@@ -106,44 +107,44 @@ public class TimeTable {
         boolean slotOrange2000 = isSlotOrange(acceptableSlots, S20_00);
         boolean slotOrange2030 = isSlotOrange(acceptableSlots, S20_30);
 
-        if (slotFree1800) aggregatedSlots[0] = WHITE;
-        if (slotOrange1800) aggregatedSlots[0] = ORANGE;
+        if (slotFree1800) court[0] = WHITE;
+        if (slotOrange1800) court[0] = ORANGE;
         if (slotFree1830 || (slotFree1800 && slotDoesNotExist(acceptableSlots, S18_30))){
-            aggregatedSlots[1] = WHITE;
+            court[1] = WHITE;
         }
         if (slotOrange1830 || (slotOrange1800 && slotDoesNotExist(acceptableSlots, S18_30))){
-            aggregatedSlots[1] = ORANGE;
+            court[1] = ORANGE;
         }
 
 
-        if (slotFree1900) aggregatedSlots[2] = WHITE;
-        if (slotOrange1900) aggregatedSlots[2] = ORANGE;
+        if (slotFree1900) court[2] = WHITE;
+        if (slotOrange1900) court[2] = ORANGE;
         if (slotFree1930 || (slotFree1900 && slotDoesNotExist(acceptableSlots, S19_30))){
-            aggregatedSlots[3] = WHITE;
+            court[3] = WHITE;
         }
         if (slotOrange1930 || (slotOrange1900 && slotDoesNotExist(acceptableSlots, S19_30))){
-            aggregatedSlots[3] = ORANGE;
+            court[3] = ORANGE;
         }
 
 
-        if (slotFree2000) aggregatedSlots[4] = WHITE;
-        if (slotOrange2000) aggregatedSlots[4] = ORANGE;
+        if (slotFree2000) court[4] = WHITE;
+        if (slotOrange2000) court[4] = ORANGE;
         if (slotFree2030 || (slotFree2000 && slotDoesNotExist(acceptableSlots, S20_30))){
-            aggregatedSlots[5] = WHITE;
+            court[5] = WHITE;
         }
         if (slotOrange2030 || (slotOrange2000 && slotDoesNotExist(acceptableSlots, S20_30))){
-            aggregatedSlots[5] = ORANGE;
+            court[5] = ORANGE;
         }
 
-        return new ArrayList<>(Arrays.asList(aggregatedSlots));
+        return new ArrayList<>(Arrays.asList(court));
     }
 
-    private static void coalesceCourts(List<Integer> aggregatedCourts, List<Integer> newCourt) {
+    private static void aggregateCourts(List<Integer> aggregatedCourt, List<Integer> newCourt) {
         for (int i=0; i<6; i++) {
-            if (newCourt.get(i).equals(ORANGE)) {       // todo add green and yellow maybe
-                aggregatedCourts.set(i, ORANGE);
+            if (newCourt.get(i).equals(ORANGE)) {
+                aggregatedCourt.set(i, ORANGE);
             } else if (newCourt.get(i).equals(WHITE)) {
-                aggregatedCourts.set(i, WHITE);
+                aggregatedCourt.set(i, WHITE);
             }
         }
     }
@@ -192,7 +193,7 @@ public class TimeTable {
     public void updateFromCache(Cache cache) {
         List<Integer> cached = cache.get(Pair.with(date, courtId));
         if (cached != null) {
-            coalesceCourts(this.aggregatedCourts, cached);
+            aggregateCourts(this.aggregatedCourt, cached);
         }
     }
 }

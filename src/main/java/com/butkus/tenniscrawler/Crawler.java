@@ -79,7 +79,7 @@ public class Crawler {
             TimeTable timeTable = new TimeTable(slots, dayAtCourt);     // fixme: this step takes too long
 
             if (page.loggedInAsRegisteredUser()) {
-                cache.addIfCacheable(dayAtCourt, timeTable.getAggregatedCourts());
+                cache.addIfCacheable(dayAtCourt, timeTable.getAggregatedCourt());
             } else {
                 timeTable.updateFromCache(cache);
             }
@@ -90,7 +90,7 @@ public class Crawler {
                 foundInCurrent = true;
             }
             String foundNotFoundMark = foundInCurrent ? "‹✔›" : " \uD83D\uDFA8 ";   // IntelliJ UTF-8 console output issue: https://stackoverflow.com/a/56430344
-            System.out.printf("%-54s %s%n", timeTable.getReadableAggregatedCourt(), foundNotFoundMark);     // fixme replace arbitrary 54
+            System.out.printf("%-54s %s%n", timeTable.toString(), foundNotFoundMark);     // fixme replace arbitrary 54
         }
 
         if (cacheStale) {      // todo rework to be less dependent on order. now before-if, withing-if, and after-if operations are interrwined to work correctly. Would be nice to have cache work independently

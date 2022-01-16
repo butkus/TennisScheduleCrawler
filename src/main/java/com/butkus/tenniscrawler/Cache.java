@@ -18,7 +18,7 @@ public class Cache {
 
     private Instant lastUpdated;
     private final Duration updateFrequency;
-    private Map<Pair<LocalDate, Integer>, List<Integer>> map;   // Date+Court --> aggregatedCourts
+    private Map<Pair<LocalDate, Integer>, List<Integer>> map;   // Date+Court --> aggregatedCourt
     private final List<Integer> cacheableColors = List.of(Colors.ORANGE, Colors.GREEN, Colors.YELLOW);
 
     @Autowired
@@ -42,16 +42,16 @@ public class Cache {
         map.clear();
     }
 
-    public void addIfCacheable(Triplet<LocalDate, Integer, ExtensionInterest> dayAtCourt, List<Integer> aggregatedCourts) {
-        if (cacheable(aggregatedCourts)) {
+    public void addIfCacheable(Triplet<LocalDate, Integer, ExtensionInterest> dayAtCourt, List<Integer> aggregatedCourt) {
+        if (cacheable(aggregatedCourt)) {
             LocalDate date = dayAtCourt.getValue0();
             Integer court = dayAtCourt.getValue1();
-            map.put(Pair.with(date, court), aggregatedCourts);
+            map.put(Pair.with(date, court), aggregatedCourt);
         }
     }
 
-    private boolean cacheable(List<Integer> aggregatedCourts) {
-        return aggregatedCourts.stream().anyMatch(cacheableColors::contains);
+    private boolean cacheable(List<Integer> aggregatedCourt) {
+        return aggregatedCourt.stream().anyMatch(cacheableColors::contains);
     }
 
     public void setUpdated() {

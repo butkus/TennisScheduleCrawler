@@ -9,6 +9,6 @@ import lombok.experimental.Accessors;
 @Data
 public class Slot {
     private final String classes;
-    private final String court;
+    private final String courtNo;
     private final String time;
 }
