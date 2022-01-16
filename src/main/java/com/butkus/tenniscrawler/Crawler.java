@@ -114,7 +114,7 @@ public class Crawler {
         return localDateTime.format(formatter);
     }
 
-    private static List<Triplet<LocalDate, Integer, ExtensionInterest>> makeInputs() {        // todo: input: same as now + ExtensionInterest(EarlierThanBooked, LaterThanBooked, Both)
+    private static List<Triplet<LocalDate, Integer, ExtensionInterest>> makeInputs() {
         List<Triplet<LocalDate, Integer, ExtensionInterest>> specialDays = new ArrayList<>();
         specialDays.addAll(getHolidays());
         specialDays.addAll(getExceptionDays());

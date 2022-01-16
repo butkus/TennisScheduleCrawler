@@ -28,7 +28,6 @@ public class Page {
     private ChromeDriver driver;
     private WebDriverWait wait;
 
-    private boolean loggedIn;       // todo remove
     private UserType loggedInAs;
 
     @Autowired
@@ -38,12 +37,11 @@ public class Page {
         this.chromeDriverPath = chromeDriverPath.getPath();
         this.sebUsername = sebUsername;
         this.sebPassword = sebPassword;
-        loggedIn = false;
         loggedInAs = UserType.LOGGED_OUT;
     }
 
     public void loadDayAtCourt(Triplet<LocalDate, Integer, ExtensionInterest> dayAtCourt) {
-        if (!loggedIn) {
+        if (loggedInAs == UserType.LOGGED_OUT) {
             login(UserType.ANONYMOUS_USER);
         }
         LocalDate date = dayAtCourt.getValue0();
@@ -56,7 +54,6 @@ public class Page {
         init();
         driver.get("https://savitarna.tenisopasaulis.lt");
         loginAsUser(userType);
-        loggedIn = true;
     }
 
     private void init() {
@@ -64,7 +61,7 @@ public class Page {
         this.wait = createDriverWait(driver);
     }
 
-    private void loginAsUser(UserType userType) {       // todo unify terms
+    private void loginAsUser(UserType userType) {
         if (userType == UserType.REGISTERED_USER) {
             authorizedLogin();
             loggedInAs = UserType.REGISTERED_USER;
@@ -126,7 +123,6 @@ public class Page {
     public void close() {
 //        driver.close();
         driver.quit();      // todo quit driver, just close page (need to close chromedriver on app shutdown)
-        loggedIn = false;
         loggedInAs = UserType.LOGGED_OUT;
     }
 
