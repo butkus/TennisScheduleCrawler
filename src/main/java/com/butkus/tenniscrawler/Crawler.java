@@ -86,6 +86,8 @@ public class Crawler {
 
             boolean foundInCurrent = false;
             if (timeTable.isOfferFound(cache)) {        // todo isOfferFound() to return enum(X for free new time, LATER for later found, EARIEL for earlier found, etc... (so that to later log out if specific improvement found or not)
+                boolean firstFind = !foundAny;
+                if (firstFind) audioPlayer.playSound();
                 foundAny = true;
                 foundInCurrent = true;
             }
@@ -96,8 +98,6 @@ public class Crawler {
         if (cacheStale) {      // todo rework to be less dependent on order. now before-if, withing-if, and after-if operations are interrwined to work correctly. Would be nice to have cache work independently
             cache.setUpdated();
         }
-
-        if (foundAny) audioPlayer.playSound();
 
         printCrawlEndTime(start);
     }
@@ -173,15 +173,12 @@ public class Crawler {
     private static List<Triplet<LocalDate, Integer, ExtensionInterest>> getExceptionDays() {
         List<Triplet<LocalDate, Integer, ExtensionInterest>> exceptionDays = new ArrayList<>();
 
-        addExclusions(exceptionDays, "2022-01-14");        // friday
-
-        addExclusions(exceptionDays, "2022-01-15");        // saturday, secured, not interedted in updating
-//        exceptionDays.add(Triplet.with(LocalDate.parse("2022-01-15"), HARD, EARLIER));      // 19:30 secured
-//        exceptionDays.add(Triplet.with(LocalDate.parse("2022-01-15"), CARPET, EARLIER));      // 19:30 secured
-
-        addExclusions(exceptionDays, "2022-01-16");        // have day before already
         exceptionDays.add(Triplet.with(LocalDate.parse("2022-01-17"), HARD, LATER));        // fixme: If I don't add this, 2022-01-17 HARD won't be cached (will be skipped)
         exceptionDays.add(Triplet.with(LocalDate.parse("2022-01-17"), CARPET, LATER));      // fixme: but add this, and 2022-01-17 CARPET will say:  Requested LATER for date=2022-01-17 and court=Kilimas (courtId=8) but no existing booking
+
+        addExclusions(exceptionDays, "2022-01-18");        // tuesday 19:30
+        addExclusions(exceptionDays, "2022-01-19");        // not interested
+        addExclusions(exceptionDays, "2022-01-20");        // not interested
 
         addExclusions(exceptionDays, "2022-01-21");        // friday
 
