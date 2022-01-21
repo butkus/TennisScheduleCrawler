@@ -143,7 +143,7 @@ public class TimeTable {
         for (int i=0; i<6; i++) {
             if (newCourt.get(i).equals(ORANGE)) {
                 aggregatedCourt.set(i, ORANGE);
-            } else if (newCourt.get(i).equals(WHITE)) {
+            } else if (newCourt.get(i).equals(WHITE) && !aggregatedCourt.get(i).equals(ORANGE)) {
                 aggregatedCourt.set(i, WHITE);
             }
         }

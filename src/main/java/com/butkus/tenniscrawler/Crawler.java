@@ -138,7 +138,8 @@ public class Crawler {
             }
         }
 
-//        listCarpet.add(Triplet.with(LocalDate.parse("2022-01-30"), CARPET, BOTH));
+//        listHard.add(Triplet.with(LocalDate.parse("2022-02-08"), HARD, ANY));
+//        listCarpet.add(Triplet.with(LocalDate.parse("2022-02-08"), CARPET, ANY));
         List<Triplet<LocalDate, Integer, ExtensionInterest>> list = new ArrayList<>();
         list.addAll(listHard);
         list.addAll(listCarpet);
@@ -176,7 +177,6 @@ public class Crawler {
         exceptionDays.add(Triplet.with(LocalDate.parse("2022-01-17"), HARD, LATER));        // fixme: If I don't add this, 2022-01-17 HARD won't be cached (will be skipped)
         exceptionDays.add(Triplet.with(LocalDate.parse("2022-01-17"), CARPET, LATER));      // fixme: but add this, and 2022-01-17 CARPET will say:  Requested LATER for date=2022-01-17 and court=Kilimas (courtId=8) but no existing booking
 
-        addExclusions(exceptionDays, "2022-01-18");        // tuesday 19:30
         addExclusions(exceptionDays, "2022-01-19");        // not interested
         addExclusions(exceptionDays, "2022-01-20");        // not interested
 
@@ -186,14 +186,25 @@ public class Crawler {
         addExclusions(exceptionDays, "2022-01-23");        // sunday, booked and happy with
         addExclusions(exceptionDays, "2022-01-24");        // monday 1830
         addExclusions(exceptionDays, "2022-01-25");        // tuesday 1830
-//        exceptionDays.add(Triplet.with(LocalDate.parse("2022-01-23"), HARD, BOTH));      // 19:30 secured
-//        exceptionDays.add(Triplet.with(LocalDate.parse("2022-01-23"), CARPET, BOTH));      // 19:30 secured
 
         addExclusions(exceptionDays, "2022-01-28");     // dovile stand-by, already booked with Delfi
         addExclusions(exceptionDays, "2022-01-29");        // saturday
 
+        exceptionDays.add(Triplet.with((LocalDate.parse("2022-02-01")), HARD, EARLIER));        // turim 1900
+        exceptionDays.add(Triplet.with((LocalDate.parse("2022-02-01")), CARPET, EARLIER));      // turim 1900
+
+
         addExclusions(exceptionDays, "2022-02-04");        // friday, booked on delfi
         addExclusions(exceptionDays, "2022-02-05");        // saturday, not interested
+
+        exceptionDays.add(Triplet.with((LocalDate.parse("2022-02-08")), HARD, EARLIER));        // turim 2000
+        exceptionDays.add(Triplet.with((LocalDate.parse("2022-02-08")), CARPET, EARLIER));      // turim 2000
+
+        exceptionDays.add(Triplet.with(LocalDate.parse("2022-02-10"), HARD, EARLIER));          // turim 1930
+        exceptionDays.add(Triplet.with(LocalDate.parse("2022-02-10"), CARPET, EARLIER));        // turim 1930
+
+        addExclusions(exceptionDays, "2022-02-11");        // FRIDAY, BOOKED AT DELFI
+        addExclusions(exceptionDays, "2022-02-12");        // saturday
 
         return exceptionDays;
     }
