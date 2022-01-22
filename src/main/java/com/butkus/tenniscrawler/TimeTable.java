@@ -57,7 +57,7 @@ public class TimeTable {
     }
 
     public boolean isOfferFound(Cache cache) {
-        SlotFinder slotFinder = new SlotFinder(cache, aggregatedCourt, date, courtId, courtName, extensionInterest);
+        SlotFinder slotFinder = new SlotFinder(cache, aggregatedCourt, date, courtId, extensionInterest);
         return slotFinder.isOfferFound();
     }
 

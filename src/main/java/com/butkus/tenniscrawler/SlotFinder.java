@@ -16,18 +16,16 @@ public class SlotFinder {
     private final List<Integer> currentCourt;
     private final LocalDate date;
     private final Integer courtId;
-    private final String courtName;
     private final ExtensionInterest extensionInterest;
 
     private final boolean hasReservationInCurrentCourt;
     private final List<Integer> otherCourt;
     private final boolean hasReservationInOtherCourt;
 
-    public SlotFinder(Cache cache, List<Integer> currentCourt, LocalDate date, Integer courtId, String courtName, ExtensionInterest extensionInterest) {
+    public SlotFinder(Cache cache, List<Integer> currentCourt, LocalDate date, Integer courtId, ExtensionInterest extensionInterest) {
         this.currentCourt = currentCourt;
         this.date = date;
         this.courtId = courtId;
-        this.courtName = courtName;
         this.extensionInterest = extensionInterest;
 
         this.hasReservationInCurrentCourt = currentCourt.stream().anyMatch(ORANGE::equals);
@@ -155,7 +153,8 @@ public class SlotFinder {
     }
 
     private void logRequestedExtensionButNoBookingFound() {
-        System.out.printf("Requested %s for date=%s and court=%s (courtId=%s) but no existing booking%n", extensionInterest, date, courtName, courtId);
+        String courtNameEng = courtId.equals(2) ? "HARD" : "CARPET";
+        System.out.printf("Requested %s for  %s in %s court  but no existing booking%n", extensionInterest, date, courtNameEng);
     }
 
 }

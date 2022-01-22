@@ -36,7 +36,7 @@ class SlotFinderTest {
             @Test
             void findsAdjacentEarlierTime() {
                 List<Integer> aggregatedCourt = List.of(0,0,0,1,4,4);
-                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, "Kieta danga", EARLIER);
+                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, EARLIER);
 
                 assertTrue(slotFinder.isOfferFound());
             }
@@ -44,7 +44,7 @@ class SlotFinderTest {
             @Test
             void findsNonAdjacentEarlierTime() {
                 List<Integer> aggregatedCourt = List.of(0,1,1,0,4,4);
-                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, "Kieta danga", EARLIER);
+                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, EARLIER);
 
                 assertTrue(slotFinder.isOfferFound());
             }
@@ -56,7 +56,7 @@ class SlotFinderTest {
             @Test
             void findsAdjacentLaterTime() {
                 List<Integer> aggregatedCourt = List.of(0,4,4,1,0,0);
-                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, "Kieta danga", LATER);
+                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, LATER);
 
                 assertTrue(slotFinder.isOfferFound());
             }
@@ -64,7 +64,7 @@ class SlotFinderTest {
             @Test
             void findsNonAdjacentLaterTime() {
                 List<Integer> aggregatedCourt = List.of(0,4,4,0,1,1);
-                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, "Kieta danga", LATER);
+                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, LATER);
 
                 assertTrue(slotFinder.isOfferFound());
             }
@@ -82,7 +82,7 @@ class SlotFinderTest {
                 cache.addIfCacheable(keyFrm(date, CARPET), List.of(0,0,0,0,4,4));
 
                 List<Integer> aggregatedCourt = List.of(0,0,0,1,1,0);
-                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, "Kieta danga", EARLIER);
+                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, EARLIER);
 
                 assertTrue(slotFinder.isOfferFound());
             }
@@ -92,7 +92,7 @@ class SlotFinderTest {
                 cache.addIfCacheable(keyFrm(date, CARPET), List.of(0,0,0,0,4,4));
 
                 List<Integer> aggregatedCourt = List.of(0,0,1,1,0,0);
-                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, "Kieta danga", EARLIER);
+                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, EARLIER);
 
                 assertTrue(slotFinder.isOfferFound());
             }
@@ -102,7 +102,7 @@ class SlotFinderTest {
                 cache.addIfCacheable(keyFrm(date, CARPET), List.of(0,0,0,0,4,4));
 
                 List<Integer> aggregatedCourt = List.of(0,1,1,0,0,0);
-                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, "Kieta danga", EARLIER);
+                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, EARLIER);
 
                 assertTrue(slotFinder.isOfferFound());
             }
@@ -117,7 +117,7 @@ class SlotFinderTest {
                 cache.addIfCacheable(keyFrm(date, CARPET), List.of(4,4,0,0,0,0));
 
                 List<Integer> aggregatedCourt = List.of(0,1,1,0,0,0);
-                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, "Kieta danga", LATER);
+                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, LATER);
 
                 assertTrue(slotFinder.isOfferFound());
             }
@@ -127,7 +127,7 @@ class SlotFinderTest {
                 cache.addIfCacheable(keyFrm(date, CARPET), List.of(4,4,0,0,0,0));
 
                 List<Integer> aggregatedCourt = List.of(0,0,1,1,0,0);
-                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, "Kieta danga", LATER);
+                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, LATER);
 
                 assertTrue(slotFinder.isOfferFound());
             }
@@ -137,7 +137,7 @@ class SlotFinderTest {
                 cache.addIfCacheable(keyFrm(date, CARPET), List.of(4,4,0,0,0,0));
 
                 List<Integer> aggregatedCourt = List.of(0,0,0,1,1,0);
-                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, "Kieta danga", LATER);
+                slotFinder = new SlotFinder(cache, aggregatedCourt, date, Court.HARD, LATER);
 
                 assertTrue(slotFinder.isOfferFound());
             }
