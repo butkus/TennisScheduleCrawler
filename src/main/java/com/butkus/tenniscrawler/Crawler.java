@@ -29,6 +29,7 @@ public class Crawler {
     private final AudioPlayer audioPlayer;
     private final Page page;
     private final Cache cache;
+    private final BackwardsCounter forcedRefresh;
     private final Random random;
     private final Duration sleepUpTo;
 
@@ -40,6 +41,7 @@ public class Crawler {
         this.audioPlayer = audioPlayer;
         this.page = page;
         this.cache = cache;
+        this.forcedRefresh = new BackwardsCounter();
         this.sleepUpTo = sleepUpTo;
         this.random = SecureRandom.getInstanceStrong();
     }
@@ -59,7 +61,8 @@ public class Crawler {
         Instant start;
 
         boolean cacheStale = cache.isStale();
-        if (cacheStale) {
+        if (cacheStale || forcedRefresh.isEnabled()) {
+            forcedRefresh.decrement();
             cache.clearCache();
             page.login(Page.UserType.REGISTERED_USER);
             start = Instant.now();
@@ -87,6 +90,7 @@ public class Crawler {
             boolean foundInCurrent = false;
             if (timeTable.isOfferFound(cache)) {        // todo isOfferFound() to return enum(X for free new time, LATER for later found, EARIEL for earlier found, etc... (so that to later log out if specific improvement found or not)
                 boolean firstFind = !foundAny;
+                forcedRefresh.enableFor(2).crawls();        // todo maybe make an object for constructing message (logged in as ... bla bla.. other outputable info)
                 if (firstFind) audioPlayer.playSound();
                 foundAny = true;
                 foundInCurrent = true;
@@ -94,6 +98,7 @@ public class Crawler {
             String foundNotFoundMark = foundInCurrent ? "‹✔›" : " \uD83D\uDFA8 ";   // IntelliJ UTF-8 console output issue: https://stackoverflow.com/a/56430344
             System.out.printf("%-54s %s%n", timeTable.toString(), foundNotFoundMark);     // fixme replace arbitrary 54
         }
+        if (!foundAny) forcedRefresh.disable();
 
         if (cacheStale) {      // todo rework to be less dependent on order. now before-if, withing-if, and after-if operations are interrwined to work correctly. Would be nice to have cache work independently
             cache.setUpdated();
@@ -184,8 +189,13 @@ public class Crawler {
 
         addExclusions(exceptionDays, "2022-01-22");        // saturday
         addExclusions(exceptionDays, "2022-01-23");        // sunday, booked and happy with
-        addExclusions(exceptionDays, "2022-01-24");        // monday 1830
-        addExclusions(exceptionDays, "2022-01-25");        // tuesday 1830
+
+//        addExclusions(exceptionDays, "2022-01-24");        // monday 1830
+//        addExclusions(exceptionDays, "2022-01-25");        // tuesday 1830
+        exceptionDays.add(Triplet.with((LocalDate.parse("2022-01-24")), HARD, LATER));        // monday 1830
+        exceptionDays.add(Triplet.with((LocalDate.parse("2022-01-24")), CARPET, LATER));        // monday 1830
+        exceptionDays.add(Triplet.with((LocalDate.parse("2022-01-25")), HARD, LATER));      // tuesday 1830
+        exceptionDays.add(Triplet.with((LocalDate.parse("2022-01-25")), CARPET, LATER));      // tuesday 1830
 
         addExclusions(exceptionDays, "2022-01-28");     // dovile stand-by, already booked with Delfi
         addExclusions(exceptionDays, "2022-01-29");        // saturday
