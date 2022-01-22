@@ -154,7 +154,7 @@ public class SlotFinder {
 
     private void logRequestedExtensionButNoBookingFound() {
         String courtNameEng = courtId.equals(2) ? "HARD" : "CARPET";
-        System.out.printf("Requested %s for  %s in %s court  but no existing booking%n", extensionInterest, date, courtNameEng);
+        System.out.printf("Requested %s for  %s in %s  court but no existing booking%n", extensionInterest, date, courtNameEng);
     }
 
 }

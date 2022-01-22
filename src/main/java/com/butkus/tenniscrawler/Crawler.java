@@ -29,7 +29,7 @@ public class Crawler {
     private final AudioPlayer audioPlayer;
     private final Page page;
     private final Cache cache;
-    private final BackwardsCounter forcedRefresh;
+    private final BackwardsCounter forcedRefresh;   // fixme: after 2 tries finds same standing offer, sets counter to 2 and loops again. Perpetual authorized login
     private final Random random;
     private final Duration sleepUpTo;
 
@@ -87,16 +87,13 @@ public class Crawler {
                 timeTable.updateFromCache(cache);
             }
 
-            boolean foundInCurrent = false;
             if (timeTable.isOfferFound(cache)) {        // todo isOfferFound() to return enum(X for free new time, LATER for later found, EARIEL for earlier found, etc... (so that to later log out if specific improvement found or not)
                 boolean firstFind = !foundAny;
                 forcedRefresh.enableFor(2).crawls();        // todo maybe make an object for constructing message (logged in as ... bla bla.. other outputable info)
                 if (firstFind) audioPlayer.playSound();
                 foundAny = true;
-                foundInCurrent = true;
             }
-            String foundNotFoundMark = foundInCurrent ? "‹✔›" : " \uD83D\uDFA8 ";   // IntelliJ UTF-8 console output issue: https://stackoverflow.com/a/56430344
-            System.out.printf("%-54s %s%n", timeTable.toString(), foundNotFoundMark);     // fixme replace arbitrary 54
+            timeTable.printTable(cache);
         }
         if (!foundAny) forcedRefresh.disable();
 
@@ -143,8 +140,10 @@ public class Crawler {
             }
         }
 
-//        listHard.add(Triplet.with(LocalDate.parse("2022-02-08"), HARD, ANY));
+//        listHard.add(Triplet.with(LocalDate.parse("2022-02-08"), HARD, EARLIER));
 //        listCarpet.add(Triplet.with(LocalDate.parse("2022-02-08"), CARPET, ANY));
+//        listHard.add(Triplet.with(LocalDate.parse("2022-02-26"), HARD, ANY));
+//        listHard.add(Triplet.with(LocalDate.parse("2022-02-26"), CARPET, ANY));
         List<Triplet<LocalDate, Integer, ExtensionInterest>> list = new ArrayList<>();
         list.addAll(listHard);
         list.addAll(listCarpet);
@@ -182,39 +181,40 @@ public class Crawler {
         exceptionDays.add(Triplet.with(LocalDate.parse("2022-01-17"), HARD, LATER));        // fixme: If I don't add this, 2022-01-17 HARD won't be cached (will be skipped)
         exceptionDays.add(Triplet.with(LocalDate.parse("2022-01-17"), CARPET, LATER));      // fixme: but add this, and 2022-01-17 CARPET will say:  Requested LATER for date=2022-01-17 and court=Kilimas (courtId=8) but no existing booking
 
-        addExclusions(exceptionDays, "2022-01-19");        // not interested
-        addExclusions(exceptionDays, "2022-01-20");        // not interested
-
-        addExclusions(exceptionDays, "2022-01-21");        // friday
-
         addExclusions(exceptionDays, "2022-01-22");        // saturday
         addExclusions(exceptionDays, "2022-01-23");        // sunday, booked and happy with
+        addExclusions(exceptionDays, "2022-01-24");        // monday, not interested
 
-//        addExclusions(exceptionDays, "2022-01-24");        // monday 1830
-//        addExclusions(exceptionDays, "2022-01-25");        // tuesday 1830
-        exceptionDays.add(Triplet.with((LocalDate.parse("2022-01-24")), HARD, LATER));        // monday 1830
-        exceptionDays.add(Triplet.with((LocalDate.parse("2022-01-24")), CARPET, LATER));        // monday 1830
         exceptionDays.add(Triplet.with((LocalDate.parse("2022-01-25")), HARD, LATER));      // tuesday 1830
         exceptionDays.add(Triplet.with((LocalDate.parse("2022-01-25")), CARPET, LATER));      // tuesday 1830
 
+        addExclusions(exceptionDays, "2022-01-27");        // thursday
         addExclusions(exceptionDays, "2022-01-28");     // dovile stand-by, already booked with Delfi
         addExclusions(exceptionDays, "2022-01-29");        // saturday
 
         exceptionDays.add(Triplet.with((LocalDate.parse("2022-02-01")), HARD, EARLIER));        // turim 1900
         exceptionDays.add(Triplet.with((LocalDate.parse("2022-02-01")), CARPET, EARLIER));      // turim 1900
 
-
         addExclusions(exceptionDays, "2022-02-04");        // friday, booked on delfi
         addExclusions(exceptionDays, "2022-02-05");        // saturday, not interested
 
-        exceptionDays.add(Triplet.with((LocalDate.parse("2022-02-08")), HARD, EARLIER));        // turim 2000
-        exceptionDays.add(Triplet.with((LocalDate.parse("2022-02-08")), CARPET, EARLIER));      // turim 2000
+        exceptionDays.add(Triplet.with((LocalDate.parse("2022-02-08")), HARD, EARLIER));        // turim 1900
+        exceptionDays.add(Triplet.with((LocalDate.parse("2022-02-08")), CARPET, EARLIER));      // turim 1900
+
+        exceptionDays.add(Triplet.with((LocalDate.parse("2022-02-09")), HARD, LATER));        // turim 18:30
+        exceptionDays.add(Triplet.with((LocalDate.parse("2022-02-09")), CARPET, LATER));      // turim 18:30
 
         exceptionDays.add(Triplet.with(LocalDate.parse("2022-02-10"), HARD, EARLIER));          // turim 1930
         exceptionDays.add(Triplet.with(LocalDate.parse("2022-02-10"), CARPET, EARLIER));        // turim 1930
 
         addExclusions(exceptionDays, "2022-02-11");        // FRIDAY, BOOKED AT DELFI
         addExclusions(exceptionDays, "2022-02-12");        // saturday
+
+        exceptionDays.add(Triplet.with(LocalDate.parse("2022-02-14"), HARD, EARLIER));          // turim 1930
+        exceptionDays.add(Triplet.with(LocalDate.parse("2022-02-14"), CARPET, EARLIER));        // turim 1930
+
+        exceptionDays.add(Triplet.with(LocalDate.parse("2022-02-15"), HARD, EARLIER));          // turim 1900
+        exceptionDays.add(Triplet.with(LocalDate.parse("2022-02-15"), CARPET, EARLIER));        // turim 1900
 
         return exceptionDays;
     }

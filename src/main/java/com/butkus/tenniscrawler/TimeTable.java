@@ -1,6 +1,7 @@
 package com.butkus.tenniscrawler;
 
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
 import org.openqa.selenium.WebElement;
@@ -13,6 +14,8 @@ import java.util.stream.Collectors;
 
 import static com.butkus.tenniscrawler.Colors.ORANGE;
 import static com.butkus.tenniscrawler.Colors.WHITE;
+import static com.butkus.tenniscrawler.Court.CARPET_NAME;
+import static com.butkus.tenniscrawler.Court.HARD_NAME;
 import static java.util.stream.Collectors.toList;
 
 public class TimeTable {
@@ -38,7 +41,6 @@ public class TimeTable {
     private final LocalDate date;
     private final Integer courtId;
     private final ExtensionInterest extensionInterest;
-    private String courtName;
 
     @Getter
     private final List<Integer> aggregatedCourt;
@@ -49,11 +51,6 @@ public class TimeTable {
         this.date = dayAtCourt.getValue0();
         this.courtId = dayAtCourt.getValue1();
         this.extensionInterest = dayAtCourt.getValue2();
-        if (courtId == 2) {
-            this.courtName = "Kieta danga";
-        } else if (courtId == 8) {
-            this.courtName = "Kilimas";
-        }
     }
 
     public boolean isOfferFound(Cache cache) {
@@ -77,15 +74,6 @@ public class TimeTable {
             aggregateCourts(aggregatedCourtsForTheDay, court);
         }
         return aggregatedCourtsForTheDay;
-    }
-
-    @Override
-    public String toString() {
-        if (this.aggregatedCourt == null || this.aggregatedCourt.isEmpty())
-            throw new RuntimeException("Can't get readable court info from empty court");
-        String times = aggregatedCourt.toString();
-        String niceDate = date + ", " + date.getDayOfWeek();
-        return String.format("%-21s %s  %9s", niceDate, times, courtName);       // fixme: replace arbitrary 21 and 9
     }
 
     private static List<Integer> resolveCourt(List<Slot> courtSlots) {
@@ -196,4 +184,23 @@ public class TimeTable {
             aggregateCourts(this.aggregatedCourt, cached);
         }
     }
+
+    public void printTable(Cache cache) {
+        String niceDate = date + ", " + date.getDayOfWeek();
+        String courtMap = aggregatedCourt.toString();
+
+        boolean hasBookedSlots = aggregatedCourt.stream().anyMatch(e -> e.equals(ORANGE));
+        String extensionInterestSign = hasBookedSlots ? extensionInterest.getSign() : " ";
+
+        String courtNameCentered = getCenteredCourtName();
+        String foundNotFoundMark = isOfferFound(cache) ? "‹✔›" : "\uD83D\uDFA8";   // IntelliJ UTF-8 console output issue: https://stackoverflow.com/a/56430344
+        System.out.printf("%-21s %s  %s  %s  %5s%n", niceDate, courtMap, extensionInterestSign, courtNameCentered, foundNotFoundMark);    // todo arbitrarey number
+    }
+
+    private String getCenteredCourtName() {
+        String courtName = courtId == 2 ? HARD_NAME : CARPET_NAME;
+        int courtNameMaxLength = Math.max(HARD_NAME.length(), CARPET_NAME.length());
+        return StringUtils.center(courtName, courtNameMaxLength);
+    }
+
 }
