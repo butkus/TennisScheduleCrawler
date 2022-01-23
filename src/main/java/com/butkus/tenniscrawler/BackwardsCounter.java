@@ -3,17 +3,19 @@ package com.butkus.tenniscrawler;
 public class BackwardsCounter {
 
     private int counter;
+    private boolean enabled;
 
     public BackwardsCounter() {
-        this.counter = 0;
+        init();
     }
 
-    public boolean isEnabled() {
+    public boolean isOn() {
         return counter > 0;
     }
 
-    public BackwardsCounter enableFor(int setTo) {
-        if (counter == 0) {
+    public BackwardsCounter enableOnceFor(int setTo) {
+        if (!enabled) {
+            enabled = true;
             counter = setTo;
         }
         return this;
@@ -28,13 +30,11 @@ public class BackwardsCounter {
     }
 
     public void disable() {
-        counter = 0;
+        init();
     }
 
-    @Override
-    public String toString() {
-        return "BackwardsCounter{" +
-                "counter=" + counter +
-                '}';
+    private void init() {
+        counter = 0;
+        enabled = false;
     }
 }

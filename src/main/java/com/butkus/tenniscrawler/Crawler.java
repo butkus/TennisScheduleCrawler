@@ -61,7 +61,7 @@ public class Crawler {
         Instant start;
 
         boolean cacheStale = cache.isStale();
-        if (cacheStale || forcedRefresh.isEnabled()) {
+        if (cacheStale || forcedRefresh.isOn()) {
             forcedRefresh.decrement();
             cache.clearCache();
             page.login(Page.UserType.REGISTERED_USER);
@@ -77,6 +77,8 @@ public class Crawler {
 
         boolean foundAny = false;
         for (Triplet<LocalDate, Integer, ExtensionInterest> dayAtCourt : makeInputs()) {
+            if (dayAtCourt.getValue2() == NONE && !page.loggedInAsRegisteredUser()) continue;
+
             page.loadDayAtCourt(dayAtCourt);
             List<WebElement> slots = getAllTimeSlotsSeb(page);
             TimeTable timeTable = new TimeTable(slots, dayAtCourt);     // fixme: this step takes too long
@@ -89,7 +91,7 @@ public class Crawler {
 
             if (timeTable.isOfferFound(cache)) {        // todo isOfferFound() to return enum(X for free new time, LATER for later found, EARIEL for earlier found, etc... (so that to later log out if specific improvement found or not)
                 boolean firstFind = !foundAny;
-                forcedRefresh.enableFor(2).crawls();        // todo maybe make an object for constructing message (logged in as ... bla bla.. other outputable info)
+                forcedRefresh.enableOnceFor(2).crawls();
                 if (firstFind) audioPlayer.playSound();
                 foundAny = true;
             }
