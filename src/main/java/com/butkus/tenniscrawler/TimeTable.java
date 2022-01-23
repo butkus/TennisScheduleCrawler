@@ -16,6 +16,7 @@ import static com.butkus.tenniscrawler.Colors.ORANGE;
 import static com.butkus.tenniscrawler.Colors.WHITE;
 import static com.butkus.tenniscrawler.Court.CARPET_NAME;
 import static com.butkus.tenniscrawler.Court.HARD_NAME;
+import static com.butkus.tenniscrawler.ExtensionInterest.NONE;
 import static java.util.stream.Collectors.toList;
 
 public class TimeTable {
@@ -189,12 +190,22 @@ public class TimeTable {
         String niceDate = date + ", " + date.getDayOfWeek();
         String courtMap = aggregatedCourt.toString();
 
-        boolean hasBookedSlots = aggregatedCourt.stream().anyMatch(e -> e.equals(ORANGE));
-        String extensionInterestSign = hasBookedSlots ? extensionInterest.getSign() : " ";
+        String extensionInterestSign = getExtensionInterestSign();
 
         String courtNameCentered = getCenteredCourtName();
         String foundNotFoundMark = isOfferFound(cache) ? "‹✔›" : "\uD83D\uDFA8";   // IntelliJ UTF-8 console output issue: https://stackoverflow.com/a/56430344
         System.out.printf("%-21s %s  %s  %s  %5s%n", niceDate, courtMap, extensionInterestSign, courtNameCentered, foundNotFoundMark);    // todo arbitrarey number
+    }
+
+    private String getExtensionInterestSign() {
+        boolean hasBookedSlots = aggregatedCourt.stream().anyMatch(e -> e.equals(ORANGE));
+        if (extensionInterest == NONE) {
+            return extensionInterest.getSign();
+        } else if (hasBookedSlots) {
+            return extensionInterest.getSign();
+        } else {
+            return " ";
+        }
     }
 
     private String getCenteredCourtName() {

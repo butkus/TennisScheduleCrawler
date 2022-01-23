@@ -9,7 +9,7 @@ public enum ExtensionInterest {
     EARLIER("‹"),
     LATER("›"),
     ANY(" "),
-    NONE(" ");
+    NONE("-");
 
     private final String sign;
 }

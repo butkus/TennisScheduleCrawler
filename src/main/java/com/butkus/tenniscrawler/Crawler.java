@@ -101,6 +101,7 @@ public class Crawler {
             cache.setUpdated();
         }
 
+        Calendar.printCalendar(cache);
         printCrawlEndTime(start);
     }
 
@@ -128,8 +129,8 @@ public class Crawler {
             LocalDate currentDate = date.plusDays(i);
             boolean currentDateInSpecialDays = specialDays.stream().anyMatch(e -> e.getValue0().equals(currentDate));
             if (currentDateInSpecialDays) {
-                List<Triplet<LocalDate, Integer, ExtensionInterest>> hard = specialDays.stream().filter(e -> e.getValue0().equals(currentDate)).filter(e -> e.getValue1().equals(HARD) && e.getValue2() != NONE).collect(Collectors.toList());
-                List<Triplet<LocalDate, Integer, ExtensionInterest>> carpet = specialDays.stream().filter(e -> e.getValue0().equals(currentDate)).filter(e -> e.getValue1().equals(CARPET) && e.getValue2() != NONE).collect(Collectors.toList());
+                List<Triplet<LocalDate, Integer, ExtensionInterest>> hard = specialDays.stream().filter(e -> e.getValue0().equals(currentDate)).filter(e -> e.getValue1().equals(HARD)).collect(Collectors.toList());       // todo simplify
+                List<Triplet<LocalDate, Integer, ExtensionInterest>> carpet = specialDays.stream().filter(e -> e.getValue0().equals(currentDate)).filter(e -> e.getValue1().equals(CARPET)).collect(Collectors.toList());
                 listHard.addAll(hard);
                 listCarpet.addAll(carpet);
             } else {
@@ -175,18 +176,15 @@ public class Crawler {
         return holidays;
     }
 
-    private static List<Triplet<LocalDate, Integer, ExtensionInterest>> getExceptionDays() {
+    private static List<Triplet<LocalDate, Integer, ExtensionInterest>> getExceptionDays() {        // todo move all input-related to own class (and make it in separate changelist and never commit)
         List<Triplet<LocalDate, Integer, ExtensionInterest>> exceptionDays = new ArrayList<>();
 
         exceptionDays.add(Triplet.with(LocalDate.parse("2022-01-17"), HARD, LATER));        // fixme: If I don't add this, 2022-01-17 HARD won't be cached (will be skipped)
         exceptionDays.add(Triplet.with(LocalDate.parse("2022-01-17"), CARPET, LATER));      // fixme: but add this, and 2022-01-17 CARPET will say:  Requested LATER for date=2022-01-17 and court=Kilimas (courtId=8) but no existing booking
 
-        addExclusions(exceptionDays, "2022-01-22");        // saturday
         addExclusions(exceptionDays, "2022-01-23");        // sunday, booked and happy with
         addExclusions(exceptionDays, "2022-01-24");        // monday, not interested
-
-        exceptionDays.add(Triplet.with((LocalDate.parse("2022-01-25")), HARD, LATER));      // tuesday 1830
-        exceptionDays.add(Triplet.with((LocalDate.parse("2022-01-25")), CARPET, LATER));      // tuesday 1830
+        addExclusions(exceptionDays, "2022-01-25");        // tuesday, 1830, happy with
 
         addExclusions(exceptionDays, "2022-01-27");        // thursday
         addExclusions(exceptionDays, "2022-01-28");     // dovile stand-by, already booked with Delfi
