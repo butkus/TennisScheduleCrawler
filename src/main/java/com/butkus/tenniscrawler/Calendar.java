@@ -48,7 +48,7 @@ public class Calendar {
         YearMonth yearMonth = YearMonth.of(year, month);
 
         String headers = " P   A   T   K   P   Š   S";
-        String ltMonth = Months.getLtMonths().get(yearMonth.getMonth());
+        String ltMonth = Translations.getLtMonth(yearMonth);
         lines.add(StringUtils.center(ltMonth, headers.length()));
         lines.add(headers);
 

@@ -187,14 +187,14 @@ public class TimeTable {
     }
 
     public void printTable(Cache cache) {
-        String niceDate = date + ", " + date.getDayOfWeek();
+        String niceDate = date + ", " + Translations.getLtWeekDay(date);
         String courtMap = aggregatedCourt.toString();
 
         String extensionInterestSign = getExtensionInterestSign();
 
         String courtNameCentered = getCenteredCourtName();
         String foundNotFoundMark = isOfferFound(cache) ? "‹✔›" : "\uD83D\uDFA8";   // IntelliJ UTF-8 console output issue: https://stackoverflow.com/a/56430344
-        System.out.printf("%-21s %s  %s  %s  %5s%n", niceDate, courtMap, extensionInterestSign, courtNameCentered, foundNotFoundMark);    // todo arbitrarey number + lt names for months
+        System.out.printf("%-20s %s  %s  %s  %5s%n", niceDate, courtMap, extensionInterestSign, courtNameCentered, foundNotFoundMark);
     }
 
     private String getExtensionInterestSign() {
