@@ -39,6 +39,7 @@ public class Calendar {
         for (String lineByLine : bothMonths) {
             System.out.println(lineByLine);
         }
+        System.out.println();
     }
 
     private static List<String> getPrintableMonth(Cache cache, int year, int month) {
@@ -47,7 +48,8 @@ public class Calendar {
         YearMonth yearMonth = YearMonth.of(year, month);
 
         String headers = " P   A   T   K   P   Š   S";
-        lines.add(StringUtils.center("<< " + yearMonth.toString() + " >>", headers.length()));
+        String ltMonth = Months.getLtMonths().get(yearMonth.getMonth());
+        lines.add(StringUtils.center(ltMonth, headers.length()));
         lines.add(headers);
 
         int startOfMonthWhitespaceCount = LocalDate.of(year, month, 1).getDayOfWeek().getValue() - 1;
@@ -56,11 +58,12 @@ public class Calendar {
         DayOfWeek dayOfWeek = null;
         for (int dayOfMonth = 1; dayOfMonth <= yearMonth.lengthOfMonth(); dayOfMonth++) {
             boolean booked = isBooked(cache, year, month, dayOfMonth);
-            String dayString = booked ? " ●" : Integer.toString(dayOfMonth);
+            LocalDate currentDate = LocalDate.of(year, month, dayOfMonth);
+            String dayString = getSymbolForTheDay(dayOfMonth, booked, currentDate);
 
             accum += String.format("%2s  ", dayString);
 
-            dayOfWeek = LocalDate.of(year, month, dayOfMonth).getDayOfWeek();
+            dayOfWeek = currentDate.getDayOfWeek();
             if (dayOfWeek == SUNDAY) {
                 lines.add(accum.substring(0, accum.length() - 2));
                 accum = "";
@@ -71,6 +74,16 @@ public class Calendar {
         lines.add(accum.substring(0, accum.length() - 2));
 
         return lines;
+    }
+
+    private static String getSymbolForTheDay(int dayOfMonth, boolean booked, LocalDate dateBeingProcessed) {
+        if (dateBeingProcessed.isBefore(LocalDate.now())) {
+            return "░░";
+        } else if (booked) {
+            return " ●";
+        } else {
+            return Integer.toString(dayOfMonth);
+        }
     }
 
     private static boolean isBooked(Cache cache, int year, int month, int dayOfMonth) {

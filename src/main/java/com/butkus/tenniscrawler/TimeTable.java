@@ -194,7 +194,7 @@ public class TimeTable {
 
         String courtNameCentered = getCenteredCourtName();
         String foundNotFoundMark = isOfferFound(cache) ? "‹✔›" : "\uD83D\uDFA8";   // IntelliJ UTF-8 console output issue: https://stackoverflow.com/a/56430344
-        System.out.printf("%-21s %s  %s  %s  %5s%n", niceDate, courtMap, extensionInterestSign, courtNameCentered, foundNotFoundMark);    // todo arbitrarey number
+        System.out.printf("%-21s %s  %s  %s  %5s%n", niceDate, courtMap, extensionInterestSign, courtNameCentered, foundNotFoundMark);    // todo arbitrarey number + lt names for months
     }
 
     private String getExtensionInterestSign() {
