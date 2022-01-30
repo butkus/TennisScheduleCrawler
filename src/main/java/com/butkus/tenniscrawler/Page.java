@@ -7,7 +7,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -71,20 +70,17 @@ public class Page {
         }
     }
 
-    public MaybeElement findElement(By findBy) {
-        return new MaybeElement(driver, wait, findBy);
-    }
-
-    // todo can inline because only 1 usage
-    private List<WebElement> findElements(By findBy) {       // todo add MaybeElement fnality
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.visibilityOfElementLocated(findBy)
-        ));
-        return driver.findElements(findBy);
+    public MaybeWebElement findElement(By findBy) {
+        return new MaybeWebElement(driver, wait, findBy);
     }
 
     public List<WebElement> getAllTimeSlots() {
-        return findElements(By.id("jqReservationLink"));
+        MaybeWebElements maybeWebElements = new MaybeWebElements(driver, wait, By.id("jqReservationLink"));
+        while(!maybeWebElements.isFound()) {
+            maybeWebElements.saveScreenshot("getting time slots");
+            maybeWebElements.refresh();
+        }
+        return maybeWebElements.get();
     }
 
     private static WebDriverWait createDriverWait(WebDriver driver) {
@@ -104,24 +100,24 @@ public class Page {
     }
 
     private void anonymousLogin() {
-        MaybeElement anonymousLoginIcon = findElement(By.xpath("//a[contains(@href, '#anonymus-login')]"));
+        MaybeWebElement anonymousLoginIcon = findElement(By.xpath("//a[contains(@href, '#anonymus-login')]"));
         while (!anonymousLoginIcon.isFound()) {
             anonymousLoginIcon.saveScreenshot("anonymous-login");
             anonymousLoginIcon.refresh();
         }
         anonymousLoginIcon.click();
 
-        MaybeElement boxPopclose = findElement(By.id("boxPopclose"));
+        MaybeWebElement boxPopclose = findElement(By.id("boxPopclose"));
         if (boxPopclose.isFound()) boxPopclose.click();
     }
 
     private void authorizedLogin() {
-        MaybeElement usernameTextField = findElement(By.id("LoginForm_var_login"));
-        MaybeElement passwordTextField = findElement(By.id("LoginForm_var_password"));
+        MaybeWebElement usernameTextField = findElement(By.id("LoginForm_var_login"));
+        MaybeWebElement passwordTextField = findElement(By.id("LoginForm_var_password"));
         usernameTextField.sendKeys(sebUsername);
         passwordTextField.sendKeys(sebPassword);
 
-        MaybeElement loginButton = findElement(By.xpath("//form[@id='login_form']/div[4]/input"));
+        MaybeWebElement loginButton = findElement(By.xpath("//form[@id='login_form']/div[4]/input"));
         loginButton.click();
     }
 

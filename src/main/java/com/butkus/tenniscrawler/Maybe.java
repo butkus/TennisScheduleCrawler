@@ -4,7 +4,6 @@ import lombok.Getter;
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -14,48 +13,50 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.NoSuchElementException;
 
-public class MaybeElement {
+public abstract class Maybe<T> {
 
-    private final ChromeDriver driver;
-    private final WebDriverWait wait;
-    private final By by;
+    protected final ChromeDriver driver;
+    protected final WebDriverWait wait;
 
-    @Getter
-    private boolean found;
-    private WebElement element;
+    protected final By by;
+    protected T aMaybe;
+    @Getter private boolean found;
+
     private File tempScreenshot;
     private String screenshotFileName;
 
-    public MaybeElement(ChromeDriver driver, WebDriverWait wait, By by) {
+    Maybe(ChromeDriver driver, WebDriverWait wait, By by) {
         this.driver = driver;
         this.wait = wait;
         this.by = by;
-
         init();
     }
 
-    private void init() {
+    protected void init() {
         try {
             wait.until(ExpectedConditions.or(
                     ExpectedConditions.visibilityOfElementLocated(by)
             ));
-            element = driver.findElement(by);
+            loadAMaybe();
             found = true;
         } catch (Exception e) {
-            element = null;
+            System.out.println("Failed to load element " + by.toString());
+            aMaybe = null;
             found = false;
             takeScreenshot();
             screenshotFileName = "Screenshot_" + Instant.now().toString().replace(":", "-") +
-                    "  ---  " + by.toString();      // todo nicer name, dates
+                    "  ---  " + by.toString().replace(":", "-");      // todo nicer name, dates
         }
     }
+
+    protected abstract void loadAMaybe();
 
     public void refresh() {
         driver.navigate().refresh();
         init();
     }
 
-    public void takeScreenshot(){
+    private void takeScreenshot(){
         tempScreenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
     }
 
@@ -74,17 +75,8 @@ public class MaybeElement {
         }
     }
 
-    public void click() {
-        validateElementFound();
-        element.click();
+    protected void validateElementFound() {
+        if (!found) throw new NoSuchElementException("Element not found: " + by.toString());
     }
 
-    public void sendKeys(String string) {
-        validateElementFound();
-        element.sendKeys(string);
-    }
-
-    private void validateElementFound() {
-        if (!found) throw new NoSuchElementException();
-    }
 }
