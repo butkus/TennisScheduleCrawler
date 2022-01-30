@@ -75,11 +75,16 @@ public class Page {
         return new MaybeElement(driver, wait, findBy);
     }
 
-    public List<WebElement> findElements(By findBy) {       // todo add MaybeElement fnality
+    // todo can inline because only 1 usage
+    private List<WebElement> findElements(By findBy) {       // todo add MaybeElement fnality
         wait.until(ExpectedConditions.or(
                 ExpectedConditions.visibilityOfElementLocated(findBy)
         ));
         return driver.findElements(findBy);
+    }
+
+    public List<WebElement> getAllTimeSlots() {
+        return findElements(By.id("jqReservationLink"));
     }
 
     private static WebDriverWait createDriverWait(WebDriver driver) {

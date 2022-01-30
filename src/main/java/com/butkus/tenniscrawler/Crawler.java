@@ -1,7 +1,6 @@
 package com.butkus.tenniscrawler;
 
 import org.javatuples.Triplet;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +24,7 @@ public class Crawler {
     private final AudioPlayer audioPlayer;
     private final Page page;
     private final Cache cache;
-    private final BackwardsCounter forcedRefresh;   // fixme: after 2 tries finds same standing offer, sets counter to 2 and loops again. Perpetual authorized login
+    private final BackwardsCounter forcedRefresh;
     private final Random random;
     private final Duration sleepUpTo;
 
@@ -76,7 +75,7 @@ public class Crawler {
             if (dayAtCourt.getValue2() == NONE && !page.loggedInAsRegisteredUser()) continue;
 
             page.loadDayAtCourt(dayAtCourt);
-            List<WebElement> slots = getAllTimeSlotsSeb(page);
+            List<WebElement> slots = page.getAllTimeSlots();
             TimeTable timeTable = new TimeTable(slots, dayAtCourt);     // fixme: this step takes too long
 
             if (page.loggedInAsRegisteredUser()) {
@@ -95,7 +94,7 @@ public class Crawler {
         }
         if (!foundAny) forcedRefresh.disable();
 
-        if (cacheStale) {      // todo rework to be less dependent on order. now before-if, withing-if, and after-if operations are interrwined to work correctly. Would be nice to have cache work independently
+        if (cacheStale) {
             cache.setUpdated();
         }
 
@@ -113,10 +112,6 @@ public class Crawler {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(" HH:mm:ss");
         LocalDateTime localDateTime = start.atZone(ZoneId.of("Europe/Vilnius")).toLocalDateTime();
         return localDateTime.format(formatter);
-    }
-
-    private static List<WebElement> getAllTimeSlotsSeb(Page page) {
-        return page.findElements(By.id("jqReservationLink"));       // fixme: `by` is seb-specific, it should be in `page`
     }
 
 }
