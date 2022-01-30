@@ -11,6 +11,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.NoSuchElementException;
 
 public abstract class Maybe<T> {
@@ -44,9 +47,17 @@ public abstract class Maybe<T> {
             aMaybe = null;
             found = false;
             takeScreenshot();
-            screenshotFileName = "Screenshot_" + Instant.now().toString().replace(":", "-") +
-                    "  ---  " + by.toString().replace(":", "-");      // todo nicer name, dates
+            screenshotFileName = getScreenshotFileName();
         }
+    }
+
+    private String getScreenshotFileName() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd  HH_mm_ss");
+        LocalDateTime localDateTime = Instant.now().atZone(ZoneId.of("Europe/Vilnius")).toLocalDateTime();
+        String dateTimeString = localDateTime.format(formatter);
+        String elementBy = by.toString().replace(":", "").replace(".", "_");
+
+        return dateTimeString + "  ---  Cannot find element " + elementBy;
     }
 
     protected abstract void loadAMaybe();
