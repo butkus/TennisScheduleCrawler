@@ -71,7 +71,8 @@ public class Crawler {
         }
 
         boolean foundAny = false;
-        for (Triplet<LocalDate, Integer, ExtensionInterest> dayAtCourt : Input.makeInputs()) {
+        List<Triplet<LocalDate, Integer, ExtensionInterest>> inputs = Input.makeInputs();
+        for (Triplet<LocalDate, Integer, ExtensionInterest> dayAtCourt : inputs) {
             if (dayAtCourt.getValue2() == NONE && !page.loggedInAsRegisteredUser()) continue;
 
             page.loadDayAtCourt(dayAtCourt);
@@ -98,7 +99,7 @@ public class Crawler {
             cache.setUpdated();
         }
 
-        Calendar.printCalendar(cache);
+        Calendar.printCalendar(cache, inputs);
         printCrawlEndTime(start);
     }
 
