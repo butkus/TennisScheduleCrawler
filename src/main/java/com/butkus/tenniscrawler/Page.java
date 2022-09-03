@@ -96,7 +96,16 @@ public class Page {
 
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless", "--window-size=1920,1200");
-        return new ChromeDriver(options);
+        return tryCreateChromeDriver(options);
+    }
+
+    private ChromeDriver tryCreateChromeDriver(ChromeOptions options) {
+        try {
+            return new ChromeDriver(options);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private void anonymousLogin() {
