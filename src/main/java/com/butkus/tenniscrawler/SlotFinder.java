@@ -5,8 +5,7 @@ import org.javatuples.Pair;
 import java.time.LocalDate;
 import java.util.List;
 
-import static com.butkus.tenniscrawler.Colors.ORANGE;
-import static com.butkus.tenniscrawler.Colors.WHITE;
+import static com.butkus.tenniscrawler.Colors.*;
 import static com.butkus.tenniscrawler.Court.CARPET;
 import static com.butkus.tenniscrawler.Court.HARD;
 import static com.butkus.tenniscrawler.ExtensionInterest.*;
@@ -74,7 +73,9 @@ public class SlotFinder {
 
     private boolean found2FreeSlots() {
         for (int i=0; i<5; i++) {
-            if (currentCourt.get(i).equals(WHITE) && currentCourt.get(i + 1).equals(WHITE)) {
+            boolean foundWhite = currentCourt.get(i).equals(WHITE) && currentCourt.get(i + 1).equals(WHITE);
+            boolean foundYellow = currentCourt.get(i).equals(YELLOW) && currentCourt.get(i + 1).equals(YELLOW);
+            if (foundWhite || foundYellow) {
                 return true;
             }
         }
