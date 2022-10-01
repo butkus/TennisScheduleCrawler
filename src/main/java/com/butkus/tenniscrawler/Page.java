@@ -1,6 +1,5 @@
 package com.butkus.tenniscrawler;
 
-import org.javatuples.Triplet;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -39,15 +37,28 @@ public class Page {
         loggedInAs = UserType.LOGGED_OUT;
     }
 
-    public void loadDayAtCourt(Triplet<LocalDate, Integer, ExtensionInterest> dayAtCourt) {
+    public void loadMainBookingPage() {
         if (loggedInAs == UserType.LOGGED_OUT) {
             login(UserType.ANONYMOUS_USER);
         }
-        // todo next
-        LocalDate date = dayAtCourt.getValue0();
-        Integer courtId = dayAtCourt.getValue1();
-        String url = String.format("https://savitarna.tenisopasaulis.lt/rezervavimas/rezervavimas?sDate=%s&iPlaceId=%s", date.toString(), courtId);
-        driver.get(url);
+
+        driver.get("https://book.sebarena.lt/#/rezervuoti/tenisas");
+
+        MaybeWebElement popupCloseButton = findElement(By.className("closeBtn"));
+        if (popupCloseButton.isFound()) popupCloseButton.click();
+
+        MaybeWebElement chooseFilterElement = findElement(
+                By.xpath("//*[text()='Pasirinkite filtrus, kurie visada bus saugomi Jūsų vartotojo aplinkoje.']//../..//*[@class='btn blue min']"));
+        chooseFilterElement.click();
+
+        MaybeWebElement filter60mins = findElement(By.xpath("//*[text()='60 min']/../.."));
+        filter60mins.click();
+
+        MaybeWebElement filterEveningOnly = findElement(By.xpath("//*[text()='Vakaras 15:00 - 23:00']/../.."));
+        filterEveningOnly.click();
+
+        MaybeWebElement filterCloseButton = findElement(By.className("closeBtn"));
+        if (filterCloseButton.isFound()) filterCloseButton.click();
     }
 
     public void login(UserType userType) {

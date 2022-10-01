@@ -75,7 +75,8 @@ public class Crawler {
         for (Triplet<LocalDate, Integer, ExtensionInterest> dayAtCourt : inputs) {
             if (dayAtCourt.getValue2() == NONE && !page.loggedInAsRegisteredUser()) continue;
 
-            page.loadDayAtCourt(dayAtCourt);
+            page.loadMainBookingPage();
+
             List<WebElement> slots = page.getAllTimeSlots();
             TimeTable timeTable = new TimeTable(slots, dayAtCourt);     // fixme: this step takes too long
 
