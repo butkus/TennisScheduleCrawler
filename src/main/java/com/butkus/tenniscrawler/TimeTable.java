@@ -14,8 +14,6 @@ import java.util.stream.Collectors;
 
 import static com.butkus.tenniscrawler.Colors.ORANGE;
 import static com.butkus.tenniscrawler.Colors.WHITE;
-import static com.butkus.tenniscrawler.Court.CARPET_NAME;
-import static com.butkus.tenniscrawler.Court.HARD_NAME;
 import static com.butkus.tenniscrawler.ExtensionInterest.NONE;
 import static java.util.stream.Collectors.toList;
 
@@ -40,7 +38,7 @@ public class TimeTable {
 
     private final List<Slot> slots;
     private final LocalDate date;
-    private final Integer courtId;
+    private final Court court;
     private final ExtensionInterest extensionInterest;
 
     @Getter
@@ -50,12 +48,12 @@ public class TimeTable {
         this.slots = resolveSlots(webElements);
         this.aggregatedCourt = getAggregatedCourtForTheDay();
         this.date = dayAtCourt.getValue0();
-        this.courtId = dayAtCourt.getValue1();
+        this.court = Court.fromCourtId(dayAtCourt.getValue1());
         this.extensionInterest = dayAtCourt.getValue2();
     }
 
     public boolean isOfferFound(Cache cache) {
-        SlotFinder slotFinder = new SlotFinder(cache, aggregatedCourt, date, courtId, extensionInterest);
+        SlotFinder slotFinder = new SlotFinder(cache, aggregatedCourt, date, court, extensionInterest);
         return slotFinder.isOfferFound();
     }
 
@@ -71,8 +69,8 @@ public class TimeTable {
             List<Slot> courtSlots = slots.stream()
                     .filter(e -> courtNo.equals(e.getCourtNo()))
                     .collect(toList());
-            List<Integer> court = resolveCourt(courtSlots);
-            aggregateCourts(aggregatedCourtsForTheDay, court);
+            List<Integer> courtSchedule = resolveCourt(courtSlots);
+            aggregateCourts(aggregatedCourtsForTheDay, courtSchedule);
         }
         return aggregatedCourtsForTheDay;
     }
@@ -180,7 +178,7 @@ public class TimeTable {
     }
 
     public void updateFromCache(Cache cache) {
-        List<Integer> cached = cache.get(Pair.with(date, courtId));
+        List<Integer> cached = cache.get(Pair.with(date, court.getCourtId()));
         if (cached != null) {
             aggregateCourts(this.aggregatedCourt, cached);
         }
@@ -209,9 +207,13 @@ public class TimeTable {
     }
 
     private String getCenteredCourtName() {
-        String courtName = courtId == 2 ? HARD_NAME : CARPET_NAME;
-        int courtNameMaxLength = Math.max(HARD_NAME.length(), CARPET_NAME.length());
-        return StringUtils.center(courtName, courtNameMaxLength);
+        String courtName = court.getTranslation();
+
+        int longestCourtName = 0;
+        for (Court c : Court.values()) {
+            longestCourtName = Math.max(longestCourtName, c.getTranslation().length());
+        }
+        return StringUtils.center(courtName, longestCourtName);
     }
 
 }

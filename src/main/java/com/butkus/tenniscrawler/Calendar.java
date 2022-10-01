@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.butkus.tenniscrawler.Colors.ORANGE;
-import static com.butkus.tenniscrawler.Court.CARPET;
-import static com.butkus.tenniscrawler.Court.HARD;
 import static java.time.DayOfWeek.SUNDAY;
 
 @UtilityClass
@@ -108,10 +106,11 @@ public class Calendar {
     }
 
     private static boolean isBooked(Cache cache, int year, int month, int dayOfMonth) {
-        List<Integer> cacheHard = cache.get(Pair.with(LocalDate.of(year, month, dayOfMonth), HARD));
-        List<Integer> cacheCarpet = cache.get(Pair.with(LocalDate.of(year, month, dayOfMonth), CARPET));
-        boolean foundInHard = cacheHard != null && cacheHard.stream().anyMatch(e -> e.equals(ORANGE));
-        boolean foundInCarpet = cacheCarpet != null && cacheCarpet.stream().anyMatch(e -> e.equals(ORANGE));
-        return foundInHard || foundInCarpet;
+        for (Court court : Court.values()) {
+            List<Integer> cachedCourt = cache.get(Pair.with(LocalDate.of(year, month, dayOfMonth), court.getCourtId()));
+            boolean foundInCourt = cachedCourt != null && cachedCourt.stream().anyMatch(e -> e.equals(ORANGE));
+            if (foundInCourt) return true;
+        }
+        return false;
     }
 }

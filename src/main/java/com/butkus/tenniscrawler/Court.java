@@ -1,12 +1,25 @@
 package com.butkus.tenniscrawler;
 
-import lombok.experimental.UtilityClass;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-@UtilityClass
-public class Court {
-    public static final int HARD = 2;
-    public static final int CARPET = 8;
+@Getter
+@AllArgsConstructor
+public enum Court {
+    HARD (2, "Kieta danga"),
+    CARPET (8, "Kilimas"),
+    GRASS (20, "Žolė"),
+    CLAY (5, "Gruntas"),
+    HARD_2(18, "Plėtra");
 
-    public static final String HARD_NAME = "Kieta danga";
-    public static final String CARPET_NAME = "Kilimas";
+    private final int courtId;
+    private final String translation;
+
+    public static Court fromCourtId(Integer courtId) {
+        for (Court court : Court.values()) {
+            if (court.getCourtId() == courtId) return court;
+        }
+        throw new RuntimeException("fromCourtId(): non-existent court requested");
+
+    }
 }

@@ -5,11 +5,12 @@ import org.javatuples.Triplet;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.butkus.tenniscrawler.Court.CARPET;
-import static com.butkus.tenniscrawler.Court.HARD;
+import static com.butkus.tenniscrawler.Court.*;
 import static com.butkus.tenniscrawler.ExtensionInterest.*;
 
 @UtilityClass
@@ -20,28 +21,33 @@ public class Input {
         specialDays.addAll(getHolidays());
         specialDays.addAll(getExceptionDays());
 
+        // todo 'Court' and 'Integer' refer to the same thing
+        // Map<court type, list of extension preference for the day>
+        Map<Court, List<Triplet<LocalDate, Integer, ExtensionInterest>>> inputMap = new EnumMap<>(Court.class);
+        for (Court court : Court.values()) {
+            List<Triplet<LocalDate, Integer, ExtensionInterest>> courtList = new ArrayList<>();
+            inputMap.put(court, courtList);
+        }
+
         LocalDate date = LocalDate.now();
-        List<Triplet<LocalDate, Integer, ExtensionInterest>> listHard = new ArrayList<>();
-        List<Triplet<LocalDate, Integer, ExtensionInterest>> listCarpet = new ArrayList<>();
-        for (int i=0; i<30; i++) {
+        for (int i=0; i<24; i++) {
             LocalDate currentDate = date.plusDays(i);
             boolean currentDateInSpecialDays = specialDays.stream().anyMatch(e -> e.getValue0().equals(currentDate));
             if (currentDateInSpecialDays) {
-                listHard.addAll(getFrom(specialDays, currentDate, HARD));
-                listCarpet.addAll(getFrom(specialDays, currentDate, CARPET));
+                for (Court court : Court.values()) {
+                    inputMap.get(court).addAll(getFrom(specialDays, currentDate, court.getCourtId()));
+                }
             } else {
-                listHard.add(Triplet.with(currentDate, HARD, ANY));
-                listCarpet.add(Triplet.with(currentDate, CARPET, ANY));
+                for (Court court : Court.values()) {
+                    inputMap.get(court).add(Triplet.with(currentDate, court.getCourtId(), ANY));
+                }
             }
         }
 
-//        listHard.add(Triplet.with(LocalDate.parse("2022-02-08"), HARD, EARLIER));
-//        listCarpet.add(Triplet.with(LocalDate.parse("2022-02-08"), CARPET, ANY));
-//        listHard.add(Triplet.with(LocalDate.parse("2022-02-26"), HARD, ANY));
-//        listHard.add(Triplet.with(LocalDate.parse("2022-02-26"), CARPET, ANY));
         List<Triplet<LocalDate, Integer, ExtensionInterest>> list = new ArrayList<>();
-        list.addAll(listHard);
-        list.addAll(listCarpet);
+        for (List<Triplet<LocalDate, Integer, ExtensionInterest>> courtList : inputMap.values()) {
+            list.addAll(courtList);
+        }
         return list;
     }
 
@@ -126,11 +132,13 @@ public class Input {
     }
 
     private static void addExclusions(List<Triplet<LocalDate, Integer, ExtensionInterest>> result, String date) {
-        result.add(Triplet.with(LocalDate.parse(date), HARD, NONE));
-        result.add(Triplet.with(LocalDate.parse(date), CARPET, NONE));
+        for (Court court : Court.values()) {
+            result.add(Triplet.with(LocalDate.parse(date), court.getCourtId(), NONE));
+        }
     }
     private static void addExclusions(List<Triplet<LocalDate, Integer, ExtensionInterest>> result, LocalDate localDate) {
-        result.add(Triplet.with(localDate, HARD, NONE));
-        result.add(Triplet.with(localDate, CARPET, NONE));
+        for (Court court : Court.values()) {
+            result.add(Triplet.with(localDate, court.getCourtId(), NONE));
+        }
     }
 }
