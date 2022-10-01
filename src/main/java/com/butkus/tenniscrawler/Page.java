@@ -43,6 +43,7 @@ public class Page {
         if (loggedInAs == UserType.LOGGED_OUT) {
             login(UserType.ANONYMOUS_USER);
         }
+        // todo next
         LocalDate date = dayAtCourt.getValue0();
         Integer courtId = dayAtCourt.getValue1();
         String url = String.format("https://savitarna.tenisopasaulis.lt/rezervavimas/rezervavimas?sDate=%s&iPlaceId=%s", date.toString(), courtId);
@@ -51,7 +52,7 @@ public class Page {
 
     public void login(UserType userType) {
         init();
-        driver.get("https://savitarna.tenisopasaulis.lt");
+        driver.get("https://book.sebarena.lt");
         loginAsUser(userType);
     }
 
@@ -121,13 +122,16 @@ public class Page {
     }
 
     private void authorizedLogin() {
-        MaybeWebElement usernameTextField = findElement(By.id("LoginForm_var_login"));
-        MaybeWebElement passwordTextField = findElement(By.id("LoginForm_var_password"));
+        MaybeWebElement usernameTextField = findElement(By.xpath("//*[text()='Prisijungimo vardas']/../..//input"));
+        MaybeWebElement passwordTextField = findElement(By.xpath("//*[text()='Slaptažodis']/../..//input"));
         usernameTextField.sendKeys(sebUsername);
         passwordTextField.sendKeys(sebPassword);
 
-        MaybeWebElement loginButton = findElement(By.xpath("//form[@id='login_form']/div[4]/input"));
+        MaybeWebElement loginButton = findElement(By.xpath("//*[text()='Prisijungti']/../.."));
         loginButton.click();
+
+        MaybeWebElement popupCloseButton = findElement(By.className("closeBtn"));
+        if (popupCloseButton.isFound()) popupCloseButton.click();
     }
 
     public void close() {
