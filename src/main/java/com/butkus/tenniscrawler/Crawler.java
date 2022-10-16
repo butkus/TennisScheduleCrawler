@@ -1,6 +1,5 @@
 package com.butkus.tenniscrawler;
 
-import org.javatuples.Triplet;
 import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,14 +8,15 @@ import org.springframework.stereotype.Component;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.time.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-
-import static com.butkus.tenniscrawler.ExtensionInterest.NONE;
 
 @Component
 public class Crawler {
@@ -70,38 +70,39 @@ public class Crawler {
                     sleepSeconds, getTimeString(start), cache.durationToLive().toMinutes());
         }
 
-        boolean foundAny = false;
-        List<Triplet<LocalDate, Integer, ExtensionInterest>> inputs = Input.makeInputs();
-        for (Triplet<LocalDate, Integer, ExtensionInterest> dayAtCourt : inputs) {
-            if (dayAtCourt.getValue2() == NONE && !page.loggedInAsRegisteredUser()) continue;
+//        boolean foundAny = false;
+//        List<Triplet<LocalDate, Integer, ExtensionInterest>> inputs = Input.makeInputs();
+//        for (Triplet<LocalDate, Integer, ExtensionInterest> dayAtCourt : inputs) {
+//            if (dayAtCourt.getValue2() == NONE && !page.loggedInAsRegisteredUser()) continue;
+
 
             page.loadMainBookingPage();
 
             List<WebElement> slots = page.getAllTimeSlots();
-            TimeTable timeTable = new TimeTable(slots, dayAtCourt);     // fixme: this step takes too long
+//            TimeTable timeTable = new TimeTable(slots, dayAtCourt);     // fixme: this step takes too long
+//
+//            if (page.loggedInAsRegisteredUser()) {
+//                cache.addIfCacheable(dayAtCourt, timeTable.getAggregatedCourt());
+//            } else {
+//                timeTable.updateFromCache(cache);
+//            }
+//
+//            if (timeTable.isOfferFound(cache)) {
+//                boolean firstFind = !foundAny;
+//                forcedRefresh.enableOnceFor(2).crawls();
+//                if (firstFind) audioPlayer.playSound();
+//                foundAny = true;
+//            }
+//            timeTable.printTable(cache);
+//        } // end of for
+//        if (!foundAny) forcedRefresh.disable();
+//
+//        if (cacheStale) {
+//            cache.setUpdated();
+//        }
 
-            if (page.loggedInAsRegisteredUser()) {
-                cache.addIfCacheable(dayAtCourt, timeTable.getAggregatedCourt());
-            } else {
-                timeTable.updateFromCache(cache);
-            }
-
-            if (timeTable.isOfferFound(cache)) {
-                boolean firstFind = !foundAny;
-                forcedRefresh.enableOnceFor(2).crawls();
-                if (firstFind) audioPlayer.playSound();
-                foundAny = true;
-            }
-            timeTable.printTable(cache);
-        }
-        if (!foundAny) forcedRefresh.disable();
-
-        if (cacheStale) {
-            cache.setUpdated();
-        }
-
-        Calendar.printCalendar(cache, inputs);
-        printCrawlEndTime(start);
+//        Calendar.printCalendar(cache, inputs);
+//        printCrawlEndTime(start);
     }
 
     private void printCrawlEndTime(Instant start) {

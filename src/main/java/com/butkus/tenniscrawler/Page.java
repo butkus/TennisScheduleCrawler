@@ -12,11 +12,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 
 @Component
 public class Page {
+
+    public static final String YRA_LAISVO = "yraLaisvo";
+    public static final String YRA_PARDUODAMO = "yraParduodamo";
+    public static final String YRA_NUPIRKTO = "yraNupirkto";
 
     private final String chromeDriverPath;
     private final String sebUsername;
@@ -87,12 +95,100 @@ public class Page {
     }
 
     public List<WebElement> getAllTimeSlots() {
-        MaybeWebElements maybeWebElements = new MaybeWebElements(driver, wait, By.id("jqReservationLink"));
-        while(!maybeWebElements.isFound()) {
-            maybeWebElements.saveScreenshot("getting time slots");
-            maybeWebElements.refresh();
+        MaybeWebElement main_page_content = findElement(By.className("main_page_content"));
+        WebElement table = main_page_content.getAMaybe().findElement(By.className("table"));
+        WebElement header = table.findElement(By.className("header"));
+        List<WebElement> headerDivsWithDates = header.findElements(By.xpath("./child::*"));
+        List<LocalDate> dates = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+        int todaysMonth = now.getMonth().getValue();
+        int todaysDayOfMonth = now.getDayOfMonth();
+        for (int i = 1; i < headerDivsWithDates.size(); i++) {
+            String dateString = headerDivsWithDates.get(i).getText();   // e.g. 10/08
+            String[] split = dateString.split("/");
+            if (split.length < 2) break;
+
+            int currentMonth = Integer.parseInt(split[0]);
+            int currentDayOfMonth = Integer.parseInt(split[1]);
+            boolean isToday = currentMonth == todaysMonth && currentDayOfMonth == todaysDayOfMonth;
+
+            boolean monthInFuture = currentMonth > todaysMonth;
+            boolean sameMonthButDayInFuture = currentMonth == todaysMonth && currentDayOfMonth > todaysDayOfMonth;
+            boolean isFuture = monthInFuture || sameMonthButDayInFuture;
+
+            if (isToday || isFuture) {
+                dates.add(LocalDate.of(now.getYear(), currentMonth, currentDayOfMonth));
+            } else {
+                dates.add(LocalDate.of(now.getYear() + 1, currentMonth, currentDayOfMonth));
+            }
         }
-        return maybeWebElements.get();
+
+        List<WebElement> timeColumn = table.findElements(By.xpath("div[contains(@class, 'left')]/div[1]/child::*"));
+        boolean soundPlayed = false;
+        int slotCountInDay = table.findElements(By.xpath(String.format("//div[contains(@class, 'laikai')]/div[1]/div[1]/child::*"))).size();
+        for (int dateIteration = 0; dateIteration < dates.size(); dateIteration++) {
+            System.out.printf("%n%n--- TIMES FOR " + dates.get(dateIteration) + " ---%n");
+
+            for (int timeIteration = 0; timeIteration < slotCountInDay; timeIteration++) {
+                String time = timeColumn.get(timeIteration).getText();
+
+                Optional<WebElement> slotOpt = getSlot(table, dateIteration, timeIteration);
+                if (slotOpt.isEmpty()) {
+                    System.out.println(time + "  nėra laisvų");
+                } else {
+                    WebElement slot = slotOpt.get();
+                    String className = slot.getAttribute("class");
+                    boolean hasFreeCourts = className.contains(YRA_LAISVO);
+                    boolean paidByMe = className.contains(YRA_NUPIRKTO);
+                    String noOfFreeCourts = slot.findElement(By.xpath("span[1]")).getText();
+                    if (paidByMe && hasFreeCourts) {
+                        System.out.printf("%s  MANO nupirktas BEI yra laisvų: %s %n", time, noOfFreeCourts);
+                    } else if (paidByMe) {
+                        System.out.printf("%s  MANO nupirktas laikas %n", time);
+                    } else if (hasFreeCourts) {
+                        System.out.printf("%s  laisvų: %s %n", time, noOfFreeCourts);
+                        
+                        LocalDate nextWednesday = LocalDate.of(2022, 10, 19);
+                        LocalDate nextNextWednesday = LocalDate.of(2022, 10, 26);
+                        LocalDate currDate = dates.get(dateIteration);
+                        boolean next2Wednesdays = currDate.equals(nextWednesday) || currDate.equals(nextNextWednesday);
+                        boolean between6And8pm = List.of(6, 7, 8, 9, 10).contains(timeIteration);
+                        if (next2Wednesdays && between6And8pm) {
+                            if (!soundPlayed) {
+                                soundPlayed = true;
+                                audioPlayer.playSound();
+                            }
+                        }
+
+                    } else {
+                        System.out.println(" === NEI LAISVAS, NEI TURI LAISVŲ KORTŲ, NEI MANO NUPIRKTAS ===");
+                    }
+
+                }
+            }
+        }
+
+//
+
+
+
+//        MaybeWebElements maybeWebElements = new MaybeWebElements(driver, wait, By.id("jqReservationLink"));
+//        while(!maybeWebElements.isFound()) {
+//            maybeWebElements.saveScreenshot("getting time slots");
+//            maybeWebElements.refresh();
+//        }
+//        return maybeWebElements.get();
+                return null;
+    }
+
+    private Optional<WebElement> getSlot(WebElement table, int dateIteration, int i) {
+        try {
+            String slotXpath = String.format("//div[contains(@class, 'laikai')]/div[%s]/div[1]/div[%s]/div[1]/div[1]", dateIteration + 1, i + 1);   // fixme: getClass() dependent on outside iterator
+            WebElement slot = table.findElement(By.xpath(slotXpath));
+            return Optional.of(slot);
+        } catch (org.openqa.selenium.NoSuchElementException noSuchElementException) {
+            return Optional.empty();
+        }
     }
 
     private static WebDriverWait createDriverWait(WebDriver driver) {
