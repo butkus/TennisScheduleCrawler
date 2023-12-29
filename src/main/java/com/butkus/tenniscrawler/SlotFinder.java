@@ -20,17 +20,17 @@ public class SlotFinder {
     private final List<List<Integer>> otherCourts = new ArrayList<>();
     private boolean hasReservationInOtherCourt;
 
-    public SlotFinder(Cache cache, List<Integer> currentCourt, LocalDate date, Court court, ExtensionInterest extensionInterest) {
+    public SlotFinder(Cache cache, List<Integer> currentCourt, LocalDate date, CourtType court, ExtensionInterest extensionInterest) {
         this.currentCourt = currentCourt;
         this.date = date;
-        this.courtId = court.getCourtId();
+        this.courtId = court.getCourtTypeId();
         this.extensionInterest = extensionInterest;
 
         this.hasReservationInCurrentCourt = currentCourt.stream().anyMatch(ORANGE::equals);
 
-        for (Court ct : Court.values()) {
-            boolean notCurrentCourt = ct.getCourtId() != court.getCourtId();
-            List<Integer> courtSchedule = cache.get(Pair.with(date, ct.getCourtId()));
+        for (CourtType ct : CourtType.values()) {
+            boolean notCurrentCourt = ct.getCourtTypeId() != court.getCourtTypeId();
+            List<Integer> courtSchedule = cache.get(Pair.with(date, ct.getCourtTypeId()));
             if (notCurrentCourt && courtSchedule != null) {
                 this.hasReservationInOtherCourt = true;
                 this.otherCourts.add(courtSchedule);
@@ -183,7 +183,7 @@ public class SlotFinder {
     }
 
     private void logRequestedExtensionButNoBookingFound() {
-        String courtNameEng = Court.fromCourtId(courtId).name();
+        String courtNameEng = CourtType.fromCourtId(courtId).name();
         System.out.printf("Requested %s for  %s in %s  court but no existing booking%n", extensionInterest, date, courtNameEng);
     }
 

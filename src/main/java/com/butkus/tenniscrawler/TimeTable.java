@@ -38,7 +38,7 @@ public class TimeTable {
 
     private final List<Slot> slots;
     private final LocalDate date;
-    private final Court court;
+    private final CourtType court;
     private final ExtensionInterest extensionInterest;
 
     @Getter
@@ -48,7 +48,7 @@ public class TimeTable {
         this.slots = resolveSlots(webElements);
         this.aggregatedCourt = getAggregatedCourtForTheDay();
         this.date = dayAtCourt.getValue0();
-        this.court = Court.fromCourtId(dayAtCourt.getValue1());
+        this.court = CourtType.fromCourtId(dayAtCourt.getValue1());
         this.extensionInterest = dayAtCourt.getValue2();
     }
 
@@ -178,7 +178,7 @@ public class TimeTable {
     }
 
     public void updateFromCache(Cache cache) {
-        List<Integer> cached = cache.get(Pair.with(date, court.getCourtId()));
+        List<Integer> cached = cache.get(Pair.with(date, court.getCourtTypeId()));
         if (cached != null) {
             aggregateCourts(this.aggregatedCourt, cached);
         }
@@ -210,7 +210,7 @@ public class TimeTable {
         String courtName = court.getTranslation();
 
         int longestCourtName = 0;
-        for (Court c : Court.values()) {
+        for (CourtType c : CourtType.values()) {
             longestCourtName = Math.max(longestCourtName, c.getTranslation().length());
         }
         return StringUtils.center(courtName, longestCourtName);

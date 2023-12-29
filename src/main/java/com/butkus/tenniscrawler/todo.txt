@@ -1,0 +1,36 @@
+
+FEATURES:
+- maybe use placeInfoBatch (1 big half-hour availability json for all dates, all courts)
+    - use it for quick-scan, i.e. to see which days are fully booked
+- use timeInfoBatch for crawling
+    - use to check there are free courts of desired time (e.g. 19:00 weekdays or 17:00 weekends)
+    - if we have ExtensionInterest, see if there is a new court with desired ExtensionInterest (and at least 1 hr time)
+    - if not, make a timeInfoBatch call with held courtID and see if there is 30min availability
+- cache
+    - old cache had
+        - half-hour slot array (from 18:00 till 20:00 I think)
+        - aggregate reservation data
+    - new cache should have
+        - booked time (duration?) -- more flexible than half-hour slots
+        - booked courtID          -- not aggregate, allows implementing proper extension interest
+- extension interest
+    - now only 30 mins extension implemented. Do incrementally earler/later extension aattempts (with floor/ceiling)
+        - actually, a gradually degradding favorable thing should be attempted. Floor/ceiling is necessary (for weekday and weekend)
+        - but also priority list e.g. I'll do 18:00 if I need to but I'd rather change court/venue to make it 18:30
+
+- ability to have arbitrary from-to time bracket (like we have EARLY_BIRD, LATE_OWL) for weekdays and for weekends (or for any weekday, or even for specific Desire?)
+- for <48-hour purchase-only (vs. reserve with ability to cancel) cases. Sometimes they are 90-min- or 120-min- only, because seller decided to not sell in pieces.
+     In these cases need to attempt to make 60-, 90-, and 120- minute requests, because they will not appear in 60-min aviable durations
+- chime does not work reliably
+    - will see if audioPlayer.reset() solves it
+    - regardless, check why 2 instantces are made
+        2023-10-20 14:09:43.108  INFO 65496 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1015 ms
+        --- AP constructor, initial played = false
+        --- AP constructor, initial played = false
+        ..........
+- retire Inputs class
+    - take fixed holidays from it
+    - take whatever else is there
+    - delete class
+- bring back summary calendar at the end of fetching
+

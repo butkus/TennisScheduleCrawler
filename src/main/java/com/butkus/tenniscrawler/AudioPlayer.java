@@ -13,13 +13,29 @@ import java.io.IOException;
 public class AudioPlayer {
 
     private final File bellSound;
+    private boolean played;
 
     @Autowired
     public AudioPlayer(@Value("${app.bell-sound-path}") File bellSound) {
         this.bellSound = bellSound;
+        this.played = false;
+        System.out.println("--- AP constructor, initial played = " + played);
     }
 
-    public void playSound() {
+    public void reset() {
+        this.played = false;
+    }
+
+    public void chimeIfNecessary() {
+        System.out.println("--- AP: chimeIfNecessary --> played = " + played);
+        if (!played) {
+            System.out.println("--- AP: chimeIfNecessary --> played = " + played + ", sound will play now.");
+            tryPlay();
+            played = true;
+        }
+    }
+
+    private void tryPlay() {
         try {
             playClip(bellSound);
         } catch (IOException | UnsupportedAudioFileException | LineUnavailableException | InterruptedException e) {

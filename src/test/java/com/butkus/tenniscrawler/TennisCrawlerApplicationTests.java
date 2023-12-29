@@ -21,4 +21,8 @@ class TennisCrawlerApplicationTests {
 		}
 	}
 
+	@Test
+	void runNewSystem() {
+		crawler.newSystem();
+	}
 }

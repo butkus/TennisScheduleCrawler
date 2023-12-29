@@ -1,6 +1,5 @@
 package com.butkus.tenniscrawler;
 
-import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -8,113 +7,68 @@ import org.springframework.stereotype.Component;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static java.time.DayOfWeek.*;
+
 @Component
 public class Crawler {
 
-    private final AudioPlayer audioPlayer;
-    private final Page page;
-    private final Cache cache;
-    private final BackwardsCounter forcedRefresh;
+    public static final Clock CLOCK = Clock.system(ZoneId.of("Europe/Vilnius"));
     private final Random random;
     private final Duration sleepUpTo;
+    private final DesiresIteratorThingy desiresThingy;
 
     @Autowired
-    public Crawler(AudioPlayer audioPlayer,
-                   Page page,
-                   Cache cache,
-                   @Value("${app.sleep-up-to}") Duration sleepUpTo) throws NoSuchAlgorithmException {
-        this.audioPlayer = audioPlayer;
-        this.page = page;
-        this.cache = cache;
-        this.forcedRefresh = new BackwardsCounter();
+    public Crawler(@Value("${app.sleep-up-to}") Duration sleepUpTo,
+                   DesiresIteratorThingy desiresThingy) throws NoSuchAlgorithmException {
         this.sleepUpTo = sleepUpTo;
         this.random = SecureRandom.getInstanceStrong();
+        this.desiresThingy = desiresThingy;
     }
 
     @Scheduled(cron = "${app.cron}")
     public void run() throws InterruptedException {
-        try {
-            crawlEverythingOnce(page);
-        } finally {
-            page.close();
-        }
+        crawlEverythingOnce();
     }
 
-    private void crawlEverythingOnce(Page page) throws InterruptedException {
+    private void crawlEverythingOnce() throws InterruptedException {
         int sleepSeconds = random.nextInt((int) sleepUpTo.toSeconds());
         TimeUnit.SECONDS.sleep(sleepSeconds);
-        Instant start;
+        Instant start = Instant.now();
 
-        boolean cacheStale = cache.isStale();
-        if (cacheStale || forcedRefresh.isOn()) {
-            forcedRefresh.decrement();
-            cache.clearCache();
-            page.login(Page.UserType.REGISTERED_USER);
-            start = Instant.now();
-            System.out.printf("Logged in as <<<REGISTERED USER>>> slept for %s seconds, crawl started at %s%n",
-                    sleepSeconds, getTimeString(start));
-        } else {
-            page.login(Page.UserType.ANONYMOUS_USER);
-            start = Instant.now();
-            System.out.printf("Logged in as <<<ANONYMOUS USER>>> slept for %s seconds, crawl started at %s. Cache expires in %s minutes%n",
-                    sleepSeconds, getTimeString(start), cache.durationToLive().toMinutes());
-        }
+        newSystem();
 
-//        boolean foundAny = false;
-//        List<Triplet<LocalDate, Integer, ExtensionInterest>> inputs = Input.makeInputs();
-//        for (Triplet<LocalDate, Integer, ExtensionInterest> dayAtCourt : inputs) {
-//            if (dayAtCourt.getValue2() == NONE && !page.loggedInAsRegisteredUser()) continue;
-
-
-            page.loadMainBookingPage();
-
-            List<WebElement> slots = page.getAllTimeSlots();
-//            TimeTable timeTable = new TimeTable(slots, dayAtCourt);     // fixme: this step takes too long
-//
-//            if (page.loggedInAsRegisteredUser()) {
-//                cache.addIfCacheable(dayAtCourt, timeTable.getAggregatedCourt());
-//            } else {
-//                timeTable.updateFromCache(cache);
-//            }
-//
-//            if (timeTable.isOfferFound(cache)) {
-//                boolean firstFind = !foundAny;
-//                forcedRefresh.enableOnceFor(2).crawls();
-//                if (firstFind) audioPlayer.playSound();
-//                foundAny = true;
-//            }
-//            timeTable.printTable(cache);
-//        } // end of for
-//        if (!foundAny) forcedRefresh.disable();
-//
-//        if (cacheStale) {
-//            cache.setUpdated();
-//        }
-
-//        Calendar.printCalendar(cache, inputs);
-//        printCrawlEndTime(start);
+        printCrawlEndTime(start);
     }
 
     private void printCrawlEndTime(Instant start) {
         Instant end = Instant.now();
         long jobLengthInSeconds = start.until(end, ChronoUnit.SECONDS);
-        System.out.printf("Crawl took %s seconds and finished at %s%n", jobLengthInSeconds, getTimeString(end));
+        System.out.printf("Scan took %s seconds and finished at %s%n", jobLengthInSeconds, getTimeString(end));
     }
 
     private String getTimeString(Instant start) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(" HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(" HH:mm");
         LocalDateTime localDateTime = start.atZone(ZoneId.of("Europe/Vilnius")).toLocalDateTime();
         return localDateTime.format(formatter);
+    }
+
+    public void newSystem() {
+        DesireMaker desireMaker = new DesireMaker(CLOCK);
+        List<Desire> inputs = desireMaker
+                .addExplicitDesires()
+                .addNext(10, MONDAY)
+                .addNext(10, TUESDAY)
+                .addNext(10, WEDNESDAY)
+                .addNext(10, THURSDAY)
+                .make();
+        desiresThingy.doWork(inputs);
     }
 
 }

@@ -64,19 +64,19 @@ class SlotFinderTest {
     @Nested
     class OtherCourt {
 
-        Court currentCourt = Court.HARD;
-        Court otherCourt1 = null;
-        Court otherCourt2 = null;
+        CourtType currentCourt = CourtType.HARD;
+        CourtType otherCourt1 = null;
+        CourtType otherCourt2 = null;
 
         @BeforeEach
         void setUp() {
-            for (Court court : Court.values()) {
+            for (CourtType court : CourtType.values()) {
                 if (court != currentCourt) {
                     otherCourt1 = court;
                     break;
                 }
             }
-            for (Court court : Court.values()) {
+            for (CourtType court : CourtType.values()) {
                 if (court != currentCourt && court != otherCourt1) {
                     otherCourt2 = court;
                     break;
@@ -91,16 +91,16 @@ class SlotFinderTest {
             class OverlappingEarlierTime {
 
                 @ParameterizedTest
-                @EnumSource(value = Court.class, names = "HARD", mode = EnumSource.Mode.EXCLUDE)
-                void findsForAllOtherCourts(Court otherCourt) {
-                    cache.addIfCacheable(keyFrom(date, otherCourt.getCourtId()), List.of(0,0,0,0,4,4));
+                @EnumSource(value = CourtType.class, names = "HARD", mode = EnumSource.Mode.EXCLUDE)
+                void findsForAllOtherCourts(CourtType otherCourt) {
+                    cache.addIfCacheable(keyFrom(date, otherCourt.getCourtTypeId()), List.of(0,0,0,0,4,4));
                     assertOfferFound(List.of(0,0,0,1,1,0), EARLIER);
                 }
 
                 @Test
                 void other_2_courtsHaveReservations_1stOneNoExtension_2ndOneYesExtension_findsTime() {
-                    cache.addIfCacheable(keyFrom(date, otherCourt1.getCourtId()), List.of(4,4,0,0,0,0)); // is earliest, cannot find earlier for this
-                    cache.addIfCacheable(keyFrom(date, otherCourt2.getCourtId()), List.of(0,0,0,0,4,4)); // is latest, any earlier will fit EARLIER ExtensionInterest
+                    cache.addIfCacheable(keyFrom(date, otherCourt1.getCourtTypeId()), List.of(4,4,0,0,0,0)); // is earliest, cannot find earlier for this
+                    cache.addIfCacheable(keyFrom(date, otherCourt2.getCourtTypeId()), List.of(0,0,0,0,4,4)); // is latest, any earlier will fit EARLIER ExtensionInterest
 
                     assertOfferFound(List.of(0,0,0,1,1,0), EARLIER);
                 }
@@ -111,16 +111,16 @@ class SlotFinderTest {
             class AdjacentEarlierTime {
 
                 @ParameterizedTest
-                @EnumSource(value = Court.class, names = "HARD", mode = EnumSource.Mode.EXCLUDE)
-                void findsForAllOtherCourts(Court otherCourt) {
-                    cache.addIfCacheable(keyFrom(date, otherCourt.getCourtId()), List.of(0, 0, 0, 0, 4, 4));
+                @EnumSource(value = CourtType.class, names = "HARD", mode = EnumSource.Mode.EXCLUDE)
+                void findsForAllOtherCourts(CourtType otherCourt) {
+                    cache.addIfCacheable(keyFrom(date, otherCourt.getCourtTypeId()), List.of(0, 0, 0, 0, 4, 4));
                     assertOfferFound(List.of(0,0,1,1,0,0), EARLIER);
                 }
 
                 @Test
                 void other_2_courtsHaveReservations_1stOneNoExtension_2ndOneYesExtension_findsTime() {
-                    cache.addIfCacheable(keyFrom(date, otherCourt1.getCourtId()), List.of(4,4,0,0,0,0)); // is earliest, cannot find earlier for this
-                    cache.addIfCacheable(keyFrom(date, otherCourt2.getCourtId()), List.of(0,0,0,0,4,4)); // is latest, any earlier will fit EARLIER ExtensionInterest
+                    cache.addIfCacheable(keyFrom(date, otherCourt1.getCourtTypeId()), List.of(4,4,0,0,0,0)); // is earliest, cannot find earlier for this
+                    cache.addIfCacheable(keyFrom(date, otherCourt2.getCourtTypeId()), List.of(0,0,0,0,4,4)); // is latest, any earlier will fit EARLIER ExtensionInterest
 
                     assertOfferFound(List.of(0,0,1,1,0,0), EARLIER);
                 }
@@ -131,16 +131,16 @@ class SlotFinderTest {
             class NonAdjacentEarlierTime {
 
                 @ParameterizedTest
-                @EnumSource(value = Court.class, names = "HARD", mode = EnumSource.Mode.EXCLUDE)
-                void findsForAllOtherCourts(Court otherCourt) {
-                    cache.addIfCacheable(keyFrom(date, otherCourt.getCourtId()), List.of(0,0,0,0,4,4));
+                @EnumSource(value = CourtType.class, names = "HARD", mode = EnumSource.Mode.EXCLUDE)
+                void findsForAllOtherCourts(CourtType otherCourt) {
+                    cache.addIfCacheable(keyFrom(date, otherCourt.getCourtTypeId()), List.of(0,0,0,0,4,4));
                     assertOfferFound(List.of(0,1,1,0,0,0), EARLIER);
                 }
 
                 @Test
                 void other_2_courtsHaveReservations_1stOneNoExtension_2ndOneYesExtension_findsTime() {
-                    cache.addIfCacheable(keyFrom(date, otherCourt1.getCourtId()), List.of(4,4,0,0,0,0)); // is earliest, cannot find earlier for this
-                    cache.addIfCacheable(keyFrom(date, otherCourt2.getCourtId()), List.of(0,0,0,0,4,4)); // is latest, any earlier will fit EARLIER ExtensionInterest
+                    cache.addIfCacheable(keyFrom(date, otherCourt1.getCourtTypeId()), List.of(4,4,0,0,0,0)); // is earliest, cannot find earlier for this
+                    cache.addIfCacheable(keyFrom(date, otherCourt2.getCourtTypeId()), List.of(0,0,0,0,4,4)); // is latest, any earlier will fit EARLIER ExtensionInterest
 
                     assertOfferFound(List.of(0,1,1,0,0,0), EARLIER);
                 }
@@ -155,16 +155,16 @@ class SlotFinderTest {
             class OverlappingLaterTime {
 
                 @ParameterizedTest
-                @EnumSource(value = Court.class, names = "HARD", mode = EnumSource.Mode.EXCLUDE)
-                void findsForAllOtherCourts(Court otherCourt) {
-                    cache.addIfCacheable(keyFrom(date, otherCourt.getCourtId()), List.of(4,4,0,0,0,0));
+                @EnumSource(value = CourtType.class, names = "HARD", mode = EnumSource.Mode.EXCLUDE)
+                void findsForAllOtherCourts(CourtType otherCourt) {
+                    cache.addIfCacheable(keyFrom(date, otherCourt.getCourtTypeId()), List.of(4,4,0,0,0,0));
                     assertOfferFound(List.of(0,1,1,0,0,0), LATER);
                 }
 
                 @Test
                 void other_2_courtsHaveReservations_1stOneNoExtension_2ndOneYesExtension_findsTime() {
-                    cache.addIfCacheable(keyFrom(date, otherCourt1.getCourtId()), List.of(0,0,0,0,4,4)); // is latest, cannot find later for this
-                    cache.addIfCacheable(keyFrom(date, otherCourt2.getCourtId()), List.of(4,4,0,0,0,0)); // is earliest, any later will fit LATER ExtensionInterest
+                    cache.addIfCacheable(keyFrom(date, otherCourt1.getCourtTypeId()), List.of(0,0,0,0,4,4)); // is latest, cannot find later for this
+                    cache.addIfCacheable(keyFrom(date, otherCourt2.getCourtTypeId()), List.of(4,4,0,0,0,0)); // is earliest, any later will fit LATER ExtensionInterest
 
                     assertOfferFound(List.of(0,1,1,0,0,0), LATER);
                 }
@@ -175,16 +175,16 @@ class SlotFinderTest {
             class AdjacentLaterTime {
 
                 @ParameterizedTest
-                @EnumSource(value = Court.class, names = "HARD", mode = EnumSource.Mode.EXCLUDE)
-                void findsForAllOtherCourts(Court otherCourt) {
-                    cache.addIfCacheable(keyFrom(date, otherCourt.getCourtId()), List.of(4,4,0,0,0,0));
+                @EnumSource(value = CourtType.class, names = "HARD", mode = EnumSource.Mode.EXCLUDE)
+                void findsForAllOtherCourts(CourtType otherCourt) {
+                    cache.addIfCacheable(keyFrom(date, otherCourt.getCourtTypeId()), List.of(4,4,0,0,0,0));
                     assertOfferFound(List.of(0,0,1,1,0,0), LATER);
                 }
 
                 @Test
                 void other_2_courtsHaveReservations_1stOneNoExtension_2ndOneYesExtension_findsTime() {
-                    cache.addIfCacheable(keyFrom(date, otherCourt1.getCourtId()), List.of(0,0,0,0,4,4)); // is latest, cannot find later for this
-                    cache.addIfCacheable(keyFrom(date, otherCourt2.getCourtId()), List.of(4,4,0,0,0,0)); // is earliest, any later will fit LATER ExtensionInterest
+                    cache.addIfCacheable(keyFrom(date, otherCourt1.getCourtTypeId()), List.of(0,0,0,0,4,4)); // is latest, cannot find later for this
+                    cache.addIfCacheable(keyFrom(date, otherCourt2.getCourtTypeId()), List.of(4,4,0,0,0,0)); // is earliest, any later will fit LATER ExtensionInterest
 
                     assertOfferFound(List.of(0,0,1,1,0,0), LATER);
                 }
@@ -195,16 +195,16 @@ class SlotFinderTest {
             class NonAdjacentLaterTime {
 
                 @ParameterizedTest
-                @EnumSource(value = Court.class, names = "HARD", mode = EnumSource.Mode.EXCLUDE)
-                void findsNonAdjacentLaterTime(Court otherCourt) {
-                    cache.addIfCacheable(keyFrom(date, otherCourt.getCourtId()), List.of(4,4,0,0,0,0));
+                @EnumSource(value = CourtType.class, names = "HARD", mode = EnumSource.Mode.EXCLUDE)
+                void findsNonAdjacentLaterTime(CourtType otherCourt) {
+                    cache.addIfCacheable(keyFrom(date, otherCourt.getCourtTypeId()), List.of(4,4,0,0,0,0));
                     assertOfferFound(List.of(0,0,0,1,1,0), LATER);
                 }
 
                 @Test
                 void other_2_courtsHaveReservations_1stOneNoExtension_2ndOneYesExtension_findsTime() {
-                    cache.addIfCacheable(keyFrom(date, otherCourt1.getCourtId()), List.of(0,0,0,0,4,4)); // is latest, cannot find later for this
-                    cache.addIfCacheable(keyFrom(date, otherCourt2.getCourtId()), List.of(4,4,0,0,0,0)); // is earliest, any later will fit LATER ExtensionInterest
+                    cache.addIfCacheable(keyFrom(date, otherCourt1.getCourtTypeId()), List.of(0,0,0,0,4,4)); // is latest, cannot find later for this
+                    cache.addIfCacheable(keyFrom(date, otherCourt2.getCourtTypeId()), List.of(4,4,0,0,0,0)); // is earliest, any later will fit LATER ExtensionInterest
 
                     assertOfferFound(List.of(0,0,0,1,1,0), LATER);
                 }
@@ -221,7 +221,7 @@ class SlotFinderTest {
     }
 
     private void assertOfferFound(List<Integer> currentCourtAggregated, ExtensionInterest extensionInterest) {
-        slotFinder = new SlotFinder(cache, currentCourtAggregated, date, Court.HARD, extensionInterest);
+        slotFinder = new SlotFinder(cache, currentCourtAggregated, date, CourtType.HARD, extensionInterest);
         assertTrue(slotFinder.isOfferFound());
     }
 }

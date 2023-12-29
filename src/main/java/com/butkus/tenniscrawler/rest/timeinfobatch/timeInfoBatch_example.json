@@ -1,0 +1,491 @@
+{
+  "status":"success",
+  "data":[
+    {
+      "courtID":1,
+      "placeName":"Vidaus hard",
+      "courtName":"SEB 01",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[
+        {
+          "duration_min":90,
+          "price":"49.50",
+          "price_with_discount":"42.00",
+          "courtID":1
+        },
+        {
+          "duration_min":120,
+          "price":"66.00",
+          "price_with_discount":"56.00",
+          "courtID":1
+        }
+      ]
+    },
+    {
+      "courtID":7,
+      "placeName":"Vidaus hard",
+      "courtName":"SEB 02",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":8,
+      "placeName":"Vidaus hard",
+      "courtName":"SEB 03",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":10,
+      "placeName":"Vidaus hard",
+      "courtName":"SEB 04",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[
+        {
+          "duration_min":30,
+          "price":"16.50",
+          "price_with_discount":"14.00",
+          "courtID":10
+        }
+      ]
+    },
+    {
+      "courtID":11,
+      "placeName":"Vidaus hard",
+      "courtName":"SEB 05",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":12,
+      "placeName":"Vidaus hard",
+      "courtName":"SEB 06",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":13,
+      "placeName":"Vidaus hard",
+      "courtName":"SEB 07",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":14,
+      "placeName":"Vidaus hard",
+      "courtName":"SEB 08",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":15,
+      "placeName":"Vidaus hard",
+      "courtName":"SEB 09",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":16,
+      "placeName":"Vidaus hard",
+      "courtName":"SEB 10",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":17,
+      "placeName":"Vidaus hard",
+      "courtName":"SEB 11",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":18,
+      "placeName":"Vidaus hard",
+      "courtName":"SEB 12",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":19,
+      "placeName":"Vidaus hard",
+      "courtName":"SEB 13",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":20,
+      "placeName":"Vidaus hard",
+      "courtName":"SEB 14",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":21,
+      "placeName":"Vidaus hard",
+      "courtName":"SEB 15",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":44,
+      "placeName":"Bernardinai gruntas",
+      "courtName":"BS 01 gruntas",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":45,
+      "placeName":"Bernardinai gruntas",
+      "courtName":"BS 02 gruntas",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":46,
+      "placeName":"Bernardinai gruntas",
+      "courtName":"BS 03 gruntas",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":47,
+      "placeName":"Bernardinai gruntas",
+      "courtName":"BS 04 gruntas",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":48,
+      "placeName":"Bernardinai gruntas",
+      "courtName":"BS 05 gruntas",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":49,
+      "placeName":"Bernardinai gruntas",
+      "courtName":"BS 06 gruntas",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":50,
+      "placeName":"Bernardinai gruntas",
+      "courtName":"BS 07 gruntas",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[
+        {
+          "duration_min":30,
+          "price":"10.50",
+          "price_with_discount":"8.00",
+          "courtID":50
+        },
+        {
+          "duration_min":60,
+          "price":"21.00",
+          "price_with_discount":"16.00",
+          "courtID":50
+        }
+      ]
+    },
+    {
+      "courtID":51,
+      "placeName":"Bernardinai gruntas",
+      "courtName":"BS 08 gruntas",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":52,
+      "placeName":"Bernardinai gruntas",
+      "courtName":"BS 09 gruntas",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":53,
+      "placeName":"Bernardinai gruntas",
+      "courtName":"BS 10 gruntas",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":54,
+      "placeName":"Bernardinai sint. žolė",
+      "courtName":"BS 11 sint. žolė",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[
+        {
+          "duration_min":30,
+          "price":"10.50",
+          "price_with_discount":"8.00",
+          "courtID":54
+        },
+        {
+          "duration_min":60,
+          "price":"21.00",
+          "price_with_discount":"16.00",
+          "courtID":54
+        }
+      ]
+    },
+    {
+      "courtID":55,
+      "placeName":"Bernardinai sint. žolė",
+      "courtName":"BS 12 sint. žolė",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[
+        {
+          "duration_min":30,
+          "price":"10.50",
+          "price_with_discount":"8.00",
+          "courtID":55
+        },
+        {
+          "duration_min":60,
+          "price":"21.00",
+          "price_with_discount":"16.00",
+          "courtID":55
+        }
+      ]
+    },
+    {
+      "courtID":59,
+      "placeName":"Kilimas",
+      "courtName":"K1",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[
+        {
+          "duration_min":30,
+          "price":"16.50",
+          "price_with_discount":"14.00",
+          "courtID":59
+        },
+        {
+          "duration_min":60,
+          "price":"33.00",
+          "price_with_discount":"28.00",
+          "courtID":59
+        },
+        {
+          "duration_min":90,
+          "price":"49.50",
+          "price_with_discount":"42.00",
+          "courtID":59
+        },
+        {
+          "duration_min":120,
+          "price":"66.00",
+          "price_with_discount":"56.00",
+          "courtID":59
+        }
+      ]
+    },
+    {
+      "courtID":61,
+      "placeName":"Kilimas",
+      "courtName":"K2",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[
+        {
+          "duration_min":30,
+          "price":"16.50",
+          "price_with_discount":"14.00",
+          "courtID":61
+        },
+        {
+          "duration_min":60,
+          "price":"33.00",
+          "price_with_discount":"28.00",
+          "courtID":61
+        },
+        {
+          "duration_min":90,
+          "price":"49.50",
+          "price_with_discount":"42.00",
+          "courtID":61
+        },
+        {
+          "duration_min":120,
+          "price":"66.00",
+          "price_with_discount":"56.00",
+          "courtID":61
+        }
+      ]
+    },
+    {
+      "courtID":63,
+      "placeName":"Kilimas",
+      "courtName":"K3",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[
+        {
+          "duration_min":30,
+          "price":"16.50",
+          "price_with_discount":"14.00",
+          "courtID":63
+        },
+        {
+          "duration_min":60,
+          "price":"33.00",
+          "price_with_discount":"28.00",
+          "courtID":63
+        },
+        {
+          "duration_min":90,
+          "price":"49.50",
+          "price_with_discount":"42.00",
+          "courtID":63
+        },
+        {
+          "duration_min":120,
+          "price":"66.00",
+          "price_with_discount":"56.00",
+          "courtID":63
+        }
+      ]
+    },
+    {
+      "courtID":65,
+      "placeName":"Kilimas",
+      "courtName":"K4",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[
+        {
+          "duration_min":30,
+          "price":"16.50",
+          "price_with_discount":"14.00",
+          "courtID":65
+        },
+        {
+          "duration_min":60,
+          "price":"33.00",
+          "price_with_discount":"28.00",
+          "courtID":65
+        },
+        {
+          "duration_min":90,
+          "price":"49.50",
+          "price_with_discount":"42.00",
+          "courtID":65
+        },
+        {
+          "duration_min":120,
+          "price":"66.00",
+          "price_with_discount":"56.00",
+          "courtID":65
+        }
+      ]
+    },
+    {
+      "courtID":67,
+      "placeName":"Kilimas",
+      "courtName":"K5",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":69,
+      "placeName":"Kilimas",
+      "courtName":"K6",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":135,
+      "placeName":"Vidaus hard plėtra",
+      "courtName":"SEB 16",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":137,
+      "placeName":"Vidaus hard plėtra",
+      "courtName":"SEB 17",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":139,
+      "placeName":"Vidaus hard plėtra",
+      "courtName":"SEB 18",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":141,
+      "placeName":"Vidaus hard plėtra",
+      "courtName":"SEB 19",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":143,
+      "placeName":"Vidaus hard plėtra",
+      "courtName":"SEB 20",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":145,
+      "placeName":"Vidaus hard plėtra",
+      "courtName":"SEB 21",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[ ]
+    },
+    {
+      "courtID":147,
+      "placeName":"Vidaus hard plėtra",
+      "courtName":"Centrinis (CC)",
+      "date":"2023-09-03",
+      "time":"19:00:00",
+      "aviableDurations":[
+        {
+          "duration_min":30,
+          "price":"16.50",
+          "price_with_discount":"14.00",
+          "courtID":147
+        }
+      ]
+    }
+  ]
+}

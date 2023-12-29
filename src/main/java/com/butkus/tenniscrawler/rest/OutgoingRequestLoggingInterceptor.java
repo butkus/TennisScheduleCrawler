@@ -46,7 +46,7 @@ public class OutgoingRequestLoggingInterceptor implements ClientHttpRequestInter
             log.warn("Failed to read response body content.", e);
         }
 
-        log.info("http-response received (duration: {}\nStatus: {} {}\nHeaders: {}\nBody: {}\n",
+        log.info("http-response received (duration: {} ms)\nStatus: {} {}\nHeaders: {}\nBody: {}\n",
                 duration, response.getRawStatusCode(), reason, response.getHeaders(), bodyString);
 
         return response;

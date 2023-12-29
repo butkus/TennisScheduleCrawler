@@ -26,4 +26,14 @@ public class MaybeWebElement extends Maybe<WebElement> {
         aMaybe.sendKeys(string);
     }
 
+    // todo delete
+    public String getUnderpinnings() {
+        return aMaybe.getText();
+    }
+
+    // todo delete
+    public WebElement getAMaybe() {
+        return aMaybe;
+    }
+
 }

@@ -13,8 +13,9 @@ import java.util.stream.Collectors;
 import static com.butkus.tenniscrawler.Court.*;
 import static com.butkus.tenniscrawler.ExtensionInterest.*;
 
+// todo go through todo's, take what's useful and delete this class
 @UtilityClass
-public class Input {
+public class Input {    // todo we now have DesiresIteratorThingy and probably other less-than-perfect names. So after deleting this Input class (and other legecy classes), do some refacting and maybe rename some new classes with old names. Is input better than Desire? I don't know. But some other legacy names might be better than new ones.
 
     public static List<Triplet<LocalDate, Integer, ExtensionInterest>> makeInputs() {
         List<Triplet<LocalDate, Integer, ExtensionInterest>> specialDays = new ArrayList<>();

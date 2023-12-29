@@ -106,8 +106,8 @@ public class Calendar {
     }
 
     private static boolean isBooked(Cache cache, int year, int month, int dayOfMonth) {
-        for (Court court : Court.values()) {
-            List<Integer> cachedCourt = cache.get(Pair.with(LocalDate.of(year, month, dayOfMonth), court.getCourtId()));
+        for (CourtType court : CourtType.values()) {
+            List<Integer> cachedCourt = cache.get(Pair.with(LocalDate.of(year, month, dayOfMonth), court.getCourtTypeId()));
             boolean foundInCourt = cachedCourt != null && cachedCourt.stream().anyMatch(e -> e.equals(ORANGE));
             if (foundInCourt) return true;
         }
