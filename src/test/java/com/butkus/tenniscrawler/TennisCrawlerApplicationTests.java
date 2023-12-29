@@ -1,5 +1,6 @@
 package com.butkus.tenniscrawler;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,16 +12,7 @@ class TennisCrawlerApplicationTests {
 	@Autowired
 	private Crawler crawler;
 
-	@Test
-	void contextLoads() {
-		try {
-			crawler.run();
-		} catch (InterruptedException e) {
-			System.out.println(" --- CRAWLER TEST FAILED --- ");
-			throw new RuntimeException(e);
-		}
-	}
-
+	@Disabled("for one-time runs, create a run configuration with debugMode=true.")
 	@Test
 	void runNewSystem() {
 		crawler.newSystem();
