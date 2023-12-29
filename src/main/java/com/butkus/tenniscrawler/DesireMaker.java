@@ -11,8 +11,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.butkus.tenniscrawler.ExtensionInterest.*;
-
 @RequiredArgsConstructor
 public class DesireMaker {
 
@@ -44,27 +42,8 @@ public class DesireMaker {
     }
 
     public DesireMaker addExplicitDesires() {
-        this.explicitDesires = makeExplicitDesires();
+        this.explicitDesires = DesiresExplicit.makeExplicitDesires();
         return this;
-    }
-
-    // todo extract this into a separate class which would only have this list of desires. Easier for commit-not-commit decisions, also less scrolling among unnecessary methods to find a list (you're not always in the middle of file where the list is)
-    List<Desire> makeExplicitDesires() {
-        ArrayList<Desire> desires = new ArrayList<>();
-
-        desires.add(new Desire("2024-01-02", NONE));
-        desires.add(new Desire("2024-01-03", NONE));
-        desires.add(new Desire("2024-01-04", EARLIER));
-        desires.add(new Desire("2024-01-08", NONE));
-        desires.add(new Desire("2024-01-09", NONE));
-        desires.add(new Desire("2024-01-11", LATER));
-        desires.add(new Desire("2024-01-16", NONE));
-        desires.add(new Desire("2024-01-17", EARLIER));
-
-        desires.add(new Desire("2024-02-14", NONE));
-        desires.add(new Desire("2024-02-19", EARLIER));
-
-        return desires;
     }
 
     public DesireMaker addNext(int count, DayOfWeek dayOfWeek) {

@@ -1,7 +1,9 @@
 package com.butkus.tenniscrawler;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import java.time.Clock;
 import java.time.DayOfWeek;
@@ -11,18 +13,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
 
 class DesireMakerTest {
 
-    private Clock clock;
     private DesireMaker desireMaker;
+    private MockedStatic<DesiresExplicit> desiresExplicitMockedStatic;
 
     @BeforeEach
     void setUp() {
-        this.clock = Clock.fixed(Instant.parse("2023-10-15T12:35:00.00Z"), ZoneId.of("Europe/Vilnius"));
-        this.desireMaker = spy(new DesireMaker(clock));
+        Clock clock = Clock.fixed(Instant.parse("2023-10-15T12:35:00.00Z"), ZoneId.of("Europe/Vilnius"));
+        desireMaker = spy(new DesireMaker(clock));
+        desiresExplicitMockedStatic = mockStatic(DesiresExplicit.class);
+    }
+
+    @AfterEach
+    void tearDown() {
+        desiresExplicitMockedStatic.close();
     }
 
     @Test
@@ -51,7 +59,7 @@ class DesireMakerTest {
     void explicitDesireHasPriority() {
         List<Desire> nextThursday = new ArrayList<>();
         nextThursday.add(new Desire("2023-10-19", ExtensionInterest.LATER));
-        doReturn(nextThursday).when(desireMaker).makeExplicitDesires();
+        desiresExplicitMockedStatic.when(DesiresExplicit::makeExplicitDesires).thenReturn(nextThursday);
 
         List<Desire> expected = new ArrayList<>();
         expected.add(new Desire("2023-10-19", ExtensionInterest.LATER));
@@ -69,7 +77,7 @@ class DesireMakerTest {
         List<Desire> stubbedExplicit = new ArrayList<>();
         stubbedExplicit.add(new Desire("2023-10-17", ExtensionInterest.EARLIER)); // tue
         stubbedExplicit.add(new Desire("2023-10-19", ExtensionInterest.LATER)); // thu
-        doReturn(stubbedExplicit).when(desireMaker).makeExplicitDesires();
+        desiresExplicitMockedStatic.when(DesiresExplicit::makeExplicitDesires).thenReturn(stubbedExplicit);
 
         List<Desire> expected = new ArrayList<>();
         expected.add(new Desire("2023-10-17", ExtensionInterest.EARLIER)); // tue
