@@ -29,10 +29,11 @@ public class DesireMaker {
         this.periodicDesires.sort(Comparator.comparing(Desire::getDate));
 
         List<Desire> combined = new ArrayList<>();
-        List<LocalDate> explicitDates = explicitDesires.stream()    // todo do we need to sort? in the end the list is sorted anyways. (add test in DesireMakerTest)
-                .map(Desire::getDate).collect(Collectors.toList());
+        List<LocalDate> explicitDates = explicitDesires.stream().map(Desire::getDate).collect(Collectors.toList());
         for (Desire periodicDesire : periodicDesires) {
-            if (!explicitDates.contains(periodicDesire.getDate())) {
+            LocalDate date = periodicDesire.getDate();
+            boolean notInExplicitDesires = !explicitDates.contains(date);
+            if (notInExplicitDesires && !isHoliday(date)) {
                 combined.add(periodicDesire);
             }
         }
@@ -61,5 +62,36 @@ public class DesireMaker {
     private LocalDate getNow() {
         return LocalDate.now(clock);
     }
+
+    private boolean isHoliday(LocalDate date) {
+        return getFixedHolidays().contains(date);
+    }
+
+    public List<LocalDate> getFixedHolidays() {
+        int thisYear = getNow().getYear();
+        int nextYear = thisYear + 1;
+
+        List<LocalDate> holidays = new ArrayList<>();
+        addFixedHolidays(holidays, thisYear);
+        addFixedHolidays(holidays, nextYear);
+
+        return holidays;
+    }
+
+    private void addFixedHolidays(List<LocalDate> holidays, int year) {
+        holidays.add(LocalDate.of(year, 1, 1));
+        holidays.add(LocalDate.of(year, 2, 16));
+        holidays.add(LocalDate.of(year, 3, 11));
+        holidays.add(LocalDate.of(year, 5, 1));
+        holidays.add(LocalDate.of(year, 6, 24));
+        holidays.add(LocalDate.of(year, 7, 6));
+        holidays.add(LocalDate.of(year, 8, 15));
+        holidays.add(LocalDate.of(year, 11, 1));
+        holidays.add(LocalDate.of(year, 11, 2));
+        holidays.add(LocalDate.of(year, 12, 24));
+        holidays.add(LocalDate.of(year, 12, 25));
+        holidays.add(LocalDate.of(year, 12, 26));
+    }
+
 
 }

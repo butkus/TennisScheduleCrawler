@@ -2,6 +2,7 @@ package com.butkus.tenniscrawler;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
@@ -23,7 +24,7 @@ class DesireMakerTest {
 
     @BeforeEach
     void setUp() {
-        Clock clock = Clock.fixed(Instant.parse("2023-10-15T12:35:00.00Z"), ZoneId.of("Europe/Vilnius"));
+        Clock clock = Clock.fixed(Instant.parse("2023-12-24T12:35:00.00Z"), ZoneId.of("Europe/Vilnius"));
         desireMaker = spy(new DesireMaker(clock));
         desiresExplicitMockedStatic = mockStatic(DesiresExplicit.class);
     }
@@ -36,7 +37,7 @@ class DesireMakerTest {
     @Test
     void getNext1Thursday() {
         List<Desire> expected = new ArrayList<>();
-        expected.add(new Desire("2023-10-19"));
+        expected.add(new Desire("2023-12-28")); // thursday
         List<Desire> actual = desireMaker.addNext(1, DayOfWeek.THURSDAY).make();
         assertEquals(expected, actual);
     }
@@ -44,11 +45,11 @@ class DesireMakerTest {
     @Test
     void getNext5Thursdays() {
         List<Desire> expected = new ArrayList<>();
-        expected.add(new Desire("2023-10-19"));
-        expected.add(new Desire("2023-10-26"));
-        expected.add(new Desire("2023-11-02"));
-        expected.add(new Desire("2023-11-09"));
-        expected.add(new Desire("2023-11-16"));
+        expected.add(new Desire("2023-12-28"));
+        expected.add(new Desire("2024-01-04"));
+        expected.add(new Desire("2024-01-11"));
+        expected.add(new Desire("2024-01-18"));
+        expected.add(new Desire("2024-01-25"));
 
         List<Desire> actual = desireMaker.addNext(5, DayOfWeek.THURSDAY).make();
 
@@ -58,11 +59,11 @@ class DesireMakerTest {
     @Test
     void explicitDesireHasPriority() {
         List<Desire> nextThursday = new ArrayList<>();
-        nextThursday.add(new Desire("2023-10-19", ExtensionInterest.LATER));
+        nextThursday.add(new Desire("2023-12-28", ExtensionInterest.LATER));
         desiresExplicitMockedStatic.when(DesiresExplicit::makeExplicitDesires).thenReturn(nextThursday);
 
         List<Desire> expected = new ArrayList<>();
-        expected.add(new Desire("2023-10-19", ExtensionInterest.LATER));
+        expected.add(new Desire("2023-12-28", ExtensionInterest.LATER));    // LATER is to verify that explicit is taken; periodic would be ANY
 
         List<Desire> actualExplicitThenPeriodic = desireMaker.addExplicitDesires().addNext(1, DayOfWeek.THURSDAY).make();
         assertEquals(expected, actualExplicitThenPeriodic);
@@ -73,24 +74,49 @@ class DesireMakerTest {
     }
 
     @Test
-    void explicitTuesdayAndThursdayAndImplicitTuesdayAndThursdayAndSunday_makes3DesiresSorted() {
+    void explicitWednesdayAndThursday_andImplicitWednesdayAndThursdayAndSunday_makes3DesiresSorted() {
         List<Desire> stubbedExplicit = new ArrayList<>();
-        stubbedExplicit.add(new Desire("2023-10-17", ExtensionInterest.EARLIER)); // tue
-        stubbedExplicit.add(new Desire("2023-10-19", ExtensionInterest.LATER)); // thu
+        stubbedExplicit.add(new Desire("2023-12-27", ExtensionInterest.EARLIER)); // wed
+        stubbedExplicit.add(new Desire("2023-12-28", ExtensionInterest.LATER)); // thu
         desiresExplicitMockedStatic.when(DesiresExplicit::makeExplicitDesires).thenReturn(stubbedExplicit);
 
         List<Desire> expected = new ArrayList<>();
-        expected.add(new Desire("2023-10-17", ExtensionInterest.EARLIER)); // tue
-        expected.add(new Desire("2023-10-19", ExtensionInterest.LATER)); // thu
-        expected.add(new Desire("2023-10-22", ExtensionInterest.ANY)); // sun
+        expected.add(new Desire("2023-12-27", ExtensionInterest.EARLIER)); // wed
+        expected.add(new Desire("2023-12-28", ExtensionInterest.LATER)); // thu
+        expected.add(new Desire("2023-12-31", ExtensionInterest.ANY)); // sun
 
         List<Desire> actual = desireMaker
                 .addExplicitDesires()
-                .addNext(1, DayOfWeek.TUESDAY)
+                .addNext(1, DayOfWeek.WEDNESDAY)
                 .addNext(1, DayOfWeek.SUNDAY)   // not in order, but result will be
                 .addNext(1, DayOfWeek.THURSDAY)
                 .make();
         assertEquals(expected, actual);
+    }
+
+    @Nested
+    class Holidays {
+
+        // todo in calendar: make holiday bookings visible that they're on holiday
+
+        @Test
+        void periodicDesiresSkipHolidayButExplicitDesiresDoNot() {
+            // todo refactor, too many comments
+
+            // Test explanation:
+            // implicit + holiday = no desire: 2023-12-25
+            // implicit + explicit + holiday = yes desire: 2023-12-26
+            // explicit + holiday = yes desire: 2024-01-01
+            desiresExplicitMockedStatic.when(DesiresExplicit::makeExplicitDesires)
+                    .thenReturn(new ArrayList<>(List.of(new Desire("2023-12-26"), new Desire("2024-01-01"))));
+
+            List<Desire> expected = List.of(new Desire("2023-12-26"), new Desire("2024-01-01"));
+            List<Desire> actual = desireMaker.addExplicitDesires()
+                    .addNext(1, DayOfWeek.MONDAY)   // clock=2023-12-24 --> next monday = 2023-12-25 First Christmas day (only 1 monday requested, so 2024-01-01 is not added)
+                    .addNext(1, DayOfWeek.TUESDAY)  // clock=2023-12-24 --> next tuesday = 2023-12-26 Second Christmas day
+                    .make();
+            assertEquals(expected, actual);
+        }
     }
 
 }
