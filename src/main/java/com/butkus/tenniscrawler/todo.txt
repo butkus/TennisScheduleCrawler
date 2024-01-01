@@ -34,3 +34,7 @@ FEATURES:
     - delete class
 - bring back summary calendar at the end of fetching
 
+- UI
+    - turn of logging of REST requests/responses in output console
+    - add newly-found prospect as soon as found
+    - output all reservations (will be better than SEB-provided ones because I coalesce 60 min + 30 min reservations into one

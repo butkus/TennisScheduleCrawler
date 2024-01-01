@@ -1,9 +1,8 @@
 package com.butkus.tenniscrawler;
 
+import com.butkus.tenniscrawler.rest.orders.Order;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
-import org.javatuples.Pair;
-import org.javatuples.Triplet;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -11,8 +10,8 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
-import static com.butkus.tenniscrawler.Colors.ORANGE;
 import static java.time.DayOfWeek.SUNDAY;
 
 @UtilityClass
@@ -22,14 +21,21 @@ public class Calendar {
     public static final Map<String, String> STRIKE_THROUGH_DIGITS =
             Map.of("1", "1̶", "2", "2̶", "3", "3̶", "4", "4̶", "5", "5̶", "6", "6̶", "7", "7̶", "8", "8̶", "9", "9̶", "0", "0̶");
 
-    public static void printCalendar(Cache cache,
-                                     List<Triplet<LocalDate, Integer, ExtensionInterest>> inputs) {
+    public static void printCalendar(List<Order> orders, List<Desire> desires) {
         int year = LocalDate.now().getYear();
         int currentMonth = LocalDate.now().getMonth().getValue();
         int nextMonth = currentMonth + 1;
 
-        List<String> currentMonthLines = getPrintableMonth(cache, year, currentMonth, inputs);
-        List<String> nextMonthLines = getPrintableMonth(cache, year, nextMonth, inputs);
+        // todo redo all year, month, day integers to LocalDate or something like this-global-month, next-global-month data structures (month containing which year it belongs to)
+
+        int yearForNextMonth = year;
+        if (nextMonth == 13) {
+            yearForNextMonth = year + 1;
+            nextMonth = 1;
+        }
+
+        List<String> currentMonthLines = getPrintableMonth(orders, year, currentMonth, desires);
+        List<String> nextMonthLines = getPrintableMonth(orders, yearForNextMonth, nextMonth, desires);
         List<String> bothMonths = new ArrayList<>();
         String emptyCalendarLine = " ".repeat(currentMonthLines.get(0).length());
         for (int i = 0; i < MAX_CALENDAR_LINES; i++) {
@@ -45,10 +51,7 @@ public class Calendar {
         System.out.println();
     }
 
-    private static List<String> getPrintableMonth(Cache cache,
-                                                  int year,
-                                                  int month,
-                                                  List<Triplet<LocalDate, Integer, ExtensionInterest>> inputs) {
+    private static List<String> getPrintableMonth(List<Order> orders, int year, int month, List<Desire> desires) {
         List<String> lines = new ArrayList<>();
 
         YearMonth yearMonth = YearMonth.of(year, month);
@@ -63,9 +66,9 @@ public class Calendar {
 
         DayOfWeek dayOfWeek = null;
         for (int dayOfMonth = 1; dayOfMonth <= yearMonth.lengthOfMonth(); dayOfMonth++) {
-            boolean booked = isBooked(cache, year, month, dayOfMonth);
+            boolean booked = isBooked(orders, year, month, dayOfMonth);
             LocalDate currentDate = LocalDate.of(year, month, dayOfMonth);
-            String dayString = getSymbolForTheDay(dayOfMonth, booked, currentDate, inputs);
+            String dayString = getSymbolForTheDay(dayOfMonth, booked, currentDate, desires);
 
             accum += String.format("%2s  ", dayString);
 
@@ -77,6 +80,7 @@ public class Calendar {
         }
         int daysTillEndOfWeek = SUNDAY.getValue() - dayOfWeek.getValue();
         accum += "    ".repeat(daysTillEndOfWeek);
+        if (accum.isEmpty()) accum = "==";  // todo solve why it is empty (was empty on 2023-12-31)
         lines.add(accum.substring(0, accum.length() - 2));
 
         return lines;
@@ -85,10 +89,12 @@ public class Calendar {
     private static String getSymbolForTheDay(int dayOfMonth,
                                              boolean booked,
                                              LocalDate dateBeingProcessed,
-                                             List<Triplet<LocalDate, Integer, ExtensionInterest>> inputs) {
-        boolean skipped = inputs.stream()
-                .filter(e -> dateBeingProcessed.equals(e.getValue0()))
-                .anyMatch(e -> e.getValue2() == ExtensionInterest.NONE);
+                                             List<Desire> desires) {
+
+        boolean skipped = desires.stream()
+                .filter(e -> e.getDate().equals(dateBeingProcessed))
+                .anyMatch(e -> e.getExtensionInterest() == ExtensionInterest.NONE);
+
         if (dateBeingProcessed.isBefore(LocalDate.now())) {
             return "░░";
         } else if (booked) {
@@ -105,12 +111,10 @@ public class Calendar {
         }
     }
 
-    private static boolean isBooked(Cache cache, int year, int month, int dayOfMonth) {
-        for (CourtType court : CourtType.values()) {
-            List<Integer> cachedCourt = cache.get(Pair.with(LocalDate.of(year, month, dayOfMonth), court.getCourtTypeId()));
-            boolean foundInCourt = cachedCourt != null && cachedCourt.stream().anyMatch(e -> e.equals(ORANGE));
-            if (foundInCourt) return true;
-        }
-        return false;
+    private static boolean isBooked(List<Order> orders, int year, int month, int dayOfMonth) {
+        Predicate<Order> sameDate = e -> e.getDate().getYear() == year &&
+                e.getDate().getMonth().getValue() == month &&
+                e.getDate().getDayOfMonth() == dayOfMonth;
+        return orders.stream().anyMatch(sameDate);
     }
 }

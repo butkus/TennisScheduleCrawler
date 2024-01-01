@@ -45,8 +45,7 @@ public class DesiresIteratorThingy {
             prospect.find();
         }
 
-
-
+        Calendar.printCalendar(orders, desires);
     }
 
 
