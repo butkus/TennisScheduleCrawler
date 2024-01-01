@@ -27,9 +27,7 @@ public class AudioPlayer {
     }
 
     public void chimeIfNecessary() {
-        System.out.println("--- AP: chimeIfNecessary --> played = " + played);
         if (!played) {
-            System.out.println("--- AP: chimeIfNecessary --> played = " + played + ", sound will play now.");
             tryPlay();
             played = true;
         }

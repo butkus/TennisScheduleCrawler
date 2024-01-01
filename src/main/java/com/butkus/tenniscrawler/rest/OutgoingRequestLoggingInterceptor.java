@@ -17,6 +17,12 @@ import java.nio.charset.StandardCharsets;
 
 public class OutgoingRequestLoggingInterceptor implements ClientHttpRequestInterceptor {
 
+    private final boolean debugMode;
+
+    public OutgoingRequestLoggingInterceptor(boolean debugMode) {
+        this.debugMode = debugMode;
+    }
+
     private static final Logger log = LoggerFactory.getLogger("com.butkus.tenniscrawler.RequestResponse");
 
     @Override
@@ -25,7 +31,9 @@ public class OutgoingRequestLoggingInterceptor implements ClientHttpRequestInter
         URI uri = request.getURI();
         HttpHeaders headers = request.getHeaders();
         String requestBody = new String(body, StandardCharsets.UTF_8);
-        log.info("http-request sent\nRequest: {} {}\nHeaders: {}\nBody: {}\n", method, uri, headers, requestBody);
+        if (debugMode) {
+            log.info("http-request sent\nRequest: {} {}\nHeaders: {}\nBody: {}\n", method, uri, headers, requestBody);
+        }
 
         long startTime = System.currentTimeMillis();
         ClientHttpResponse response = execution.execute(request, body);
@@ -46,8 +54,10 @@ public class OutgoingRequestLoggingInterceptor implements ClientHttpRequestInter
             log.warn("Failed to read response body content.", e);
         }
 
-        log.info("http-response received (duration: {} ms)\nStatus: {} {}\nHeaders: {}\nBody: {}\n",
-                duration, response.getRawStatusCode(), reason, response.getHeaders(), bodyString);
+        if (debugMode) {
+            log.info("http-response received (duration: {} ms)\nStatus: {} {}\nHeaders: {}\nBody: {}\n",
+                    duration, response.getRawStatusCode(), reason, response.getHeaders(), bodyString);
+        }
 
         return response;
     }

@@ -121,7 +121,8 @@ public class Prospect {
         for (DataTimeInfo datum : timeResp.getData()) {
             if (datum.hasDuration(minimumAcceptableDuration)) {
                 found = true;
-                System.out.println("--- HAS ACCEPTABLE DURATION FOR " + datum.getDate() + " " + datum.getTime() + " " + datum.getCourtName() + "(" + datum.getCourtID() + ") ----");
+                String timeString = datum.getTime().substring(0, datum.getTime().length() - 3);
+                System.out.println("●●● New  " + datum.getDate() + " " + timeString + "  " + datum.getCourtName() + " ●●●");
                 audioPlayer.chimeIfNecessary();
             }
         }

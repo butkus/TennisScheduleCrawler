@@ -48,7 +48,6 @@ public class Calendar {
         for (String lineByLine : bothMonths) {
             System.out.println(lineByLine);
         }
-        System.out.println();
     }
 
     private static List<String> getPrintableMonth(List<Order> orders, int year, int month, List<Desire> desires) {

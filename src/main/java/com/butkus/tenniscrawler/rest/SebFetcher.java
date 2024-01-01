@@ -6,6 +6,7 @@ import com.butkus.tenniscrawler.rest.placeinfobatch.PlaceInfoBatchRspDto;
 import com.butkus.tenniscrawler.rest.timeinfobatch.TimeInfoBatchRqstDto;
 import com.butkus.tenniscrawler.rest.timeinfobatch.TimeInfoBatchRspDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -21,10 +22,13 @@ import java.util.List;
 public class SebFetcher {
 
     private final RestTemplate restTemplate;
+    private final boolean debugMode;
 
     @Autowired
-    public SebFetcher(RestTemplate restTemplate) {
+    public SebFetcher(RestTemplate restTemplate,
+                      @Value("${app.debug-mode}") boolean debugMode) {
         this.restTemplate = restTemplate;
+        this.debugMode = debugMode;
     }
 
     // can be retrieved via GET https://ws.tenisopasaulis.lt/api/v1/allPlacesInfo
@@ -94,7 +98,9 @@ public class SebFetcher {
     Responses include 30-60-90-120 min. availability info.
      */
     public TimeInfoBatchRspDto postTimeInfoBatch(List<Long> courts, LocalDate date, LocalTime time) {
-        System.out.println("--- ==== SEARCHING FOR  " + date + "  " + time + " ==== ---");
+        if (debugMode) {
+            System.out.println("--- ==== SEARCHING FOR  " + date + "  " + time + " ==== ---");
+        }
 
         String url = "https://ws.tenisopasaulis.lt/api/v1/timeInfoBatch";
         URI uri = URI.create(url);
