@@ -42,7 +42,7 @@ public class Crawler {
         TimeUnit.SECONDS.sleep(sleepSeconds);
         Instant start = Instant.now();
 
-        System.out.printf("----------------------------------------------------------%n%nScan started at " + getTimeString(start) + "%n");
+        System.out.printf("-----------------------------------------------------------%n%nScan started at " + getTimeString(start) + "%n");
         newSystem();
         printCrawlEndTime(start);
     }
@@ -67,6 +67,7 @@ public class Crawler {
                 .addNext(10, TUESDAY)
                 .addNext(10, WEDNESDAY)
                 .addNext(10, THURSDAY)
+                .addNext(10, SUNDAY)
                 .make();
         desiresThingy.doWork(inputs);
     }

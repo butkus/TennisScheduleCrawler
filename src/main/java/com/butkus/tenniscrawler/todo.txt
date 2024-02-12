@@ -38,3 +38,18 @@ FEATURES:
     - turn of logging of REST requests/responses in output console
     - add newly-found prospect as soon as found
     - output all reservations (will be better than SEB-provided ones because I coalesce 60 min + 30 min reservations into one
+    - half-circle for 60 min reservations, full-circle for 90min reservations or longer (calendar)
+    - ●●● New  2024-01-04 19:00  K1 ●●●
+        - if I have reservation already, show what court and time I have as well
+
+- stdo --> logger
+    - migration to logger
+    - debugMode migration to logger level
+    - log "searching for reservation" with higher level
+    - log REST logs with lower elvel
+
+-  MOVE SEESION ID OUT OF GIT
+
+- first:
+    - if 1.5 hours and EARLIER/LATER --> only get ones that are also 1.5 hours (maybe later add param to specify length desire)
+    - add cap for weekends. I don't want my 16:30 LATER desire to yield 18:30 suggestions

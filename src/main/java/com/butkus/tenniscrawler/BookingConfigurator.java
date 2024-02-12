@@ -1,13 +1,14 @@
 package com.butkus.tenniscrawler;
 
 import com.butkus.tenniscrawler.rest.SebFetcher;
+import lombok.Data;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalTime;
 
-@Getter
+@Data
 @Component
 public class BookingConfigurator {
 
@@ -17,9 +18,9 @@ public class BookingConfigurator {
 //        .setEarlierLaterCourtTypeTradeIn(...)
 //        .build(collect);  // collect = inputs
 
-    public static final LocalTime EARLY_BIRD = LocalTime.parse("18:00");
-    public static final LocalTime COMFORTABLE = LocalTime.parse("18:30");
-    public static final LocalTime LATE_OWL = LocalTime.parse("19:30");
+    private LocalTime earlyBird = LocalTime.parse("18:00");
+    private LocalTime comfortable = LocalTime.parse("18:30");
+    private LocalTime lateOwl = LocalTime.parse("19:30");
 
     @Autowired
     public BookingConfigurator(AudioPlayer audioPlayer, SebFetcher fetcher) {

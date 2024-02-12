@@ -33,14 +33,13 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DesiresIteratorThingyTest {
-
     @Mock private AudioPlayer audioPlayer;
+
     @Mock private SebFetcher fetcher;
-    private BookingConfigurator configurator;
 
     private DesiresIteratorThingy thingy;
-//    @InjectMocks private DesiresIteratorThingy thingy;
 
+//    @InjectMocks private DesiresIteratorThingy thingy;
     private MockedStatic<SebOrderConverter> orderConverterMockedStatic;
 
     @Captor private ArgumentCaptor<List<Long>> courtsCaptor;
@@ -50,7 +49,7 @@ class DesiresIteratorThingyTest {
     @BeforeEach
     void setUp() {
         orderConverterMockedStatic = mockStatic(SebOrderConverter.class);
-        configurator = new BookingConfigurator(audioPlayer, fetcher);
+        BookingConfigurator configurator = new BookingConfigurator(audioPlayer, fetcher);
         thingy = new DesiresIteratorThingy(configurator);
     }
 
@@ -63,6 +62,11 @@ class DesiresIteratorThingyTest {
         List<Order> orders = new ArrayList<>();
         orders.add(new Order(LocalDate.parse(date), court, LocalTime.parse(timeFrom), LocalTime.parse(timeTo)));
         return orders;
+    }
+
+    private List<Order> stubOrders(Court court, String day, String timeFrom, long duration) {
+        String timeTo = LocalTime.parse(timeFrom).plusMinutes(duration).toString();
+        return stubOrders(court, day, timeFrom, timeTo);
     }
 
     private static List<Order> stubOrders(String date, String timeFrom, String timeTo) {
@@ -143,7 +147,6 @@ class DesiresIteratorThingyTest {
 
 
 
-
     // todo   maybe also do tests that have earlier, but test asks for LATER -- does not find
     @ParameterizedTest
     @CsvSource({"18:00", "19:30"})
@@ -202,7 +205,6 @@ class DesiresIteratorThingyTest {
 
 
 
-
     // adjacent (same court extension)
     @ParameterizedTest
     @EnumSource(value = ExtensionInterest.class, names = {"EARLIER", "ANY"})
@@ -251,123 +253,223 @@ class DesiresIteratorThingyTest {
         finds();
     }
 
+
+
+
+
+
+
+
+
+//////// START OF  === PRESERVE-BOOKING-LENGTH CHANGE ===  ///////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    // TODO -- MAKE A NESTED CLASS FOR "EFFECTIVELY ADJACENT" AND "NON-ADJACENT"? OR PERHAPS JUST "EFFECTIVELY ADJACENT? --
+    //  because "effectively adjacent" has near-full overlap of set-up code.
+    //  "non-adjacent" can be not-in-that-class, but there's some methods that apply, too. Make them global methods perhaps
+
     // effectively adjacent (different court but no gap between reservation and new vacancy)
     @ParameterizedTest
-    @EnumSource(value = ExtensionInterest.class, names = {"EARLIER", "ANY"})
-    void requestedEarlier_sameCourtNoVacanciesButYesVacanciesInOtherCourts_findsBrandNew60Min(ExtensionInterest earlierOrAny) {
-        Court h02 = Court.H02;
-        String day = "2023-10-01";
-        mockOrders(stubOrders(h02, day, "17:30", "19:00"));
-        List<Desire> desires = stubDesires(day, earlierOrAny, Court.getClayIds());
-
-        List<Long> allCourtsExceptBookedOrder = new ArrayList<>(Court.getClayIds());
-        allCourtsExceptBookedOrder.removeIf(e -> Objects.equals(e, h02.getCourtId()));
-        LocalDate dateVacancy = LocalDate.parse(day);
-        LocalTime timeFromVacancy = LocalTime.parse("17:00");
-
-        // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
-        when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoEmpty());
-        when(fetcher.postTimeInfoBatch(allCourtsExceptBookedOrder, dateVacancy, timeFromVacancy)).thenReturn(stubTimeInfo(Court.C01.getCourtId(), dateVacancy, timeFromVacancy, 60L));
-
-        assertDoesNotThrow(() -> thingy.doWork(desires));
-
-        fetchesTwice();
-        List<List<Long>> courtsCaptured = courtsCaptor.getAllValues();
-        assertEquals(List.of(h02.getCourtId()), courtsCaptured.get(0)); // first looks for extension of booking // todo remove? currently works but irrelevant. implementation could do diff things
-        assertEquals(Court.getClayIds(), courtsCaptured.get(1));        // next, looks in all desire's courtIds // todo remove? currently works but irrelevant. implementation could do diff things
-
-        assertFetchedDate(day);
-        assertFetchedTime("17:00");
-        finds();
+    @CsvSource({
+            "EARLIER, 60, 60, true",
+            "EARLIER, 60, 90, true",
+            "EARLIER, 60, 120, true",
+            "EARLIER, 90, 60, false",
+            "EARLIER, 90, 90, true",
+            "EARLIER, 90, 120, true",
+            "EARLIER, 120, 60, false",
+            "EARLIER, 120, 90, false",
+            "EARLIER, 120, 120, true",
+            "ANY, 60, 60, true",
+            "ANY, 60, 90, true",
+            "ANY, 60, 120, true",
+            "ANY, 90, 60, false",
+            "ANY, 90, 90, true",
+            "ANY, 90, 120, true",
+            "ANY, 120, 60, false",
+            "ANY, 120, 90, false",
+            "ANY, 120, 120, true",
+    })
+    void requestedEarlier_sameCourtNoVacanciesButYesVacanciesInOtherCourts_findsBrandNew60Min(      // todo rename name
+            ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind) {
+        String timeFrom = "17:30";
+        String searchFrom = LocalTime.parse(timeFrom).minusMinutes(30).toString();
+        searchEffectivelyAdjacent(interest, orderDuration, prospectDuration, shouldFind, timeFrom, searchFrom);
     }
 
     // effectively adjacent (different court but no gap between reservation and new vacancy)
     @ParameterizedTest
-    @EnumSource(value = ExtensionInterest.class, names = {"LATER", "ANY"})
-    void requestedLater_sameCourtNoVacanciesButYesVacanciesInOtherCourts_findsBrandNew60Min(ExtensionInterest laterOrAny) {
+    @CsvSource({
+            "LATER, 60, 90, true",
+            "LATER, 60, 60, true",
+            "LATER, 60, 120, true",
+            "LATER, 90, 60, false",
+            "LATER, 90, 90, true",
+            "LATER, 90, 120, true",
+            "LATER, 120, 60, false",
+            "LATER, 120, 90, false",
+            "LATER, 120, 120, true",
+            "ANY, 60, 60, true",
+            "ANY, 60, 90, true",
+            "ANY, 60, 120, true",
+            "ANY, 90, 60, false",
+            "ANY, 90, 90, true",
+            "ANY, 90, 120, true",
+            "ANY, 120, 60, false",
+            "ANY, 120, 90, false",
+            "ANY, 120, 120, true",
+    })
+    void requestedLater_sameCourtNoVacanciesButYesVacanciesInOtherCourts_findsBrandNew60Min(
+            ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind) {
+        String timeFrom = "17:30";
+        String searchFrom = LocalTime.parse(timeFrom).plusMinutes(orderDuration).minusMinutes(30).toString();
+        searchEffectivelyAdjacent(interest, orderDuration, prospectDuration, shouldFind, timeFrom, searchFrom);
+    }
+
+    private void searchEffectivelyAdjacent(ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind,
+                                           String timeFrom, String searchFrom) {
+        // todo param "timeFrom" -- maybe we don't need it? Does it make sense to have flexibility? currently 17:30 for both method calls
+
         Court h02 = Court.H02;
         String day = "2023-10-01";
-        mockOrders(stubOrders(h02, day, "17:30", "19:00"));
 
+        mockOrders(stubOrders(h02, day, timeFrom, orderDuration));
         // fixme. this test asks asks for "later clay" but pre-existing order has H02. Shouldn't it only search for later clay? If you don't care what court, make a desire with all courts.
-        List<Desire> desires = stubDesires(day, laterOrAny, Court.getClayIds());
+        List<Desire> desires = stubDesires(day, interest, Court.getClayIds());
 
         List<Long> allCourtsExceptBookedOrder = new ArrayList<>(Court.getClayIds());
         allCourtsExceptBookedOrder.removeIf(e -> Objects.equals(e, h02.getCourtId()));
         LocalDate dateVacancy = LocalDate.parse(day);
-        LocalTime timeFromVacancy = LocalTime.parse("18:30");
+        LocalTime timeFromVacancy = LocalTime.parse(searchFrom);
 
         // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
         when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoEmpty());
-        when(fetcher.postTimeInfoBatch(allCourtsExceptBookedOrder, dateVacancy, timeFromVacancy)).thenReturn(stubTimeInfo(Court.C01.getCourtId(), dateVacancy, timeFromVacancy, 60L));
+        when(fetcher.postTimeInfoBatch(allCourtsExceptBookedOrder, dateVacancy, timeFromVacancy))
+                .thenReturn(stubTimeInfo(Court.C01.getCourtId(), dateVacancy, timeFromVacancy, prospectDuration));
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
-        fetchesAtLeastOnce();
-        List<List<Long>> courtsCaptured = courtsCaptor.getAllValues();
-        assertEquals(List.of(h02.getCourtId()), courtsCaptured.get(0));       // first looks for extension of booking
-        assertEquals(Court.getClayIds(), courtsCaptured.get(1));                    // next, looks in all desire's courtIds
-        // todo. above checks for Court.getClayIds() why? Because desires are for clay ids? Maybe add separate test that verifies that if clay desire --> searches only clay, etc. Include "all indoor courts"
+        if (shouldFind) {
+            fetchesAtLeastOnce();
+            List<List<Long>> courtsCaptured = courtsCaptor.getAllValues();
+            assertEquals(List.of(h02.getCourtId()), courtsCaptured.get(0)); // first looks for extension of booking // todo remove? currently works but irrelevant. implementation could do diff things
+            assertEquals(Court.getClayIds(), courtsCaptured.get(1));        // next, looks in all desire's courtIds // todo remove? currently works but irrelevant. implementation could do diff things
 
-        assertFetchedDate(day);
-        assertFetchedTime("18:30");
-        finds();
+            assertFetchedDate(day);
+            assertFetchedTime(searchFrom);
+            finds();
+        } else {
+            doesNotFind();
+        }
+    }
+
+
+    // non-adjacent (there's a gap between reservation and new vacancy)
+    @ParameterizedTest
+    @CsvSource({
+            "EARLIER, 60, 60, true",
+            "EARLIER, 60, 90, true",
+            "EARLIER, 60, 120, true",
+            "EARLIER, 90, 60, false",
+            "EARLIER, 90, 90, true",
+            "EARLIER, 90, 120, true",
+            "EARLIER, 120, 60, false",
+            "EARLIER, 120, 90, false",
+            "EARLIER, 120, 120, true",
+            "ANY, 60, 60, true",
+            "ANY, 60, 90, true",
+            "ANY, 60, 120, true",
+            "ANY, 90, 60, false",
+            "ANY, 90, 90, true",
+            "ANY, 90, 120, true",
+            "ANY, 120, 60, false",
+            "ANY, 120, 90, false",
+            "ANY, 120, 120, true",
+    })
+    void requestedEarlier_oneVacancyInNonAdjacentEarlierTime_finds(
+            ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind) {
+
+        BookingConfigurator configurator = new BookingConfigurator(audioPlayer, fetcher);
+        configurator.setEarlyBird(LocalTime.parse("17:00"));
+        thingy = new DesiresIteratorThingy(configurator);
+
+        String timeFrom = "19:30";      // = orderFrom
+        String searchFrom = "17:00";    // 17:00 will always have a gap. e.g. even if 120 min, it will be 19:00 which is 30 min before timeFrom = 19:30    todo was 18:00. Might need EarlyBird adjustment (hopefully that's it)
+        searchNonAdjacent(timeFrom, interest, orderDuration, prospectDuration, shouldFind, searchFrom);
     }
 
     // non-adjacent (there's a gap between reservation and new vacancy)
     @ParameterizedTest
-    @EnumSource(value = ExtensionInterest.class, names = {"EARLIER", "ANY"})
-    void requestedEarlier_oneVacancyInNonAdjacentEarlierTime_finds(ExtensionInterest earlierOrAny) {
-        String day = "2023-10-01";
-        mockOrders(stubOrders(Court.H02, day, "19:30", "20:30"));
+    @CsvSource({
+            "LATER, 60, 90, true",
+            "LATER, 60, 60, true",
+            "LATER, 60, 120, true",
+            "LATER, 90, 60, false",
+            "LATER, 90, 90, true",
+            "LATER, 90, 120, true",
+            "LATER, 120, 60, false",
+            "LATER, 120, 90, false",
+            "LATER, 120, 120, true",
+            "ANY, 60, 60, true",
+            "ANY, 60, 90, true",
+            "ANY, 60, 120, true",
+            "ANY, 90, 60, false",
+            "ANY, 90, 90, true",
+            "ANY, 90, 120, true",
+            "ANY, 120, 60, false",
+            "ANY, 120, 90, false",
+            "ANY, 120, 120, true",
+    })
+    void requestedLater_oneVacancyInNonAdjacentLaterTime_finds(
+            ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind) {
+        BookingConfigurator configurator = new BookingConfigurator(audioPlayer, fetcher);
+        configurator.setEarlyBird(LocalTime.parse("17:00"));
+        thingy = new DesiresIteratorThingy(configurator);
 
-        List<Desire> desires = stubDesires(day, earlierOrAny, Court.getClayIds());
+        String timeFrom = "17:00";  // = orderFrom
+        String searchFrom = "19:30";    // 19:30 will always have a gap. e.g. even if 120 min, end of prospect will be 19:00 which is 30 min before 19:30
+        searchNonAdjacent(timeFrom, interest, orderDuration, prospectDuration, shouldFind, searchFrom);
+    }
+
+    private void searchNonAdjacent(String orderFrom, ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind, String searchFrom) {
+        String day = "2023-10-01";
+        mockOrders(stubOrders(Court.H02, day, orderFrom, orderDuration));
+
+        List<Desire> desires = stubDesires(day, interest, Court.getClayIds());
 
         List<Long> allCourts = new ArrayList<>(Court.getClayIds());
         LocalDate dateVacancy = LocalDate.parse(day);
-        LocalTime timeFromVacancy = LocalTime.parse("18:00");
+        LocalTime timeFromVacancy = LocalTime.parse(searchFrom);
         // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
         when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoEmpty());
-        when(fetcher.postTimeInfoBatch(allCourts, dateVacancy, timeFromVacancy)).thenReturn(stubTimeInfo(Court.C01.getCourtId(), dateVacancy, timeFromVacancy, 60L));
+        when(fetcher.postTimeInfoBatch(allCourts, dateVacancy, timeFromVacancy)).thenReturn(stubTimeInfo(Court.C01.getCourtId(), dateVacancy, timeFromVacancy, prospectDuration));
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
-        fetches4times();
-        List<LocalTime> timesCaptured = timeCaptor.getAllValues();
-        // todo will probably decommission these, because it's implementation details, we shouldn't care. Unless for performance reasons if it searches for way too many times for some reason
-        assertEquals(LocalTime.parse("19:00"), timesCaptured.get(0));   // first looks for extension of booking  (same H02 court 19:00-19:30 -- for half hour)
-        assertEquals(LocalTime.parse("19:00"), timesCaptured.get(1));   // first looks for brand-new reservation (clay court     19:00-20:00 -- for one hour)
-        assertEquals(LocalTime.parse("18:30"), timesCaptured.get(2));   // next, looks for brand-new reservation (clay court     18:30-19:30 -- for one hour)
-        assertEquals(LocalTime.parse("18:00"), timesCaptured.get(3));   // next, looks for brand-new reservation (clay court     18:00-19:00 -- for one hour)
-
-        assertFetchedDate(day);
-        assertFetchedTime("18:00");
-        finds();
+        if (shouldFind) {
+            fetchesAtLeastOnce();
+            assertFetchedDate(day);
+            assertFetchedTime(searchFrom);
+            finds();
+        } else {
+            doesNotFind();
+        }
     }
 
-    // non-adjacent (there's a gap between reservation and new vacancy)
-    @ParameterizedTest
-    @EnumSource(value = ExtensionInterest.class, names = {"LATER", "ANY"})
-    void requestedLater_oneVacancyInNonAdjacentLaterTime_finds(ExtensionInterest laterOrAny) {
-        String day = "2023-10-01";
-        mockOrders(stubOrders(Court.H02, day, "17:30", "19:00"));
 
-        List<Desire> desires = stubDesires(day, laterOrAny, Court.getClayIds());
+//////// END OF  === PRESERVE-BOOKING-LENGTH CHANGE ===  ///////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        List<Long> allCourts = new ArrayList<>(Court.getClayIds());
-        LocalDate dateVacancy = LocalDate.parse(day);
-        LocalTime timeFromVacancy = LocalTime.parse("19:30");
-        // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
-        when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoEmpty());
-        when(fetcher.postTimeInfoBatch(allCourts, dateVacancy, timeFromVacancy)).thenReturn(stubTimeInfo(Court.C01.getCourtId(), dateVacancy, timeFromVacancy, 60L));
 
-        assertDoesNotThrow(() -> thingy.doWork(desires));
 
-        fetchesAtLeastOnce();
-        assertFetchedDate(day);
-        assertFetchedTime("19:30");
-        finds();
-    }
+
+
+
+
+
+
+
 
     private void finds() {
         verify(audioPlayer).chimeIfNecessary();

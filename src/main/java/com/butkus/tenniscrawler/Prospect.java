@@ -7,7 +7,6 @@ import com.butkus.tenniscrawler.rest.timeinfobatch.TimeInfoBatchRspDto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjuster;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,11 +14,13 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.butkus.tenniscrawler.ExtensionInterest.*;
+import static java.time.temporal.ChronoUnit.MINUTES;
 
+// todo rename to Vacancy? I used that word in tests, and it may just be more intuitive
 public class Prospect {
 
-    public static final TemporalAdjuster ADD_30_MIN = t -> t.plus(30L, ChronoUnit.MINUTES);
-    public static final TemporalAdjuster SUBTRACT_30_MIN = t -> t.minus(30L, ChronoUnit.MINUTES);
+    public static final TemporalAdjuster ADD_30_MIN = t -> t.plus(30L, MINUTES);
+    public static final TemporalAdjuster SUBTRACT_30_MIN = t -> t.minus(30L, MINUTES);
     private final LocalTime earlyBird;
     private final LocalTime comfortable;
     private final LocalTime lateOwl;
@@ -40,9 +41,9 @@ public class Prospect {
 
     // todo prospect builder to build main parts separtely, so that only params (or major ones) would be desire and order
     public Prospect(Desire desire, List<Order> orders, BookingConfigurator bookingConfigurator) {
-        this.earlyBird = BookingConfigurator.EARLY_BIRD;
-        this.comfortable = BookingConfigurator.COMFORTABLE;
-        this.lateOwl = BookingConfigurator.LATE_OWL;
+        this.earlyBird = bookingConfigurator.getEarlyBird();
+        this.comfortable = bookingConfigurator.getComfortable();
+        this.lateOwl = bookingConfigurator.getLateOwl();
 
         isAfterLateOwl = t -> t.isAfter(lateOwl);
         isBeforeEarlyBird = t -> t.isBefore(earlyBird);
@@ -99,10 +100,6 @@ public class Prospect {
         return found;
     }
 
-    private LocalTime getOrderToMinus30Min() {
-        return getOrder().getTimeTo().minusMinutes(30);
-    }
-
 
     private boolean searchForReservation(List<Long> courts, LocalTime time, long minimumAcceptableDuration) {
         TimeInfoBatchRspDto response = fetcher.postTimeInfoBatch(courts, this.day, time);
@@ -153,6 +150,19 @@ public class Prospect {
         return getOrder().getTimeFrom().minusMinutes(30);
     }
 
+    private LocalTime getOrderToMinus30Min() {
+        return getOrder().getTimeTo().minusMinutes(30);
+    }
+
+    private long getOrderDurationOrDefault() {
+        if (orderExists()) {
+            Order order = getOrder();
+            return MINUTES.between(order.getTimeFrom(), order.getTimeTo());
+        } else {
+            return 60L;
+        }
+    }
+
     private LocalTime getOrderTimeTo() {
         return getOrder().getTimeTo();
     }
@@ -162,7 +172,7 @@ public class Prospect {
         boolean enough;
         LocalTime time = initial;
         do {
-            found = searchForReservation(courts, time, 60L);
+            found = searchForReservation(courts, time, getOrderDurationOrDefault());
             time = time.with(next);
             enough = found || searchUntil.test(time);
         } while (!enough);
