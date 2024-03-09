@@ -33,10 +33,11 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DesiresIteratorThingyTest {
+
+    public static final String DAY = "2023-10-01";
+
     @Mock private AudioPlayer audioPlayer;
-
     @Mock private SebFetcher fetcher;
-
     private DesiresIteratorThingy thingy;
 
 //    @InjectMocks private DesiresIteratorThingy thingy;
@@ -64,9 +65,9 @@ class DesiresIteratorThingyTest {
         return orders;
     }
 
-    private List<Order> stubOrders(Court court, String day, String timeFrom, long duration) {
+    private List<Order> stubOrders(Court court, String timeFrom, long duration) {
         String timeTo = LocalTime.parse(timeFrom).plusMinutes(duration).toString();
-        return stubOrders(court, day, timeFrom, timeTo);
+        return stubOrders(court, DAY, timeFrom, timeTo);
     }
 
     private static List<Order> stubOrders(String date, String timeFrom, String timeTo) {
@@ -102,7 +103,7 @@ class DesiresIteratorThingyTest {
         //  i.e. postPlaceInfoBatch will determine no free slots and no need for postTimeInfoBatch to search
 
         mockOrders(new ArrayList<>());
-        List<Desire> desires = stubDesires("2023-10-01", ANY, Court.getClayIds());
+        List<Desire> desires = stubDesires(DAY, ANY, Court.getClayIds());
 
         // whatever you ask, there's NO booking
         when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoEmpty());
@@ -111,7 +112,7 @@ class DesiresIteratorThingyTest {
 
         fetches4times();
         assertFetchedCourts(Court.getClayIds());
-        assertFetchedDate("2023-10-01");
+        assertFetchedDate(DAY);
 
         List<LocalTime> expectedTimes = List.of(
                 LocalTime.parse("18:00"),
@@ -127,7 +128,7 @@ class DesiresIteratorThingyTest {
     @Test
     void requestedAny_noPriorOrders_allYouAskIsVacant_searches_1_timeAndFinds() {
         mockOrders(new ArrayList<>());
-        List<Desire> desires = stubDesires("2023-10-01", ANY, Court.getClayIds());
+        List<Desire> desires = stubDesires(DAY, ANY, Court.getClayIds());
 
         // whatever you ask, there's a booking
         when(fetcher.postTimeInfoBatch(any(), any(), any())).thenAnswer(e -> stubTimeInfo(e.getArgument(1), e.getArgument(2)));
@@ -136,7 +137,7 @@ class DesiresIteratorThingyTest {
 
         fetchesOnce();
         assertFetchedCourts(Court.getClayIds());
-        assertFetchedDate("2023-10-01");
+        assertFetchedDate(DAY);
         assertFetchedTime("18:00");
         finds();
     }
@@ -151,20 +152,22 @@ class DesiresIteratorThingyTest {
     @ParameterizedTest
     @CsvSource({"18:00", "19:30"})
     void requestedAny_canFindBothEarlierOrLater(String newTime) {    // todo make LocalTime
-        mockOrders(stubOrders(Court.H02,"2023-10-01", "18:30", "19:30"));
-        List<Desire> desires = stubDesires("2023-10-01", ANY, Court.getHardIds());
+        mockOrders(stubOrders(Court.H02, DAY, "18:30", "19:30"));
+        List<Desire> desires = stubDesires(DAY, ANY, Court.getHardIds());
 
+        Court h02 = Court.H02;
+        long durationMin = 30L;
         // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
         when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoEmpty());
-        when(fetcher.postTimeInfoBatch(List.of(Court.H02.getCourtId()), LocalDate.parse("2023-10-01"), LocalTime.parse(newTime)))
-                .thenReturn(stubTimeInfo(Court.H02.getCourtId(), LocalDate.parse("2023-10-01"), LocalTime.parse(newTime), 30L));
+        when(fetcher.postTimeInfoBatch(List.of(h02.getCourtId()), LocalDate.parse(DAY), LocalTime.parse(newTime)))
+                .thenReturn(stubTimeInfo(h02.getCourtId(), LocalDate.parse(DAY), LocalTime.parse(newTime), durationMin));
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
 //        fetchesOnceOrTwice(); // could be many times because searches for earlier, then later. But could be the other way around and search count can change depending on where the vacancy is
         fetchesAtLeastOnce();
         assertFetchedCourts(List.of(Court.H02.getCourtId()));
-        assertFetchedDate("2023-10-01");
+        assertFetchedDate(DAY);
         assertFetchedTime(newTime);
         finds();
     }
@@ -182,11 +185,11 @@ class DesiresIteratorThingyTest {
     @CsvSource({"30", "60", "90", "120"})
     void requestedAny_noPriorOrders_findsAnyDurationSlotExcept30min(int minutes) {
         mockOrders(new ArrayList<>());
-        List<Desire> desires = stubDesires("2023-10-01", ANY, Court.getClayIds());
+        List<Desire> desires = stubDesires(DAY, ANY, Court.getClayIds());
 
         // whatever you ask, there's a booking
         when(fetcher.postTimeInfoBatch(any(), any(), any()))
-                .thenReturn(stubTimeInfo(Court.C01.getCourtId(), LocalDate.parse("2023-10-01"), LocalTime.parse("18:00"), minutes));
+                .thenReturn(stubTimeInfo(Court.C01.getCourtId(), LocalDate.parse(DAY), LocalTime.parse("18:00"), minutes));
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -197,7 +200,7 @@ class DesiresIteratorThingyTest {
             // 60, 90, 120 are checked
             fetchesOnce();
             assertFetchedCourts(Court.getClayIds());
-            assertFetchedDate("2023-10-01");
+            assertFetchedDate(DAY);
             assertFetchedTime("18:00");
             finds();
         }
@@ -210,21 +213,21 @@ class DesiresIteratorThingyTest {
     @EnumSource(value = ExtensionInterest.class, names = {"EARLIER", "ANY"})
     void requestedEarlier_sameCourtHalfHourEarlierExists_findsInSameCourt(ExtensionInterest earlierOrAny) {
         Court h02 = Court.H02;
-        String day = "2023-10-01";
-        mockOrders(stubOrders(h02, day, "17:30", "19:00"));
-        List<Desire> desires = stubDesires(day, earlierOrAny, Court.getClayIds());
+        mockOrders(stubOrders(h02, DAY, "17:30", "19:00"));
+        List<Desire> desires = stubDesires(DAY, earlierOrAny, Court.getClayIds());
 
-        // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
         String vacancyAt1700 = "17:00";
+        long durationMin = 30L;
+        // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
         when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoEmpty());
-        when(fetcher.postTimeInfoBatch(List.of(h02.getCourtId()), LocalDate.parse(day), LocalTime.parse(vacancyAt1700)))
-                .thenReturn(stubTimeInfo(h02.getCourtId(), LocalDate.parse(day), LocalTime.parse(vacancyAt1700), 30L));
+        when(fetcher.postTimeInfoBatch(List.of(h02.getCourtId()), LocalDate.parse(DAY), LocalTime.parse(vacancyAt1700)))
+                .thenReturn(stubTimeInfo(h02.getCourtId(), LocalDate.parse(DAY), LocalTime.parse(vacancyAt1700), durationMin));
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
         fetchesOnce();
         assertFetchedCourts(List.of(h02.getCourtId()));
-        assertFetchedDate(day);
+        assertFetchedDate(DAY);
         assertFetchedTime(vacancyAt1700);
         finds();
     }
@@ -234,21 +237,21 @@ class DesiresIteratorThingyTest {
     @EnumSource(value = ExtensionInterest.class, names = {"LATER", "ANY"})
     void requestedLater_sameCourtHalfHourLaterExists_findsInSameCourt(ExtensionInterest laterOrAny) {
         Court h02 = Court.H02;
-        String day = "2023-10-01";
-        mockOrders(stubOrders(h02, day, "17:30", "19:00"));
-        List<Desire> desires = stubDesires(day, laterOrAny, Court.getClayIds());
+        mockOrders(stubOrders(h02, DAY, "17:30", "19:00"));
+        List<Desire> desires = stubDesires(DAY, laterOrAny, Court.getClayIds());
 
-        // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
         String vacancyAt1900 = "19:00";
+        long durationMin = 30L;
+        // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
         when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoEmpty());
-        when(fetcher.postTimeInfoBatch(List.of(h02.getCourtId()), LocalDate.parse(day), LocalTime.parse(vacancyAt1900)))
-                .thenReturn(stubTimeInfo(h02.getCourtId(), LocalDate.parse(day), LocalTime.parse(vacancyAt1900), 30L));
+        when(fetcher.postTimeInfoBatch(List.of(h02.getCourtId()), LocalDate.parse(DAY), LocalTime.parse(vacancyAt1900)))
+                .thenReturn(stubTimeInfo(h02.getCourtId(), LocalDate.parse(DAY), LocalTime.parse(vacancyAt1900), durationMin));
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
         fetchesAtLeastOnce();
         assertFetchedCourts(List.of(h02.getCourtId()));
-        assertFetchedDate(day);
+        assertFetchedDate(DAY);
         assertFetchedTime(vacancyAt1900);
         finds();
     }
@@ -332,21 +335,21 @@ class DesiresIteratorThingyTest {
         // todo param "timeFrom" -- maybe we don't need it? Does it make sense to have flexibility? currently 17:30 for both method calls
 
         Court h02 = Court.H02;
-        String day = "2023-10-01";
 
-        mockOrders(stubOrders(h02, day, timeFrom, orderDuration));
+        mockOrders(stubOrders(h02, timeFrom, orderDuration));
         // fixme. this test asks asks for "later clay" but pre-existing order has H02. Shouldn't it only search for later clay? If you don't care what court, make a desire with all courts.
-        List<Desire> desires = stubDesires(day, interest, Court.getClayIds());
+        List<Desire> desires = stubDesires(DAY, interest, Court.getClayIds());
 
         List<Long> allCourtsExceptBookedOrder = new ArrayList<>(Court.getClayIds());
         allCourtsExceptBookedOrder.removeIf(e -> Objects.equals(e, h02.getCourtId()));
-        LocalDate dateVacancy = LocalDate.parse(day);
+        LocalDate dateVacancy = LocalDate.parse(DAY);
         LocalTime timeFromVacancy = LocalTime.parse(searchFrom);
 
+        Court c01 = Court.C01;
         // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
         when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoEmpty());
         when(fetcher.postTimeInfoBatch(allCourtsExceptBookedOrder, dateVacancy, timeFromVacancy))
-                .thenReturn(stubTimeInfo(Court.C01.getCourtId(), dateVacancy, timeFromVacancy, prospectDuration));
+                .thenReturn(stubTimeInfo(c01.getCourtId(), dateVacancy, timeFromVacancy, prospectDuration));
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -356,7 +359,7 @@ class DesiresIteratorThingyTest {
             assertEquals(List.of(h02.getCourtId()), courtsCaptured.get(0)); // first looks for extension of booking // todo remove? currently works but irrelevant. implementation could do diff things
             assertEquals(Court.getClayIds(), courtsCaptured.get(1));        // next, looks in all desire's courtIds // todo remove? currently works but irrelevant. implementation could do diff things
 
-            assertFetchedDate(day);
+            assertFetchedDate(DAY);
             assertFetchedTime(searchFrom);
             finds();
         } else {
@@ -433,23 +436,24 @@ class DesiresIteratorThingyTest {
     }
 
     private void searchNonAdjacent(String orderFrom, ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind, String searchFrom) {
-        String day = "2023-10-01";
-        mockOrders(stubOrders(Court.H02, day, orderFrom, orderDuration));
+        mockOrders(stubOrders(Court.H02, orderFrom, orderDuration));
 
-        List<Desire> desires = stubDesires(day, interest, Court.getClayIds());
+        List<Desire> desires = stubDesires(DAY, interest, Court.getClayIds());
 
         List<Long> allCourts = new ArrayList<>(Court.getClayIds());
-        LocalDate dateVacancy = LocalDate.parse(day);
+        LocalDate dateVacancy = LocalDate.parse(DAY);
         LocalTime timeFromVacancy = LocalTime.parse(searchFrom);
+        Court c01 = Court.C01;
+
         // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
         when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoEmpty());
-        when(fetcher.postTimeInfoBatch(allCourts, dateVacancy, timeFromVacancy)).thenReturn(stubTimeInfo(Court.C01.getCourtId(), dateVacancy, timeFromVacancy, prospectDuration));
+        when(fetcher.postTimeInfoBatch(allCourts, dateVacancy, timeFromVacancy)).thenReturn(stubTimeInfo(c01.getCourtId(), dateVacancy, timeFromVacancy, prospectDuration));
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
         if (shouldFind) {
             fetchesAtLeastOnce();
-            assertFetchedDate(day);
+            assertFetchedDate(DAY);
             assertFetchedTime(searchFrom);
             finds();
         } else {
