@@ -156,11 +156,7 @@ class DesiresIteratorThingyTest {
         List<Desire> desires = stubDesires(DAY, ANY, Court.getHardIds());
 
         Court h02 = Court.H02;
-        long durationMin = 30L;
-        // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
-        when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoEmpty());
-        when(fetcher.postTimeInfoBatch(List.of(h02.getCourtId()), LocalDate.parse(DAY), LocalTime.parse(newTime)))
-                .thenReturn(stubTimeInfo(h02.getCourtId(), LocalDate.parse(DAY), LocalTime.parse(newTime), durationMin));
+        stubEmptyExcept(List.of(h02.getCourtId()), h02, LocalTime.parse(newTime), 30L);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -217,11 +213,7 @@ class DesiresIteratorThingyTest {
         List<Desire> desires = stubDesires(DAY, earlierOrAny, Court.getClayIds());
 
         String vacancyAt1700 = "17:00";
-        long durationMin = 30L;
-        // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
-        when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoEmpty());
-        when(fetcher.postTimeInfoBatch(List.of(h02.getCourtId()), LocalDate.parse(DAY), LocalTime.parse(vacancyAt1700)))
-                .thenReturn(stubTimeInfo(h02.getCourtId(), LocalDate.parse(DAY), LocalTime.parse(vacancyAt1700), durationMin));
+        stubEmptyExcept(List.of(h02.getCourtId()), h02, LocalTime.parse(vacancyAt1700), 30L);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -241,11 +233,7 @@ class DesiresIteratorThingyTest {
         List<Desire> desires = stubDesires(DAY, laterOrAny, Court.getClayIds());
 
         String vacancyAt1900 = "19:00";
-        long durationMin = 30L;
-        // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
-        when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoEmpty());
-        when(fetcher.postTimeInfoBatch(List.of(h02.getCourtId()), LocalDate.parse(DAY), LocalTime.parse(vacancyAt1900)))
-                .thenReturn(stubTimeInfo(h02.getCourtId(), LocalDate.parse(DAY), LocalTime.parse(vacancyAt1900), durationMin));
+        stubEmptyExcept(List.of(h02.getCourtId()), h02, LocalTime.parse(vacancyAt1900), 30L);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -342,14 +330,10 @@ class DesiresIteratorThingyTest {
 
         List<Long> allCourtsExceptBookedOrder = new ArrayList<>(Court.getClayIds());
         allCourtsExceptBookedOrder.removeIf(e -> Objects.equals(e, h02.getCourtId()));
-        LocalDate dateVacancy = LocalDate.parse(DAY);
         LocalTime timeFromVacancy = LocalTime.parse(searchFrom);
 
         Court c01 = Court.C01;
-        // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
-        when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoEmpty());
-        when(fetcher.postTimeInfoBatch(allCourtsExceptBookedOrder, dateVacancy, timeFromVacancy))
-                .thenReturn(stubTimeInfo(c01.getCourtId(), dateVacancy, timeFromVacancy, prospectDuration));
+        stubEmptyExcept(allCourtsExceptBookedOrder, c01, timeFromVacancy, prospectDuration);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -441,13 +425,8 @@ class DesiresIteratorThingyTest {
         List<Desire> desires = stubDesires(DAY, interest, Court.getClayIds());
 
         List<Long> allCourts = new ArrayList<>(Court.getClayIds());
-        LocalDate dateVacancy = LocalDate.parse(DAY);
         LocalTime timeFromVacancy = LocalTime.parse(searchFrom);
-        Court c01 = Court.C01;
-
-        // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
-        when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoEmpty());
-        when(fetcher.postTimeInfoBatch(allCourts, dateVacancy, timeFromVacancy)).thenReturn(stubTimeInfo(c01.getCourtId(), dateVacancy, timeFromVacancy, prospectDuration));
+        stubEmptyExcept(allCourts, Court.C01, timeFromVacancy, prospectDuration);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -474,6 +453,13 @@ class DesiresIteratorThingyTest {
 
 
 
+    private void stubEmptyExcept(List<Long> requestedCourts, Court returnedCourt, LocalTime time, long prospectDuration) {
+        LocalDate day = LocalDate.parse(DAY);
+        // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
+        when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoEmpty());
+        when(fetcher.postTimeInfoBatch(requestedCourts, day, time))
+                .thenReturn(stubTimeInfo(returnedCourt.getCourtId(), day, time, prospectDuration));
+    }
 
     private void finds() {
         verify(audioPlayer).chimeIfNecessary();
