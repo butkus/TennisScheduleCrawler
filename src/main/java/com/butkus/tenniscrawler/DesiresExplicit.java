@@ -20,34 +20,25 @@ public class DesiresExplicit {
         //  also, in calendar printout at the end, make a note that there's a booking on holiday (or desire on holiday)
         //  this is perhaps a small overkill, but why not do it like Sony and make UX friendly
 
-        desires.add(new Desire("2024-02-11", NONE));
-        desires.add(new Desire("2024-02-12", NONE));
-        desires.add(new Desire("2024-02-13", NONE));
-        desires.add(new Desire("2024-02-14", NONE));
-        desires.add(new Desire("2024-02-15", NONE));
-        desires.add(new Desire("2024-02-18", NONE));
-        desires.add(new Desire("2024-02-19", NONE));
-        desires.add(new Desire("2024-02-20", NONE));
-        desires.add(new Desire("2024-02-21", NONE));
-        desires.add(new Desire("2024-02-22", NONE));
-        desires.add(new Desire("2024-02-25", LATER));    // later
-        desires.add(new Desire("2024-02-26", EARLIER)); // earlier
-        desires.add(new Desire("2024-02-27", LATER));
-        desires.add(new Desire("2024-02-28", EARLIER));
+        desires.add(new Desire("2024-04-21", NONE));
+        desires.add(new Desire("2024-04-22", NONE));
+        desires.add(new Desire("2024-04-23", NONE));      // turim 19:00, tomas gali Balandžio 23 ir 30
+        desires.add(new Desire("2024-04-25", LATER));
+        desires.add(new Desire("2024-04-28", NONE));
 
-        desires.add(new Desire("2024-03-03", LATER));
-        desires.add(new Desire("2024-03-04", NONE));
-        desires.add(new Desire("2024-03-07", NONE));
-        desires.add(new Desire("2024-03-10", NONE));    // later
-        desires.add(new Desire("2024-03-17", LATER));
-        desires.add(new Desire("2024-03-24", LATER));
-        desires.add(new Desire("2024-03-31", LATER));
-
-        desires.add(new Desire("2024-04-01", LATER));
-        desires.add(new Desire("2024-04-02", LATER));
-        desires.add(new Desire("2024-04-03", LATER));
-        desires.add(new Desire("2024-04-04", LATER));
-        desires.add(new Desire("2024-04-07", NONE));
+        desires.add(new Desire("2024-05-01", NONE));   // ANY
+        desires.add(new Desire("2024-05-02", NONE));
+        desires.add(new Desire("2024-05-05", NONE));   // later, weekend (have 1700)
+        desires.add(new Desire("2024-05-08", EARLIER));
+        desires.add(new Desire("2024-05-12", NONE));
+        desires.add(new Desire("2024-05-15", ANY));    // any
+        desires.add(new Desire("2024-05-16", NONE));
+        desires.add(new Desire("2024-05-19", NONE));
+        desires.add(new Desire("2024-05-21", NONE));
+        desires.add(new Desire("2024-05-22", ANY));    // any
+        desires.add(new Desire("2024-05-26", NONE));
+        desires.add(new Desire("2024-05-28", ANY));    // any
+        desires.add(new Desire("2024-05-29", EARLIER));
 
         return desires;
     }
