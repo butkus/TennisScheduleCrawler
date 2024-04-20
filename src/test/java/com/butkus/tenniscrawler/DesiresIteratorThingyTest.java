@@ -282,7 +282,7 @@ class DesiresIteratorThingyTest {
             "ANY, 120, 90, false",
             "ANY, 120, 120, true",
     })
-    void requestedEarlier_sameCourtNoVacanciesButYesVacanciesInOtherCourts_findsBrandNew60Min(      // todo rename name
+    void requestedEarlierOrAny_sameCourtNoVacanciesButYesVacanciesInOtherCourts_findsBrandNew60Min(
             ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind) {
         String timeFrom = "17:30";
         String searchFrom = LocalTime.parse(timeFrom).minusMinutes(30).toString();
@@ -311,7 +311,7 @@ class DesiresIteratorThingyTest {
             "ANY, 120, 90, false",
             "ANY, 120, 120, true",
     })
-    void requestedLater_sameCourtNoVacanciesButYesVacanciesInOtherCourts_findsBrandNew60Min(
+    void requestedLaterOrAny_sameCourtNoVacanciesButYesVacanciesInOtherCourts_findsBrandNew60Min(
             ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind) {
         String timeFrom = "17:30";
         String searchFrom = LocalTime.parse(timeFrom).plusMinutes(orderDuration).minusMinutes(30).toString();
@@ -331,7 +331,6 @@ class DesiresIteratorThingyTest {
         List<Long> allCourtsExceptBookedOrder = new ArrayList<>(Court.getClayIds());
         allCourtsExceptBookedOrder.removeIf(e -> Objects.equals(e, h02.getCourtId()));
         LocalTime timeFromVacancy = LocalTime.parse(searchFrom);
-
         Court c01 = Court.C01;
         stubEmptyExcept(allCourtsExceptBookedOrder, c01, timeFromVacancy, prospectDuration);
 
@@ -374,7 +373,7 @@ class DesiresIteratorThingyTest {
             "ANY, 120, 90, false",
             "ANY, 120, 120, true",
     })
-    void requestedEarlier_oneVacancyInNonAdjacentEarlierTime_finds(
+    void requestedEarlierOrAny_oneVacancyInNonAdjacentEarlierTime_finds(
             ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind) {
 
         BookingConfigurator configurator = new BookingConfigurator(audioPlayer, fetcher);
@@ -408,7 +407,7 @@ class DesiresIteratorThingyTest {
             "ANY, 120, 90, false",
             "ANY, 120, 120, true",
     })
-    void requestedLater_oneVacancyInNonAdjacentLaterTime_finds(
+    void requestedLaterOrAny_oneVacancyInNonAdjacentLaterTime_finds(
             ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind) {
         BookingConfigurator configurator = new BookingConfigurator(audioPlayer, fetcher);
         configurator.setEarlyBird(LocalTime.parse("17:00"));
