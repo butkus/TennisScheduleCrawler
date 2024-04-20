@@ -21,14 +21,17 @@ import java.util.List;
 @Component
 public class SebFetcher {
 
+    public final String sessionToken;
     private final RestTemplate restTemplate;
     private final boolean debugMode;
 
     @Autowired
     public SebFetcher(RestTemplate restTemplate,
-                      @Value("${app.debug-mode}") boolean debugMode) {
+                      @Value("${app.debug-mode}") boolean debugMode,
+                      @Value("${app.session-token}") String sessionToken) {
         this.restTemplate = restTemplate;
         this.debugMode = debugMode;
+        this.sessionToken = sessionToken;
     }
 
     // can be retrieved via GET https://ws.tenisopasaulis.lt/api/v1/allPlacesInfo
@@ -46,7 +49,7 @@ public class SebFetcher {
         headers.add("Accept", "application/json, text/plain, */*");
         headers.add("Accept-Encoding", "gzip, deflate, br");
         headers.add("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundarypHEpWrdQcXY7Io6N");
-        // todo: pass this as form-data: session_token: 93b25e67d079e4871686c18b02fe62f9
+        // todo: pass this as form-data: session_token: SESSION_TOKEN
 
         return null;
     }
@@ -62,7 +65,8 @@ public class SebFetcher {
         headers.add("Access-Control-Request-Method", "POST");
 
         RequestEntity<Void> requestEntity = new RequestEntity<>(null, headers, HttpMethod.OPTIONS, uri);
-        ResponseEntity<String> response = restTemplate.exchange(requestEntity, new ParameterizedTypeReference<String>() {});
+        ResponseEntity<String> response = restTemplate.exchange(requestEntity, new ParameterizedTypeReference<String>() {
+        });
         return response.getStatusCode();
     }
 
@@ -85,10 +89,11 @@ public class SebFetcher {
                 .setPlaces(places)
                 .setDates(dates)
                 .setSalePoint(11L)
-                .setSessionToken("93b25e67d079e4871686c18b02fe62f9");
+                .setSessionToken(sessionToken);
 
         RequestEntity<PlaceInfoBatchRqstDto> requestEntity = new RequestEntity<>(request, headers, HttpMethod.POST, uri);
-        ResponseEntity<PlaceInfoBatchRspDto> response = restTemplate.exchange(requestEntity, new ParameterizedTypeReference<>() {});
+        ResponseEntity<PlaceInfoBatchRspDto> response = restTemplate.exchange(requestEntity, new ParameterizedTypeReference<>() {
+        });
 
         return response.getBody();
     }
@@ -109,7 +114,7 @@ public class SebFetcher {
                 .setCourts(courts)
                 .setDate(date.toString())
                 .setSalePoint(11L)
-                .setSessionToken("93b25e67d079e4871686c18b02fe62f9");
+                .setSessionToken(sessionToken);
 
         MultiValueMap<String, String> headers = new HttpHeaders();
         headers.add("Accept", "application/json, text/plain, */*");
@@ -125,7 +130,6 @@ public class SebFetcher {
     }
 
     public OrdersRspDto getOrders(String from, String to) {
-        String sessionToken = "93b25e67d079e4871686c18b02fe62f9";
         String url = String.format("https://ws.tenisopasaulis.lt/api/v1/orders?sessionToken=%s&from=%s&to=%s", sessionToken, from, to);
         URI uri = URI.create(url);
 
