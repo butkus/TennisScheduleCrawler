@@ -53,3 +53,7 @@ FEATURES:
 - first:
     - if 1.5 hours and EARLIER/LATER --> only get ones that are also 1.5 hours (maybe later add param to specify length desire)
     - add cap for weekends. I don't want my 16:30 LATER desire to yield 18:30 suggestions
+    - in a calendar:
+        - left half circle ◖ for outside court reservation -- or ◐
+        - right half circle ◗ for inside court reservation -- or ◑
+        - full circle ● for both court reservations
