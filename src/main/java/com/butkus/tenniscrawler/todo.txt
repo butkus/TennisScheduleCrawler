@@ -57,3 +57,4 @@ FEATURES:
         - left half circle ◖ for outside court reservation -- or ◐
         - right half circle ◗ for inside court reservation -- or ◑
         - full circle ● for both court reservations
+    - clay courts that have priority: courts 1, 5 most in the shade have priority. next, courts 2, 6 have priority because they're next-best courts in shade, etc.

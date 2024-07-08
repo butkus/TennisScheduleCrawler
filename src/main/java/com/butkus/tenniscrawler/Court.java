@@ -69,6 +69,10 @@ public enum Court {
         return getIds(e -> e.courtType == CourtType.HARD || e.courtType == CourtType.HARD_2 || e.courtType == CourtType.CARPET);
     }
 
+    public static List<Long> getOutdoorIds() {
+        return getIds(e -> e.courtType == CourtType.CLAY || e.courtType == CourtType.GRASS);
+    }
+
     public static List<Long> getHardIds() {
         return getIds(e -> e.courtType == CourtType.HARD || e.courtType == CourtType.HARD_2);
     }

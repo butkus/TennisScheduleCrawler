@@ -29,6 +29,13 @@ public class Desire {
     }
 
     // fixme for summer, default courts should be indoors + outdoors. Or perhaps treat them separatelly, but then make 2 constructors (or non-constructor methods) for each
+    public Desire(LocalDate date, List<Long> courts) {
+        this.date = date;
+        this.extensionInterest = ExtensionInterest.ANY;
+        this.courts = courts;
+    }
+
+    // fixme for summer, default courts should be indoors + outdoors. Or perhaps treat them separatelly, but then make 2 constructors (or non-constructor methods) for each
     public Desire(String date, ExtensionInterest extensionInterest) {
         this.date = LocalDate.parse(date);
         this.extensionInterest = extensionInterest;

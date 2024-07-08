@@ -65,9 +65,10 @@ public class Calendar {
 
         DayOfWeek dayOfWeek = null;
         for (int dayOfMonth = 1; dayOfMonth <= yearMonth.lengthOfMonth(); dayOfMonth++) {
-            boolean booked = isBooked(orders, year, month, dayOfMonth);
+            boolean isSingleBooked = isSingleBooked(orders, year, month, dayOfMonth);
+            boolean isDoubleBooked = isDoubleBooked(orders, year, month, dayOfMonth);
             LocalDate currentDate = LocalDate.of(year, month, dayOfMonth);
-            String dayString = getSymbolForTheDay(dayOfMonth, booked, currentDate, desires);
+            String dayString = getSymbolForTheDay(dayOfMonth, isSingleBooked, isDoubleBooked, currentDate, desires);
 
             accum += String.format("%2s  ", dayString);
 
@@ -86,7 +87,8 @@ public class Calendar {
     }
 
     private static String getSymbolForTheDay(int dayOfMonth,
-                                             boolean booked,
+                                             boolean isSingleBooked,
+                                             boolean isDoubleBooked,
                                              LocalDate dateBeingProcessed,
                                              List<Desire> desires) {
 
@@ -96,7 +98,12 @@ public class Calendar {
 
         if (dateBeingProcessed.isBefore(LocalDate.now())) {
             return "░░";
-        } else if (booked) {
+        } else if (isSingleBooked) {
+            return " ●";
+            // todo find a one that works
+//            return " ◐";
+//            return " ◖";
+        } else if (isDoubleBooked) {
             return " ●";
         } else if (skipped) {
             String day = Integer.toString(dayOfMonth);
@@ -110,10 +117,18 @@ public class Calendar {
         }
     }
 
-    private static boolean isBooked(List<Order> orders, int year, int month, int dayOfMonth) {
+    // todo refactor isSignleBooked() and isDoubleBooked()
+    private static boolean isSingleBooked(List<Order> orders, int year, int month, int dayOfMonth) {
         Predicate<Order> sameDate = e -> e.getDate().getYear() == year &&
                 e.getDate().getMonth().getValue() == month &&
                 e.getDate().getDayOfMonth() == dayOfMonth;
-        return orders.stream().anyMatch(sameDate);
+        return orders.stream().filter(sameDate).count() == 1;
+    }
+
+    private static boolean isDoubleBooked(List<Order> orders, int year, int month, int dayOfMonth) {
+        Predicate<Order> sameDate = e -> e.getDate().getYear() == year &&
+                e.getDate().getMonth().getValue() == month &&
+                e.getDate().getDayOfMonth() == dayOfMonth;
+        return orders.stream().filter(sameDate).count() > 1;
     }
 }
