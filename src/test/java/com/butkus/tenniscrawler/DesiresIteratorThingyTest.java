@@ -282,7 +282,7 @@ class DesiresIteratorThingyTest {
             "ANY, 120, 90, false",
             "ANY, 120, 120, true",
     })
-    void requestedEarlierOrAny_sameCourtNoVacanciesButYesVacanciesInOtherCourts_findsBrandNew60Min(
+    void requestedEarlierOrAny_sameCourtNoVacanciesButYesVacanciesInOtherCourts_findsBrandNewSameLengthOrLonger(
             ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind) {
         String timeFrom = "17:30";
         String searchFrom = LocalTime.parse(timeFrom).minusMinutes(30).toString();
@@ -311,7 +311,7 @@ class DesiresIteratorThingyTest {
             "ANY, 120, 90, false",
             "ANY, 120, 120, true",
     })
-    void requestedLaterOrAny_sameCourtNoVacanciesButYesVacanciesInOtherCourts_findsBrandNew60Min(
+    void requestedLaterOrAny_sameCourtNoVacanciesButYesVacanciesInOtherCourts_findsBrandNewSameLengthOrLonger(
             ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind) {
         String timeFrom = "17:30";
         String searchFrom = LocalTime.parse(timeFrom).plusMinutes(orderDuration).minusMinutes(30).toString();

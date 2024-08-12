@@ -21,26 +21,6 @@ FEATURES:
 - ability to have arbitrary from-to time bracket (like we have EARLY_BIRD, LATE_OWL) for weekdays and for weekends (or for any weekday, or even for specific Desire?)
 - for <48-hour purchase-only (vs. reserve with ability to cancel) cases. Sometimes they are 90-min- or 120-min- only, because seller decided to not sell in pieces.
      In these cases need to attempt to make 60-, 90-, and 120- minute requests, because they will not appear in 60-min aviable durations
-- chime does not work reliably
-    - will see if audioPlayer.reset() solves it
-    - regardless, check why 2 instantces are made
-        2023-10-20 14:09:43.108  INFO 65496 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1015 ms
-        --- AP constructor, initial played = false
-        --- AP constructor, initial played = false
-        ..........
-- retire Inputs class
-    - take fixed holidays from it
-    - take whatever else is there
-    - delete class
-- bring back summary calendar at the end of fetching
-
-- UI
-    - turn of logging of REST requests/responses in output console
-    - add newly-found prospect as soon as found
-    - output all reservations (will be better than SEB-provided ones because I coalesce 60 min + 30 min reservations into one
-    - half-circle for 60 min reservations, full-circle for 90min reservations or longer (calendar)
-    - ●●● New  2024-01-04 19:00  K1 ●●●
-        - if I have reservation already, show what court and time I have as well
 
 - stdo --> logger
     - migration to logger
@@ -48,13 +28,6 @@ FEATURES:
     - log "searching for reservation" with higher level
     - log REST logs with lower elvel
 
--  MOVE SEESION ID OUT OF GIT
-
 - first:
-    - if 1.5 hours and EARLIER/LATER --> only get ones that are also 1.5 hours (maybe later add param to specify length desire)
     - add cap for weekends. I don't want my 16:30 LATER desire to yield 18:30 suggestions
-    - in a calendar:
-        - left half circle ◖ for outside court reservation -- or ◐
-        - right half circle ◗ for inside court reservation -- or ◑
-        - full circle ● for both court reservations
     - clay courts that have priority: courts 1, 5 most in the shade have priority. next, courts 2, 6 have priority because they're next-best courts in shade, etc.
