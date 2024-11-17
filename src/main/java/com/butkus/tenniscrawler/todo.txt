@@ -31,3 +31,5 @@ FEATURES:
 - first:
     - add cap for weekends. I don't want my 16:30 LATER desire to yield 18:30 suggestions
     - clay courts that have priority: courts 1, 5 most in the shade have priority. next, courts 2, 6 have priority because they're next-best courts in shade, etc.
+-- later
+    - minikube (mini kubernetes)

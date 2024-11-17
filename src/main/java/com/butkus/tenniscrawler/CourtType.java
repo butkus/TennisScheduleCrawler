@@ -14,7 +14,13 @@ public enum CourtType {
     CARPET (8, "Kilimas"),
     GRASS (20, "Žolė"),
     CLAY (5, "Gruntas"),
-    HARD_2(18, "Plėtra");
+    HARD_2(18, "Plėtra"),
+
+    SQUASH(4, "Skvošas"),
+    BADMINTON(9, "Badmintonas"),
+    MINI_TENNIS(15, "MINI tenisas"),
+    BERNARDINAI_PADEL(21, "Bernardinai padelio kortai");
+
 
     private final int courtTypeId;
     private final String translation;

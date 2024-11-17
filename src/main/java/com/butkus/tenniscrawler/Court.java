@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public enum Court {
 
+    // TENNIS
     H01(1L, "SEB 01", CourtType.HARD),
     H02(7L, "SEB 02", CourtType.HARD),
     H03(8L, "SEB 03", CourtType.HARD),
@@ -55,7 +56,15 @@ public enum Court {
     C10(53L, "BS 10 gruntas", CourtType.CLAY),
 
     G1(54L, "BS 11 sint. žolė", CourtType.GRASS),
-    G2(55L, "BS 12 sint. žolė", CourtType.GRASS);
+    G2(55L, "BS 12 sint. žolė", CourtType.GRASS),
+
+
+    // SQUASH
+    S1(34L, "*Skvošas Nr.1", CourtType.SQUASH),     // ORIGINAL NAME: Skvošas Nr.1
+    S2(35L, "*Skvošas Nr.2", CourtType.SQUASH),
+    S3(36L, "*Skvošas Nr.3", CourtType.SQUASH),
+    S4(37L, "*Skvošas Nr.4", CourtType.SQUASH);
+
 
     private final Long courtId;
     private final String courtName;
@@ -63,6 +72,10 @@ public enum Court {
 
     public static List<Long> getIds() {
         return getIds(e -> true);
+    }
+
+    public static List<Long> getSquashIds() {
+        return getIds(e -> e.courtType == CourtType.SQUASH);
     }
 
     public static List<Long> getIndoorIds() {
