@@ -21,7 +21,6 @@ public class DesiresExplicit {
         //  also, in calendar printout at the end, make a note that there's a booking on holiday (or desire on holiday)
         //  this is perhaps a small overkill, but why not do it like Sony and make UX friendly
 
-        desires.add(new Desire(LocalDate.parse("2025-02-06"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-02-09"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-02-11"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-02-12"), NONE, Court.getIndoorIds()));
@@ -30,6 +29,7 @@ public class DesiresExplicit {
         desires.add(new Desire(LocalDate.parse("2025-02-19"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-02-20"), LATER, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-02-23"), NONE, Court.getIndoorIds()));
+        desires.add(new Desire(LocalDate.parse("2025-02-25"), LATER, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-02-26"), NONE, Court.getIndoorIds()));
 
         desires.add(new Desire(LocalDate.parse("2025-03-02"), NONE, Court.getIndoorIds()));
