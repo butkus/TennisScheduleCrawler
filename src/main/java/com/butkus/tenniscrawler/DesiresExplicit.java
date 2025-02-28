@@ -21,24 +21,27 @@ public class DesiresExplicit {
         //  also, in calendar printout at the end, make a note that there's a booking on holiday (or desire on holiday)
         //  this is perhaps a small overkill, but why not do it like Sony and make UX friendly
 
-        desires.add(new Desire(LocalDate.parse("2025-02-16"), NONE, Court.getIndoorIds()));
-        desires.add(new Desire(LocalDate.parse("2025-02-18"), NONE, Court.getIndoorIds()));
-        desires.add(new Desire(LocalDate.parse("2025-02-19"), NONE, Court.getIndoorIds()));
-        desires.add(new Desire(LocalDate.parse("2025-02-20"), NONE, Court.getIndoorIds()));
-        desires.add(new Desire(LocalDate.parse("2025-02-23"), NONE, Court.getIndoorIds()));
-        desires.add(new Desire(LocalDate.parse("2025-02-25"), NONE, Court.getIndoorIds()));
-        desires.add(new Desire(LocalDate.parse("2025-02-26"), NONE, Court.getIndoorIds()));
 
         desires.add(new Desire(LocalDate.parse("2025-03-02"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-03-04"), NONE, Court.getIndoorIds()));
-        desires.add(new Desire(LocalDate.parse("2025-03-05"), LATER, Court.getIndoorIds()));
+        desires.add(new Desire(LocalDate.parse("2025-03-05"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-03-06"), LATER, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-03-09"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-03-12"), NONE, Court.getIndoorIds()));
+        desires.add(new Desire(LocalDate.parse("2025-03-16"), EARLIER, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-03-18"), NONE, Court.getIndoorIds()));
+        desires.add(new Desire(LocalDate.parse("2025-03-19"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-03-30"), NONE, Court.getIndoorIds()));
 
         desires.add(new Desire(LocalDate.parse("2025-04-20"), EARLIER, Court.getIndoorIds()));
+        desires.add(new Desire(LocalDate.parse("2025-04-22"), NONE, Court.getIndoorIds()));
+        desires.add(new Desire(LocalDate.parse("2025-04-23"), NONE, Court.getIndoorIds()));
+        desires.add(new Desire(LocalDate.parse("2025-04-24"), LATER, Court.getIndoorIds()));
+        desires.add(new Desire(LocalDate.parse("2025-04-30"), NONE, Court.getIndoorIds()));
+
+        desires.add(new Desire(LocalDate.parse("2025-05-06"), LATER, Court.getIndoorIds()));
+        desires.add(new Desire(LocalDate.parse("2025-05-11"), NONE, Court.getIndoorIds()));
+        desires.add(new Desire(LocalDate.parse("2025-05-13"), LATER, Court.getIndoorIds()));
 
         return desires;
     }
