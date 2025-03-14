@@ -22,11 +22,7 @@ public class DesiresExplicit {
         //  this is perhaps a small overkill, but why not do it like Sony and make UX friendly
 
 
-        desires.add(new Desire(LocalDate.parse("2025-03-09"), NONE, Court.getIndoorIds()));
-        desires.add(new Desire(LocalDate.parse("2025-03-11"), NONE, Court.getIndoorIds()));
-        desires.add(new Desire(LocalDate.parse("2025-03-12"), NONE, Court.getIndoorIds()));
-        desires.add(new Desire(LocalDate.parse("2025-03-13"), NONE, Court.getIndoorIds()));
-        desires.add(new Desire(LocalDate.parse("2025-03-16"), EARLIER, Court.getIndoorIds()));
+        desires.add(new Desire(LocalDate.parse("2025-03-16"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-03-18"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-03-19"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-03-20"), NONE, Court.getIndoorIds()));
@@ -36,9 +32,11 @@ public class DesiresExplicit {
 
         desires.add(new Desire(LocalDate.parse("2025-04-01"), LATER, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-04-03"), NONE, Court.getIndoorIds()));
+        desires.add(new Desire(LocalDate.parse("2025-04-06"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-04-08"), LATER, Court.getIndoorIds()));
+        desires.add(new Desire(LocalDate.parse("2025-04-13"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-04-15"), LATER, Court.getIndoorIds()));
-        desires.add(new Desire(LocalDate.parse("2025-04-20"), EARLIER, Court.getIndoorIds()));
+        desires.add(new Desire(LocalDate.parse("2025-04-20"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-04-22"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-04-23"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-04-24"), NONE, Court.getIndoorIds()));
@@ -46,6 +44,7 @@ public class DesiresExplicit {
         desires.add(new Desire(LocalDate.parse("2025-04-29"), LATER, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-04-30"), NONE, Court.getIndoorIds()));
 
+        desires.add(new Desire(LocalDate.parse("2025-05-04"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-05-06"), LATER, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-05-11"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-05-13"), LATER, Court.getIndoorIds()));
