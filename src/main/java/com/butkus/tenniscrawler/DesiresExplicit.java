@@ -51,6 +51,7 @@ public class DesiresExplicit {
         desires.add(new Desire(LocalDate.parse("2025-05-18"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-05-20"), NONE, Court.getIndoorIds()));
         desires.add(new Desire(LocalDate.parse("2025-05-22"), NONE, Court.getIndoorIds()));
+        desires.add(new Desire(LocalDate.parse("2025-05-25"), NONE, Court.getIndoorIds()));
 
         return desires;
     }
