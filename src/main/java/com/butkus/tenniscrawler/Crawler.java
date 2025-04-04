@@ -63,10 +63,10 @@ public class Crawler {
         DesireMaker desireMaker = new DesireMaker(CLOCK);
         List<Desire> inputs = desireMaker
                 .addExplicitDesires()
-                .addNext(8, TUESDAY)
-                .addNext(8, WEDNESDAY)
-                .addNext(8, THURSDAY)
-                .addNext(8, SUNDAY)
+                .addNext(7, TUESDAY)
+                .addNext(7, WEDNESDAY)
+                .addNext(7, THURSDAY)
+                .addNext(7, SUNDAY)
                 .make();
         desiresThingy.doWork(inputs);
     }
