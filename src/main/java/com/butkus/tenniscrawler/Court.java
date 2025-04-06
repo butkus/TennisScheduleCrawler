@@ -78,6 +78,10 @@ public enum Court {
         return getIds(e -> e.courtType == CourtType.SQUASH);
     }
 
+    public static List<Long> getNonSquashIds() {
+        return getIds(e -> e.courtType != CourtType.SQUASH);
+    }
+
     public static List<Long> getIndoorIds() {
         return getIds(e -> e.courtType == CourtType.HARD || e.courtType == CourtType.HARD_2 || e.courtType == CourtType.CARPET);
     }

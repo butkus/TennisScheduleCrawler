@@ -39,6 +39,6 @@ public class Desire {
     public Desire(String date, ExtensionInterest extensionInterest) {
         this.date = LocalDate.parse(date);
         this.extensionInterest = extensionInterest;
-        this.courts = Court.getIds();
+        this.courts = Court.getIndoorIds();  // fixme: (ctrl-f FOO1 for 2 identical comments): related
     }
 }

@@ -52,7 +52,7 @@ public class DesireMaker {
         List<Desire> result = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             LocalDate next = startDate.with(TemporalAdjusters.next(dayOfWeek));
-            result.add(new Desire(next, Court.getIndoorIds()));     // todo write a test
+            result.add(new Desire(next, Court.getIndoorIds()));     // todo write a test  // fixme: (ctrl-f FOO1 for 2 identical comments): related
             startDate = next;
         }
         this.periodicDesires.addAll(result);
