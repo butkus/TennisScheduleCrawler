@@ -99,10 +99,17 @@ class DesiresIteratorThingyTest {
 
     @Test
     void requestedAny_noPriorOrders_nothingExists_searches_4_timesAndDoesNotFind() {
-        // todo do not check at all when optimization is in place,
+        // TODO -- 1 -- do not check at all when optimization is in place,
         //  i.e. postPlaceInfoBatch will determine no free slots and no need for postTimeInfoBatch to search
+        // TODO -- 2 -- reading this test after a long time, it is:
+        //      - not so easily readable (visually distinct blocks would be nice, e.g. precondition, precondition, method call, assertions)
+        //      - after familiarizing, the test looks quite succinct, and readable
+        //      - would be nice to somehow organize the tests better, maybe more nesting, maybe more classes.
+        //      -   so that test code is first class citizen as prod code is (TDD growing pains)
+
 
         mockOrders(new ArrayList<>());
+
         List<Desire> desires = stubDesires(DAY, ANY, Court.getClayIds());
 
         // whatever you ask, there's NO booking
@@ -147,12 +154,12 @@ class DesiresIteratorThingyTest {
 
 
 
-
+    // todo   move to nested "extension interest" section?
     // todo   maybe also do tests that have earlier, but test asks for LATER -- does not find
     @ParameterizedTest
     @CsvSource({"18:00", "19:30"})
     void requestedAny_canFindBothEarlierOrLater(String newTime) {    // todo make LocalTime
-        mockOrders(stubOrders(Court.H02, DAY, "18:30", "19:30"));
+        mockOrders(stubOrders(Court.H02, DAY, "18:30", "19:30"));       // todo: orders? or reservations?
         List<Desire> desires = stubDesires(DAY, ANY, Court.getHardIds());
 
         Court h02 = Court.H02;
@@ -284,6 +291,7 @@ class DesiresIteratorThingyTest {
     })
     void requestedEarlierOrAny_sameCourtNoVacanciesButYesVacanciesInOtherCourts_findsBrandNewSameLengthOrLonger(
             ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind) {
+    // todo: csv source is the same as for 'non-adjacent' counterpart. Extract as @MethodSource?
         String timeFrom = "17:30";
         String searchFrom = LocalTime.parse(timeFrom).minusMinutes(30).toString();
         searchEffectivelyAdjacent(interest, orderDuration, prospectDuration, shouldFind, timeFrom, searchFrom);
@@ -452,6 +460,7 @@ class DesiresIteratorThingyTest {
 
 
 
+    // todo "empty" is ambiguous;  can be NO AVAILABILITY (empty available court list) or YES AVAILABILITY (all courts you want are not resererved <--> empty)
     private void stubEmptyExcept(List<Long> requestedCourts, Court returnedCourt, LocalTime time, long prospectDuration) {
         LocalDate day = LocalDate.parse(DAY);
         // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
