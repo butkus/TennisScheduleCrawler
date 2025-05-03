@@ -28,6 +28,9 @@ public class DesireMaker {
         this.explicitDesires.sort(Comparator.comparing(Desire::getDate));
         this.periodicDesires.sort(Comparator.comparing(Desire::getDate));
 
+        validateDesires(periodicDesires);
+        validateDesires(explicitDesires);
+
         List<Desire> combined = new ArrayList<>();
         List<LocalDate> explicitDates = explicitDesires.stream().map(Desire::getDate).collect(Collectors.toList());
         for (Desire periodicDesire : periodicDesires) {
@@ -42,21 +45,41 @@ public class DesireMaker {
         return combined;
     }
 
+    private void validateDesires(List<Desire> desires) {
+        boolean anyDateHasMoreThan1Desires = desires.stream().collect(Collectors.groupingBy(Desire::getDate, Collectors.counting()))
+                .values().stream().anyMatch(count -> count > 1);
+        if (anyDateHasMoreThan1Desires) throw new DuplicateDesiresException();
+    }
+
     public DesireMaker addExplicitDesires() {
         this.explicitDesires = DesiresExplicit.makeExplicitDesires();
         return this;
     }
 
     public DesireMaker addNext(int count, DayOfWeek dayOfWeek) {
+        Desire regularDesireDraft = new Desire(getNow(), Court.getIndoorIds());  // todo write a test  // fixme: (ctrl-f FOO1 for 2 identical comments): related
+        return addNext(count, dayOfWeek, regularDesireDraft);
+    }
+
+    public DesireMaker addNextRedundant(int count, DayOfWeek dayOfWeek, List<Long> mainCourts, List<Long> alternativeCourts) {
+        Desire redundantDesireDraft = new Desire(getNow(), mainCourts, alternativeCourts);
+        return addNext(count, dayOfWeek, redundantDesireDraft);
+    }
+
+    public DesireMaker addNext(int count, DayOfWeek dayOfWeek, Desire draft) {
         LocalDate startDate = getNow();
         List<Desire> result = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             LocalDate next = startDate.with(TemporalAdjusters.next(dayOfWeek));
-            result.add(new Desire(next, Court.getIndoorIds()));     // todo write a test  // fixme: (ctrl-f FOO1 for 2 identical comments): related
+            result.add(cloneWithDateChange(draft, next));
             startDate = next;
         }
         this.periodicDesires.addAll(result);
         return this;
+    }
+
+    private static Desire cloneWithDateChange(Desire desire, LocalDate date) {
+        return desire.toBuilder().date(date).build();
     }
 
     private LocalDate getNow() {
@@ -92,6 +115,5 @@ public class DesireMaker {
         holidays.add(LocalDate.of(year, 12, 25));
         holidays.add(LocalDate.of(year, 12, 26));
     }
-
 
 }
