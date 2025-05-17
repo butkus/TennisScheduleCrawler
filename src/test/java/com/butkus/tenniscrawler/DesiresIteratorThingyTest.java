@@ -97,16 +97,17 @@ class DesiresIteratorThingyTest {
 
 
 
+
+
+    // TODO -- 1 -- do not check at all when optimization is in place,
+    //  i.e. postPlaceInfoBatch will determine no free slots and no need for postTimeInfoBatch to search
+    // TODO -- 2 -- reading this test after a long time, it is:
+    //      - not so easily readable (visually distinct blocks would be nice, e.g. precondition, precondition, method call, assertions)
+    //      - after familiarizing, the test looks quite succinct, and readable
+    //      - would be nice to somehow organize the tests better, maybe more nesting, maybe more classes.
+    //      -   so that test code is first class citizen as prod code is (TDD growing pains)
     @Test
     void requestedAny_noPriorOrders_nothingExists_searches_4_timesAndDoesNotFind() {
-        // TODO -- 1 -- do not check at all when optimization is in place,
-        //  i.e. postPlaceInfoBatch will determine no free slots and no need for postTimeInfoBatch to search
-        // TODO -- 2 -- reading this test after a long time, it is:
-        //      - not so easily readable (visually distinct blocks would be nice, e.g. precondition, precondition, method call, assertions)
-        //      - after familiarizing, the test looks quite succinct, and readable
-        //      - would be nice to somehow organize the tests better, maybe more nesting, maybe more classes.
-        //      -   so that test code is first class citizen as prod code is (TDD growing pains)
-
 
         mockOrders(new ArrayList<>());
 
@@ -210,7 +211,8 @@ class DesiresIteratorThingyTest {
     }
 
 
-
+// fixme: this test --> make clay ids --> hard id's in desire stubbing --> continues to work
+// todo: additional test --> keek clay ids desire and hard id order --> should fail because desire is for clay
     // adjacent (same court extension)
     @ParameterizedTest
     @EnumSource(value = ExtensionInterest.class, names = {"EARLIER", "ANY"})
@@ -230,6 +232,10 @@ class DesiresIteratorThingyTest {
         assertFetchedTime(vacancyAt1700);
         finds();
     }
+
+
+    // todo: same as above, but clay (better yet, non-hard) --> should not find
+        // if test was on Prospect object, I could throw when mismatch between order court type and desire court type differs
 
     // adjacent (same court extension)
     @ParameterizedTest
@@ -458,6 +464,24 @@ class DesiresIteratorThingyTest {
 
 
 
+//////// START OF  === DOUBLE-BOOKING (indoors + outdoors) ===  ///////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    // - when OUTSIDE order exists, keep searching for INSIDE (todo add some indicator that I want redundancy?)
+    // - when INSIDE order exists, keep searching for OUTSIDE
+    // - edit old tests, so that extensions and such should be searched for independently inside from outside
+    // - do I need new tests? perhaps just edit old ones to accomodate?
+
+
+//////// END OF  === DOUBLE-BOOKING (indoors + outdoors) ===  ///////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
 
 
     // todo "empty" is ambiguous;  can be NO AVAILABILITY (empty available court list) or YES AVAILABILITY (all courts you want are not resererved <--> empty)
@@ -484,6 +508,13 @@ class DesiresIteratorThingyTest {
     private static List<Desire> stubDesires(String date, ExtensionInterest extensionInterest, List<Long> courtIds) {
         List<Desire> desires = new ArrayList<>();
         desires.add(new Desire(LocalDate.parse(date), extensionInterest, courtIds));
+        return desires;
+    }
+
+    // todo remove redundant desire infra
+    private static List<Desire> stubDesires(String date, ExtensionInterest extensionInterest, List<Long> courtIds, List<Long> alternativeCourtIds) {
+        List<Desire> desires = new ArrayList<>();
+        desires.add(new Desire(LocalDate.parse(date), extensionInterest, courtIds, alternativeCourtIds));
         return desires;
     }
 

@@ -45,10 +45,11 @@ public class DesireMaker {
         return combined;
     }
 
+    // todo remove redundant desire infra
     private void validateDesires(List<Desire> desires) {
-        boolean anyDateHasMoreThan1Desires = desires.stream().collect(Collectors.groupingBy(Desire::getDate, Collectors.counting()))
-                .values().stream().anyMatch(count -> count > 1);
-        if (anyDateHasMoreThan1Desires) throw new DuplicateDesiresException();
+        boolean anyDateHasMoreThan2Desires = desires.stream().collect(Collectors.groupingBy(Desire::getDate, Collectors.counting()))
+                .values().stream().anyMatch(count -> count > 2);
+        if (anyDateHasMoreThan2Desires) throw new DuplicateDesiresException();
     }
 
     public DesireMaker addExplicitDesires() {

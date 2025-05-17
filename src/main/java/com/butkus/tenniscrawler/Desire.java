@@ -1,5 +1,6 @@
 package com.butkus.tenniscrawler;
 
+import com.butkus.tenniscrawler.rest.orders.Order;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,10 +15,12 @@ public class Desire {
 
     private LocalDate date;
     private ExtensionInterest extensionInterest;
-
     private List<Long> courts;
-    private List<Long> alternativeCourts;
-    private boolean useRedundantBooking;
+
+    private List<Long> alternativeCourts;   // todo potentially for removal
+    private boolean useRedundantBooking;    // todo potentially for removal
+
+    private Order order;
 
     public Desire(LocalDate date, ExtensionInterest extensionInterest, List<Long> courts) {
         this.date = date;
@@ -28,6 +31,14 @@ public class Desire {
     public Desire(LocalDate date, List<Long> courts, List<Long> alternativeCourts) {
         this.date = date;
         this.extensionInterest = ExtensionInterest.ANY;
+        this.courts = courts;
+        this.alternativeCourts = alternativeCourts;
+        this.useRedundantBooking = true;
+    }
+
+    public Desire(LocalDate date,  ExtensionInterest interest, List<Long> courts, List<Long> alternativeCourts) {
+        this.date = date;
+        this.extensionInterest = interest;
         this.courts = courts;
         this.alternativeCourts = alternativeCourts;
         this.useRedundantBooking = true;

@@ -49,9 +49,13 @@ class DesireMakerTest {
         assertTrue(actual.get(0).isUseRedundantBooking());
     }
 
+    // todo remove redundant desire infra
+    // fixme: This tests for duplicated desires, but so does DesireOrderPairerTest
+    //   DesireOrderPairerTest is more dedicated for this purpose. Remove this below (and related) test from here?
     @Test
-    void moreThan_1_periodicDesireForSameDay_shouldThrow() {
+    void exist_3_periodicDesireForSameDay_shouldThrow() {
         Executable regularDesires = () -> desireMaker
+                .addNext(1, DayOfWeek.THURSDAY)
                 .addNext(1, DayOfWeek.THURSDAY)
                 .addNext(1, DayOfWeek.THURSDAY)
                 .make();
@@ -62,6 +66,7 @@ class DesireMakerTest {
         Executable redundantDesires = () -> desireMaker
                 .addNextRedundant(1, DayOfWeek.THURSDAY, Court.getIndoorIds(), Court.getOutdoorIds())
                 .addNextRedundant(1, DayOfWeek.THURSDAY, Court.getGrassIds(), Court.getCarpetIds())
+                .addNextRedundant(1, DayOfWeek.THURSDAY, Court.getClayIds(), Court.getHardIds())
                 .make();
         assertThrows(DuplicateDesiresException.class, redundantDesires);
 
@@ -70,13 +75,14 @@ class DesireMakerTest {
         Executable mixedDesires = () -> desireMaker
                 .addNextRedundant(1, DayOfWeek.THURSDAY, Court.getIndoorIds(), Court.getOutdoorIds())
                 .addNext(1, DayOfWeek.THURSDAY)
+                .addNext(1, DayOfWeek.THURSDAY)
                 .make();
         assertThrows(DuplicateDesiresException.class, mixedDesires);
     }
 
     @Test
-    void moreThan_1_explicitDesireForSameDay_shouldThrow() {
-        List<Desire> regularDesires = makeDesires(new Desire("2023-12-28"), new Desire("2023-12-28"));
+    void exist_3_explicitDesireForSameDay_shouldThrow() {
+        List<Desire> regularDesires = makeDesires(new Desire("2023-12-28"), new Desire("2023-12-28"), new Desire("2023-12-28"));
         desiresExplicitMockedStatic.when(DesiresExplicit::makeExplicitDesires).thenReturn(regularDesires);
         Executable makeExplicitDesires = () -> desireMaker.addExplicitDesires().make();
         assertThrows(DuplicateDesiresException.class, makeExplicitDesires);
@@ -84,6 +90,7 @@ class DesireMakerTest {
         desireMaker.reset();
 
         List<Desire> redundantDesires = makeDesires(
+                new Desire(LocalDate.parse("2023-12-28"), Court.getIndoorIds(), Court.getOutdoorIds()),
                 new Desire(LocalDate.parse("2023-12-28"), Court.getIndoorIds(), Court.getOutdoorIds()),
                 new Desire(LocalDate.parse("2023-12-28"), Court.getClayIds(), Court.getGrassIds()));
         desiresExplicitMockedStatic.when(DesiresExplicit::makeExplicitDesires).thenReturn(redundantDesires);
@@ -93,9 +100,26 @@ class DesireMakerTest {
 
         List<Desire> mixedDesires = makeDesires(
                 new Desire(LocalDate.parse("2023-12-28"), Court.getIndoorIds(), Court.getOutdoorIds()),
+                new Desire(LocalDate.parse("2023-12-28"), Court.getIndoorIds(), Court.getOutdoorIds()),
                 new Desire("2023-12-28"));
         desiresExplicitMockedStatic.when(DesiresExplicit::makeExplicitDesires).thenReturn(mixedDesires);
         assertThrows(DuplicateDesiresException.class, makeExplicitDesires);
+    }
+
+    @Test
+    void exist_2_desiresForSameDay_shouldNotThrow() {
+        Executable makePeriodicDesires = () -> desireMaker
+                .addNext(1, DayOfWeek.THURSDAY)
+                .addNext(1, DayOfWeek.THURSDAY)
+                .make();
+        assertDoesNotThrow(makePeriodicDesires);
+
+        desireMaker.reset();
+
+        List<Desire> explicitDesires = makeDesires(new Desire("2023-12-28"), new Desire("2023-12-28"));
+        desiresExplicitMockedStatic.when(DesiresExplicit::makeExplicitDesires).thenReturn(explicitDesires);
+        Executable makeExplicitDesires = () -> desireMaker.addExplicitDesires().make();
+        assertDoesNotThrow(makeExplicitDesires);
     }
 
     private static List<Desire> makeDesires(Desire... desires) {

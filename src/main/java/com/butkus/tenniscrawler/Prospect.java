@@ -92,7 +92,7 @@ public class Prospect {
 
     private boolean searchForEarlier() {
         // extend existing reservation
-        boolean found = searchForReservation(getCourtId(), getOrderFromMinus30Min(), 30L);
+        boolean found = searchForReservation(getCourtId(), getOrderFromMinus30Min(), 30L);      // tries to extend (regardless if e.g. desired court is HARD instead of CLAY)
         if (!found) {
             // find brand-new reservation
             found = repeatSearch(getOrderFromMinus30Min(), SUBTRACT_30_MIN, isBeforeEarlyBird);
