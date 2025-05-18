@@ -23,11 +23,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static com.butkus.tenniscrawler.ExtensionInterest.ANY;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.butkus.tenniscrawler.ExtensionInterest.NONE;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -177,12 +176,13 @@ class DesiresIteratorThingyTest {
     }
 
 
-
-
-
-
-
-
+// todo leave this test in here or move to DesireOrderPairer? handling logic is in there
+    @ParameterizedTest
+    @EnumSource(value = ExtensionInterest.class, names = {"EARLIER", "LATER"})
+    void requestedEarlierOrLater_dontHaveOrders_throws(ExtensionInterest interest) {
+        List<Desire> desires = stubDesires(DAY, interest, Court.getHardIds());
+        assertThrows(EarlierOrLaterDesireMustHaveOwnOrderException.class, () -> thingy.doWork(desires));
+    }
 
 
     @ParameterizedTest
@@ -211,15 +211,13 @@ class DesiresIteratorThingyTest {
     }
 
 
-// fixme: this test --> make clay ids --> hard id's in desire stubbing --> continues to work
-// todo: additional test --> keek clay ids desire and hard id order --> should fail because desire is for clay
     // adjacent (same court extension)
     @ParameterizedTest
     @EnumSource(value = ExtensionInterest.class, names = {"EARLIER", "ANY"})
     void requestedEarlier_sameCourtHalfHourEarlierExists_findsInSameCourt(ExtensionInterest earlierOrAny) {
         Court h02 = Court.H02;
         mockOrders(stubOrders(h02, DAY, "17:30", "19:00"));
-        List<Desire> desires = stubDesires(DAY, earlierOrAny, Court.getClayIds());
+        List<Desire> desires = stubDesires(DAY, earlierOrAny, Court.getHardIds());
 
         String vacancyAt1700 = "17:00";
         stubEmptyExcept(List.of(h02.getCourtId()), h02, LocalTime.parse(vacancyAt1700), 30L);
@@ -233,17 +231,13 @@ class DesiresIteratorThingyTest {
         finds();
     }
 
-
-    // todo: same as above, but clay (better yet, non-hard) --> should not find
-        // if test was on Prospect object, I could throw when mismatch between order court type and desire court type differs
-
     // adjacent (same court extension)
     @ParameterizedTest
     @EnumSource(value = ExtensionInterest.class, names = {"LATER", "ANY"})
     void requestedLater_sameCourtHalfHourLaterExists_findsInSameCourt(ExtensionInterest laterOrAny) {
         Court h02 = Court.H02;
         mockOrders(stubOrders(h02, DAY, "17:30", "19:00"));
-        List<Desire> desires = stubDesires(DAY, laterOrAny, Court.getClayIds());
+        List<Desire> desires = stubDesires(DAY, laterOrAny, Court.getHardIds());
 
         String vacancyAt1900 = "19:00";
         stubEmptyExcept(List.of(h02.getCourtId()), h02, LocalTime.parse(vacancyAt1900), 30L);
@@ -257,6 +251,25 @@ class DesiresIteratorThingyTest {
         finds();
     }
 
+    // todo marker comment: test with 2 desires
+    // todo marker comment: 2 tests above covered. No extra needed because:
+    //   - ANY covered
+    //   - EARLIER or LATER inapplicable because with no order can't ask for that (will get 'no order for EARLIER/LATER')
+    @Test
+    void requestedAnyOutsideAndNoneInside_have1insideOrder_insideDoesNotSearch_outsideDoesSearch() {
+        mockOrders(stubOrders(Court.H02, DAY, "17:30", "19:00"));
+        List<Desire> desires = stubDesires(
+                new Desire(LocalDate.parse(DAY), NONE, Court.getIndoorIds()),
+                new Desire(LocalDate.parse(DAY), ANY, Court.getOutdoorIds())
+        );
+
+        when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoEmpty());
+
+        assertDoesNotThrow(() -> thingy.doWork(desires));
+        fetches4times();    // does not search for indoors because NONE; searches for brand-new outdoor because ANY
+        assertFetchedCourts(Court.getOutdoorIds());
+        doesNotFind();
+    }
 
 
 
@@ -339,14 +352,10 @@ class DesiresIteratorThingyTest {
         Court h02 = Court.H02;
 
         mockOrders(stubOrders(h02, timeFrom, orderDuration));
-        // fixme. this test asks asks for "later clay" but pre-existing order has H02. Shouldn't it only search for later clay? If you don't care what court, make a desire with all courts.
-        List<Desire> desires = stubDesires(DAY, interest, Court.getClayIds());
+        List<Desire> desires = stubDesires(DAY, interest, Court.getHardIds());
 
-        List<Long> allCourtsExceptBookedOrder = new ArrayList<>(Court.getClayIds());
-        allCourtsExceptBookedOrder.removeIf(e -> Objects.equals(e, h02.getCourtId()));
         LocalTime timeFromVacancy = LocalTime.parse(searchFrom);
-        Court c01 = Court.C01;
-        stubEmptyExcept(allCourtsExceptBookedOrder, c01, timeFromVacancy, prospectDuration);
+        stubEmptyExcept(Court.getHardIds(), Court.H01, timeFromVacancy, prospectDuration);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -354,7 +363,7 @@ class DesiresIteratorThingyTest {
             fetchesAtLeastOnce();
             List<List<Long>> courtsCaptured = courtsCaptor.getAllValues();
             assertEquals(List.of(h02.getCourtId()), courtsCaptured.get(0)); // first looks for extension of booking // todo remove? currently works but irrelevant. implementation could do diff things
-            assertEquals(Court.getClayIds(), courtsCaptured.get(1));        // next, looks in all desire's courtIds // todo remove? currently works but irrelevant. implementation could do diff things
+            assertEquals(Court.getHardIds(), courtsCaptured.get(1));        // next, looks in all desire's courtIds // todo remove? currently works but irrelevant. implementation could do diff things
 
             assertFetchedDate(DAY);
             assertFetchedTime(searchFrom);
@@ -435,11 +444,11 @@ class DesiresIteratorThingyTest {
     private void searchNonAdjacent(String orderFrom, ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind, String searchFrom) {
         mockOrders(stubOrders(Court.H02, orderFrom, orderDuration));
 
-        List<Desire> desires = stubDesires(DAY, interest, Court.getClayIds());
+        List<Desire> desires = stubDesires(DAY, interest, Court.getNonSquashIds());
 
-        List<Long> allCourts = new ArrayList<>(Court.getClayIds());
+        List<Long> allCourts = new ArrayList<>(Court.getNonSquashIds());
         LocalTime timeFromVacancy = LocalTime.parse(searchFrom);
-        stubEmptyExcept(allCourts, Court.C01, timeFromVacancy, prospectDuration);
+        stubEmptyExcept(allCourts, Court.H02, timeFromVacancy, prospectDuration);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -468,10 +477,9 @@ class DesiresIteratorThingyTest {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    // - when OUTSIDE order exists, keep searching for INSIDE (todo add some indicator that I want redundancy?)
-    // - when INSIDE order exists, keep searching for OUTSIDE
-    // - edit old tests, so that extensions and such should be searched for independently inside from outside
-    // - do I need new tests? perhaps just edit old ones to accomodate?
+    // 1. fix existing tests -- should respect desires. If clayId's --> only finds clay -- done
+    // 2. add new tests or amend old ones -- multiple desires a day f-nality
+    //    there's 1 already with "test with 2 desires" comment
 
 
 //////// END OF  === DOUBLE-BOOKING (indoors + outdoors) ===  ///////////////////////////////////////////////////
@@ -485,10 +493,13 @@ class DesiresIteratorThingyTest {
 
 
     // todo "empty" is ambiguous;  can be NO AVAILABILITY (empty available court list) or YES AVAILABILITY (all courts you want are not resererved <--> empty)
+    //   name idea: stubNoVacanciesExcept?
     private void stubEmptyExcept(List<Long> requestedCourts, Court returnedCourt, LocalTime time, long prospectDuration) {
         LocalDate day = LocalDate.parse(DAY);
         // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
         when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoEmpty());
+
+        // todo: add validation? requestedCourts and returnedCourt.getCourtId() should be from the same pool, e.g. indoorCourts, H01 or outdoorCourts, G01
         when(fetcher.postTimeInfoBatch(requestedCourts, day, time))
                 .thenReturn(stubTimeInfo(returnedCourt.getCourtId(), day, time, prospectDuration));
     }
@@ -509,6 +520,10 @@ class DesiresIteratorThingyTest {
         List<Desire> desires = new ArrayList<>();
         desires.add(new Desire(LocalDate.parse(date), extensionInterest, courtIds));
         return desires;
+    }
+
+    private static List<Desire> stubDesires(Desire... desires) {
+        return new ArrayList<>(List.of(desires));
     }
 
     // todo remove redundant desire infra

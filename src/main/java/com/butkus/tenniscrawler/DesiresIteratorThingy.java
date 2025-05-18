@@ -40,8 +40,11 @@ public class DesiresIteratorThingy {
 
         // todo if "bandyti parduoti", order will have "sab_parduodamas":1
 
+        DesireOrderPairer pairer = new DesireOrderPairer(desires, orders);
+        pairer.pair();
+
         for (Desire desire : desires) {
-            Prospect prospect = new Prospect(desire, orders, configurator);
+            Prospect prospect = new Prospect(desire, configurator);
             prospect.find();
         }
 

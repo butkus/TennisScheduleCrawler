@@ -7,13 +7,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// todo Do I use DesireOrderPairer for functionality or just validation?
+import static com.butkus.tenniscrawler.ExtensionInterest.EARLIER;
+import static com.butkus.tenniscrawler.ExtensionInterest.LATER;
+
 @AllArgsConstructor
 public class DesireOrderPairer {
 
     private static final List<Long> INDOOR_IDS = Court.getIndoorIds();    // cascading style 1 (more specific)
     private static final List<Long> OUTDOOR_IDS = Court.getOutdoorIds();  // cascading style 1 (more specific)
-    private static final List<Long> ALL_IDS = Court.getNonSquashIds();    // cascading style 2 (less specific)
+    private static final List<Long> ALL_IDS = Court.getNonSquashIds();    // cascading style 2 (less specific)  // todo what about squash booking same time as tennis?
 
     private List<Desire> desires;
     private List<Order> orders;
@@ -22,6 +24,11 @@ public class DesireOrderPairer {
     // then, for less specific desires -- all courts
 
     public void pair() {
+        pairOrders();
+        validateDesires();
+    }
+
+    private void pairOrders() {
         for (Order order : orders) {
             List<Desire> desiresByOut = findMatchingDesire(order, OUTDOOR_IDS);
             List<Desire> desiresByIn = findMatchingDesire(order, INDOOR_IDS);
@@ -43,6 +50,16 @@ public class DesireOrderPairer {
                 match(desireByAll, order);
             } else {
                 throw new OrderWithoutDesireException("No desire found in any category. Order: " + order);
+            }
+        }
+    }
+
+    private void validateDesires() {
+        for (Desire desire : desires) {
+            boolean isEarlierOrLater = desire.getExtensionInterest() == EARLIER || desire.getExtensionInterest() == LATER;
+            boolean noOrder = desire.getOrder() == null;
+            if (isEarlierOrLater && noOrder) {
+                throw new EarlierOrLaterDesireMustHaveOwnOrderException("Desire: " + desire);
             }
         }
     }

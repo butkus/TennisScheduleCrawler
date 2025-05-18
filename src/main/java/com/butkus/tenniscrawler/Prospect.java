@@ -11,7 +11,6 @@ import java.time.temporal.TemporalAdjuster;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import static com.butkus.tenniscrawler.ExtensionInterest.*;
 import static java.time.temporal.ChronoUnit.MINUTES;
@@ -31,7 +30,8 @@ public class Prospect {
     private AudioPlayer audioPlayer;
     private SebFetcher fetcher;
 
-    private List<Order> orders;
+    private final Order order;
+
     private LocalDate day;
     private List<Long> courts;
 
@@ -40,7 +40,7 @@ public class Prospect {
     private final boolean isLater;
 
     // todo prospect builder to build main parts separtely, so that only params (or major ones) would be desire and order
-    public Prospect(Desire desire, List<Order> orders, BookingConfigurator bookingConfigurator) {
+    public Prospect(Desire desire, BookingConfigurator bookingConfigurator) {
         this.earlyBird = bookingConfigurator.getEarlyBird();
         this.comfortable = bookingConfigurator.getComfortable();
         this.lateOwl = bookingConfigurator.getLateOwl();
@@ -51,10 +51,7 @@ public class Prospect {
         this.audioPlayer = bookingConfigurator.getAudioPlayer();
         this.fetcher = bookingConfigurator.getFetcher();
 
-        // todo maybe make DesiresIteratorThingy retrieve order for the day and then this current class would not need to have getOrder() and orderExists() -- or have simplified versions of those methods.
-        //  After all, what purpose does DesiresIteratorThingy have if not iterate though the desires (and prepare everything as well as possible so that Prospect would not need to do extra work).
-        //  Alternatively, maybe DesiresIteratorThingy does not need to exist?
-        this.orders = orders;
+        this.order = desire.getOrder();
 
         day = desire.getDate();
         courts = desire.getCourts();
@@ -127,36 +124,23 @@ public class Prospect {
     }
 
     private boolean orderExists() {
-        List<Order> matchingOrder = this.orders.stream()
-                .filter(e -> e.getDate().equals(this.day))
-                .collect(Collectors.toList());
-        return !matchingOrder.isEmpty();
-    }
-
-    private Order getOrder() {
-        List<Order> matchingOrder = this.orders.stream()
-                .filter(e -> e.getDate().equals(this.day))
-                .collect(Collectors.toList());
-        if (matchingOrder.isEmpty()) throw new RuntimeException("searched for reservation, but no reservation found for " + this.day);
-        if (matchingOrder.size() > 1) throw new RuntimeException("multiple reservation per day handling not implemented. Day = " + this.day);
-        return matchingOrder.get(0);
+        return this.order != null;
     }
 
     private List<Long> getCourtId() {
-        return List.of(getOrder().getCourt().getCourtId());
+        return List.of(this.order.getCourt().getCourtId());
     }
 
     private LocalTime getOrderFromMinus30Min() {
-        return getOrder().getTimeFrom().minusMinutes(30);
+        return this.order.getTimeFrom().minusMinutes(30);
     }
 
     private LocalTime getOrderToMinus30Min() {
-        return getOrder().getTimeTo().minusMinutes(30);
+        return this.order.getTimeTo().minusMinutes(30);
     }
 
     private long getOrderDurationOrDefault() {
         if (orderExists()) {
-            Order order = getOrder();
             return MINUTES.between(order.getTimeFrom(), order.getTimeTo());
         } else {
             return 60L;
@@ -164,7 +148,7 @@ public class Prospect {
     }
 
     private LocalTime getOrderTimeTo() {
-        return getOrder().getTimeTo();
+        return this.order.getTimeTo();
     }
 
     private boolean repeatSearch(LocalTime initial, TemporalAdjuster next, Predicate<LocalTime> searchUntil) {
