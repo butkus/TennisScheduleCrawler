@@ -53,16 +53,14 @@ FEATURES:
                     - stray Desires -- ensures proper matching
                     - multiple Desires and multiple Orders -- finds ambiguous mappings and fails if found
             + remove Prospect.getOrder() and similar order-inferring logic from Prospect class
-            - nice to have: rename Prospect to Vacancy
-                - mark all places with todo's, find comments that ask that already
-                - replace
-                - make sure no "prospect" or "vacancy" comments remain
+            + nice to have: rename Prospect to Vacancy
             - maybe: get rid of DesireIteratorThingy? Or merge it with crawler. Crawler only does "do work", kind of too little responsibility.
  -- Next++: adapt booking itself
-        - make current (single-booking) work strictly -- if inside, then search for inside only
-        - make double booking simply by allowing another desire for same day with different court ids (may automatically work at this point)
+        ? make current (single-booking) work strictly -- if inside, then search for inside only -- done?
+        + make double booking simply by allowing another desire for same day with different court ids (may automatically work at this point) -- it did work automatically
         - search for and remove:  // todo remove redundant desire infra
         - make convenience methods
+        - refactor: move all the stubbing/mocking helper methods from DesireIteratorThingyTest to base class and make it extend it.
  -- Even more Next: nice to haves
     - for summer, pick clay courts in the shade first
     - for winter, pick hard first, then carpet. Or maybe remove 2 booking-per-day limit and allow e.g. priority queue:

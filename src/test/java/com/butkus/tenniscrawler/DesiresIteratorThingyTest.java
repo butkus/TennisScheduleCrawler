@@ -64,6 +64,10 @@ class DesiresIteratorThingyTest {
         return orders;
     }
 
+    private static List<Order> stubOrders(Order... orders) {
+        return new ArrayList<>(List.of(orders));
+    }
+
     private List<Order> stubOrders(Court court, String timeFrom, long duration) {
         String timeTo = LocalTime.parse(timeFrom).plusMinutes(duration).toString();
         return stubOrders(court, DAY, timeFrom, timeTo);
@@ -271,12 +275,30 @@ class DesiresIteratorThingyTest {
         doesNotFind();
     }
 
+    // todo marke comment. This test has overlap with DesireOrderPairerTest. But it also checks that H01 and G1 are both searched for.
+    @ParameterizedTest
+    @EnumSource(value = ExtensionInterest.class, names = {"EARLIER", "LATER"})
+    void requestedImprovementForBothInsideAndOutside_findsBoth(ExtensionInterest interest) {
+        mockOrders(stubOrders(
+                new Order(LocalDate.parse(DAY), Court.H01, LocalTime.parse("18:00"), LocalTime.parse("19:00")),
+                new Order(LocalDate.parse(DAY), Court.G1, LocalTime.parse("18:00"), LocalTime.parse("19:00"))
+                ));
+        List<Desire> desires = stubDesires(
+                new Desire(LocalDate.parse(DAY), interest, Court.getIndoorIds()),
+                new Desire(LocalDate.parse(DAY), interest, Court.getOutdoorIds())
+        );
 
+        // whatever you ask, there's a booking
+        when(fetcher.postTimeInfoBatch(any(), any(), any())).thenAnswer(e -> stubTimeInfo(e.getArgument(1), e.getArgument(2)));
 
+        assertDoesNotThrow(() -> thingy.doWork(desires));
+        fetchesAtLeastOnce();
+        finds2Vacancies();
 
-
-
-
+        List<List<Long>> courtsCaptured = courtsCaptor.getAllValues();
+        assertEquals(List.of(Court.H01.getCourtId()), courtsCaptured.get(0));       // todo make a test with effectively-adjacent scenario? Would it be redundant?    assertEquals(Court.getHardIds(), courtsCaptured.get(0))  Probably redundant. Because we just need 1 test to check that both H01 and G1 are searched for. Other scenarios are the same regardless if there's 1 or 2 desires/orders per day.
+        assertEquals(List.of(Court.G1.getCourtId()), courtsCaptured.get(1));
+    }
 
 //////// START OF  === PRESERVE-BOOKING-LENGTH CHANGE ===  ///////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -506,6 +528,10 @@ class DesiresIteratorThingyTest {
 
     private void finds() {
         verify(audioPlayer).chimeIfNecessary();
+    }
+
+    private void finds2Vacancies() {
+        verify(audioPlayer, times(2)).chimeIfNecessary();
     }
 
     private void doesNotFind() {
