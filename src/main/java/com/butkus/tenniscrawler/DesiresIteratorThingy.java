@@ -44,8 +44,8 @@ public class DesiresIteratorThingy {
         pairer.pair();
 
         for (Desire desire : desires) {
-            Prospect prospect = new Prospect(desire, configurator);
-            prospect.find();
+            Vacancy vacancy = new Vacancy(desire, configurator);
+            vacancy.find();
         }
 
         Calendar.printCalendar(orders, desires);

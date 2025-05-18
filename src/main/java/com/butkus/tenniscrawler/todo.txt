@@ -45,14 +45,18 @@ FEATURES:
             - which does stuff (including matching Order to Desire via Prospect.getOrder())
         Next:
             - remove Desire duplication validation from DesireMaker (later, for now should not regress, so it's fine)
-            - keep validation in DesireOrderPairer. Motivation:
+            + keep validation in DesireOrderPairer. Motivation:
                 - DesireMaker can only check for duplicate Desires (it only knows desires)
                 - DesireOrderPairer can validate
                     - duplicate Desires
                     - stray Orders (Orders that are not matched with Desires)
                     - stray Desires -- ensures proper matching
                     - multiple Desires and multiple Orders -- finds ambiguous mappings and fails if found
-            - remove Prospect.getOrder() and similar order-inferring logic from Prospect class
+            + remove Prospect.getOrder() and similar order-inferring logic from Prospect class
+            - nice to have: rename Prospect to Vacancy
+                - mark all places with todo's, find comments that ask that already
+                - replace
+                - make sure no "prospect" or "vacancy" comments remain
             - maybe: get rid of DesireIteratorThingy? Or merge it with crawler. Crawler only does "do work", kind of too little responsibility.
  -- Next++: adapt booking itself
         - make current (single-booking) work strictly -- if inside, then search for inside only

@@ -309,11 +309,11 @@ class DesiresIteratorThingyTest {
             "ANY, 120, 120, true",
     })
     void requestedEarlierOrAny_sameCourtNoVacanciesButYesVacanciesInOtherCourts_findsBrandNewSameLengthOrLonger(
-            ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind) {
+            ExtensionInterest interest, long orderDuration, long vacancyDuration, boolean shouldFind) {
     // todo: csv source is the same as for 'non-adjacent' counterpart. Extract as @MethodSource?
         String timeFrom = "17:30";
         String searchFrom = LocalTime.parse(timeFrom).minusMinutes(30).toString();
-        searchEffectivelyAdjacent(interest, orderDuration, prospectDuration, shouldFind, timeFrom, searchFrom);
+        searchEffectivelyAdjacent(interest, orderDuration, vacancyDuration, shouldFind, timeFrom, searchFrom);
     }
 
     // effectively adjacent (different court but no gap between reservation and new vacancy)
@@ -339,13 +339,13 @@ class DesiresIteratorThingyTest {
             "ANY, 120, 120, true",
     })
     void requestedLaterOrAny_sameCourtNoVacanciesButYesVacanciesInOtherCourts_findsBrandNewSameLengthOrLonger(
-            ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind) {
+            ExtensionInterest interest, long orderDuration, long vacancyDuration, boolean shouldFind) {
         String timeFrom = "17:30";
         String searchFrom = LocalTime.parse(timeFrom).plusMinutes(orderDuration).minusMinutes(30).toString();
-        searchEffectivelyAdjacent(interest, orderDuration, prospectDuration, shouldFind, timeFrom, searchFrom);
+        searchEffectivelyAdjacent(interest, orderDuration, vacancyDuration, shouldFind, timeFrom, searchFrom);
     }
 
-    private void searchEffectivelyAdjacent(ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind,
+    private void searchEffectivelyAdjacent(ExtensionInterest interest, long orderDuration, long vacancyDuration, boolean shouldFind,
                                            String timeFrom, String searchFrom) {
         // todo param "timeFrom" -- maybe we don't need it? Does it make sense to have flexibility? currently 17:30 for both method calls
 
@@ -355,7 +355,7 @@ class DesiresIteratorThingyTest {
         List<Desire> desires = stubDesires(DAY, interest, Court.getHardIds());
 
         LocalTime timeFromVacancy = LocalTime.parse(searchFrom);
-        stubEmptyExcept(Court.getHardIds(), Court.H01, timeFromVacancy, prospectDuration);
+        stubEmptyExcept(Court.getHardIds(), Court.H01, timeFromVacancy, vacancyDuration);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -397,7 +397,7 @@ class DesiresIteratorThingyTest {
             "ANY, 120, 120, true",
     })
     void requestedEarlierOrAny_oneVacancyInNonAdjacentEarlierTime_finds(
-            ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind) {
+            ExtensionInterest interest, long orderDuration, long vacancyDuration, boolean shouldFind) {
 
         BookingConfigurator configurator = new BookingConfigurator(audioPlayer, fetcher);
         configurator.setEarlyBird(LocalTime.parse("17:00"));
@@ -405,7 +405,7 @@ class DesiresIteratorThingyTest {
 
         String timeFrom = "19:30";      // = orderFrom
         String searchFrom = "17:00";    // 17:00 will always have a gap. e.g. even if 120 min, it will be 19:00 which is 30 min before timeFrom = 19:30    todo was 18:00. Might need EarlyBird adjustment (hopefully that's it)
-        searchNonAdjacent(timeFrom, interest, orderDuration, prospectDuration, shouldFind, searchFrom);
+        searchNonAdjacent(timeFrom, interest, orderDuration, vacancyDuration, shouldFind, searchFrom);
     }
 
     // non-adjacent (there's a gap between reservation and new vacancy)
@@ -431,24 +431,24 @@ class DesiresIteratorThingyTest {
             "ANY, 120, 120, true",
     })
     void requestedLaterOrAny_oneVacancyInNonAdjacentLaterTime_finds(
-            ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind) {
+            ExtensionInterest interest, long orderDuration, long vacancyDuration, boolean shouldFind) {
         BookingConfigurator configurator = new BookingConfigurator(audioPlayer, fetcher);
         configurator.setEarlyBird(LocalTime.parse("17:00"));
         thingy = new DesiresIteratorThingy(configurator);
 
         String timeFrom = "17:00";  // = orderFrom
-        String searchFrom = "19:30";    // 19:30 will always have a gap. e.g. even if 120 min, end of prospect will be 19:00 which is 30 min before 19:30
-        searchNonAdjacent(timeFrom, interest, orderDuration, prospectDuration, shouldFind, searchFrom);
+        String searchFrom = "19:30";    // 19:30 will always have a gap. e.g. even if 120 min, end of vacancy will be 19:00 which is 30 min before 19:30
+        searchNonAdjacent(timeFrom, interest, orderDuration, vacancyDuration, shouldFind, searchFrom);
     }
 
-    private void searchNonAdjacent(String orderFrom, ExtensionInterest interest, long orderDuration, long prospectDuration, boolean shouldFind, String searchFrom) {
+    private void searchNonAdjacent(String orderFrom, ExtensionInterest interest, long orderDuration, long vacancyDuration, boolean shouldFind, String searchFrom) {
         mockOrders(stubOrders(Court.H02, orderFrom, orderDuration));
 
         List<Desire> desires = stubDesires(DAY, interest, Court.getNonSquashIds());
 
         List<Long> allCourts = new ArrayList<>(Court.getNonSquashIds());
         LocalTime timeFromVacancy = LocalTime.parse(searchFrom);
-        stubEmptyExcept(allCourts, Court.H02, timeFromVacancy, prospectDuration);
+        stubEmptyExcept(allCourts, Court.H02, timeFromVacancy, vacancyDuration);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -494,14 +494,14 @@ class DesiresIteratorThingyTest {
 
     // todo "empty" is ambiguous;  can be NO AVAILABILITY (empty available court list) or YES AVAILABILITY (all courts you want are not resererved <--> empty)
     //   name idea: stubNoVacanciesExcept?
-    private void stubEmptyExcept(List<Long> requestedCourts, Court returnedCourt, LocalTime time, long prospectDuration) {
+    private void stubEmptyExcept(List<Long> requestedCourts, Court returnedCourt, LocalTime time, long vacancyDuration) {
         LocalDate day = LocalDate.parse(DAY);
         // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
         when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoEmpty());
 
         // todo: add validation? requestedCourts and returnedCourt.getCourtId() should be from the same pool, e.g. indoorCourts, H01 or outdoorCourts, G01
         when(fetcher.postTimeInfoBatch(requestedCourts, day, time))
-                .thenReturn(stubTimeInfo(returnedCourt.getCourtId(), day, time, prospectDuration));
+                .thenReturn(stubTimeInfo(returnedCourt.getCourtId(), day, time, vacancyDuration));
     }
 
     private void finds() {

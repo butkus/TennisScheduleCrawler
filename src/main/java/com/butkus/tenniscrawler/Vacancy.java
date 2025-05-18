@@ -15,8 +15,7 @@ import java.util.function.Predicate;
 import static com.butkus.tenniscrawler.ExtensionInterest.*;
 import static java.time.temporal.ChronoUnit.MINUTES;
 
-// todo rename to Vacancy? I used that word in tests, and it may just be more intuitive
-public class Prospect {
+public class Vacancy {
 
     public static final TemporalAdjuster ADD_30_MIN = t -> t.plus(30L, MINUTES);
     public static final TemporalAdjuster SUBTRACT_30_MIN = t -> t.minus(30L, MINUTES);
@@ -39,8 +38,8 @@ public class Prospect {
     private final boolean isEarlier;
     private final boolean isLater;
 
-    // todo prospect builder to build main parts separtely, so that only params (or major ones) would be desire and order
-    public Prospect(Desire desire, BookingConfigurator bookingConfigurator) {
+    // todo Vacancy builder to build main parts separtely, so that only params (or major ones) would be desire and order
+    public Vacancy(Desire desire, BookingConfigurator bookingConfigurator) {
         this.earlyBird = bookingConfigurator.getEarlyBird();
         this.comfortable = bookingConfigurator.getComfortable();
         this.lateOwl = bookingConfigurator.getLateOwl();
