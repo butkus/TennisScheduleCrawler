@@ -133,24 +133,57 @@ class DesireOrderPairerTest {
             assertEquals(desireAny.getOrder(), orderOut);
         }
 
-        private void reset(Desire... desires) {
-            Arrays.stream(desires).forEach(desire -> desire.setOrder(null));
+        @Nested
+        class Ambiguous {
+
+            // ambiguous ORDERS: order 1 can be mapped to any desire; so does order 2. therefore pairing cannot be made canonical
+            @Test
+            void orderIn_orderIn_and_desireIn_desireAny_shouldThrowBecauseAmbiguous() {
+                Order orderIn1 = new Order(DAY, Court.H01, TIME_1800, TIME_1900);
+                Order orderIn2 = new Order(DAY, Court.K1, TIME_1800, TIME_1900);
+                Desire desireIn = new Desire(DAY, ANY, Court.getIndoorIds());
+                Desire desireAny = new Desire(DAY, ANY, Court.getNonSquashIds());       // note that it's not  Court.getIds()  as it would include squash courts
+
+                // below all permutations are tested:
+
+                DesireOrderPairer pairer1 = new DesireOrderPairer(listOf(desireIn, desireAny), listOf(orderIn1, orderIn2));
+                assertThrows(DuplicateOrdersException.class, pairer1::pair);
+                reset(desireIn, desireAny);
+
+                DesireOrderPairer pairer2 = new DesireOrderPairer(listOf(desireAny, desireIn), listOf(orderIn1, orderIn2));
+                assertThrows(DuplicateOrdersException.class, pairer2::pair);
+                reset(desireIn, desireAny);
+
+                DesireOrderPairer pairer3 = new DesireOrderPairer(listOf(desireIn, desireAny), listOf(orderIn2, orderIn1));
+                assertThrows(DuplicateOrdersException.class, pairer3::pair);
+                reset(desireIn, desireAny);
+
+                DesireOrderPairer pairer4 = new DesireOrderPairer(listOf(desireAny, desireIn), listOf(orderIn2, orderIn1));
+                assertThrows(DuplicateOrdersException.class, pairer4::pair);
+            }
+
+            // not Cat3, but kinda belongs here. Plus, if/when we have more than indoor/outdoor categories, it will be easy to refactor it so it is Cat3 and test will perform the same
+            // ambiguous DESIRES: even though order is just 1, it is not clear which desire should be paired with it
+            @Test
+            void orderHard_desireIn_desireIn_shouldFailBecauseAmbiguous() {
+                Order orderHard = new Order(DAY, Court.H01, TIME_1800, TIME_1900);
+                Desire desireIn1 = new Desire(DAY, ANY, Court.getIndoorIds());
+                Desire desireIn2 = new Desire(DAY, ANY, Court.getIndoorIds());
+                DesireOrderPairer pairer = new DesireOrderPairer(listOf(desireIn1, desireIn2), listOf(orderHard));
+                assertThrows(DuplicateDesiresException.class, pairer::pair);
+            }
         }
 
-        @Test
-        void orderHard_orderCarpet_desireIn_desireIn_shouldFailBecauseAmbiguous() {
-            Order orderHard = new Order(DAY, Court.H01, TIME_1800, TIME_1900);
-            Order orderCarpet = new Order(DAY, Court.K1, TIME_1800, TIME_1900);
-            Desire desireIn = new Desire(DAY, ANY, Court.getIndoorIds());
-            Desire desireInAlso = new Desire(DAY, ANY, Court.getIndoorIds());
-            DesireOrderPairer pairer = new DesireOrderPairer(listOf(desireIn, desireInAlso), listOf(orderHard, orderCarpet));
-            assertThrows(DuplicateDesiresException.class, pairer::pair);
-        }
+
     }
 
     private static <T> List<T> listOf(T... items) {
         ArrayList<T> result = new ArrayList<>();
         Collections.addAll(result, items);
         return result;
+    }
+
+    private void reset(Desire... desires) {
+        Arrays.stream(desires).forEach(desire -> desire.setOrder(null));
     }
 }
