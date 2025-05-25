@@ -44,7 +44,7 @@ FEATURES:
             - passes 1 desire + all orders to Prospect finder (loop)
             - which does stuff (including matching Order to Desire via Prospect.getOrder())
         Next:
-            - remove Desire duplication validation from DesireMaker (later, for now should not regress, so it's fine)
+            + remove Desire duplication validation from DesireMaker (later, for now should not regress, so it's fine) -- not removed. Added to it, even. Duplication embraced now.
             + keep validation in DesireOrderPairer. Motivation:
                 - DesireMaker can only check for duplicate Desires (it only knows desires)
                 - DesireOrderPairer can validate
@@ -59,10 +59,11 @@ FEATURES:
         ? make current (single-booking) work strictly -- if inside, then search for inside only -- done?
         + make double booking simply by allowing another desire for same day with different court ids (may automatically work at this point) -- it did work automatically
         - search for and remove:  // todo remove redundant desire infra
+        - calendar: make half-circle for 1/2 desires. Or Circle outline for 1/2 and filled-in circle for 2/2
         - make convenience methods
         - refactor: move all the stubbing/mocking helper methods from DesireIteratorThingyTest to base class and make it extend it.
  -- Even more Next: nice to haves
     - for summer, pick clay courts in the shade first
     - for winter, pick hard first, then carpet. Or maybe remove 2 booking-per-day limit and allow e.g. priority queue:
-        - first new hards, then old hards, not-3-6-9-public ones, carpet ones, finally, if none above found, seach for all other courts.
+        - first new hards, then old hards, not-3-6-9-public ones, carpet ones, finally, if none above found, search for all other courts.
         

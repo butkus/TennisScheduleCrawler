@@ -6,9 +6,7 @@ import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -32,11 +30,14 @@ public class DesireMaker {
         validateDesires(explicitDesires);
 
         List<Desire> combined = new ArrayList<>();
-        List<LocalDate> explicitDates = explicitDesires.stream().map(Desire::getDate).collect(Collectors.toList());
         for (Desire periodicDesire : periodicDesires) {
-            LocalDate date = periodicDesire.getDate();
-            boolean notInExplicitDesires = !explicitDates.contains(date);
-            if (notInExplicitDesires && !isHoliday(date)) {
+
+            // todo can we extract a predicate method/variable so that anymatch(matchesDateAndCourts)
+            boolean matchesSameDaySameCourtsExplicit = explicitDesires.stream()
+                    .filter(e -> e.getDate().equals(periodicDesire.getDate()))
+                    .anyMatch(e -> new HashSet<>(e.getCourts()).containsAll(periodicDesire.getCourts()));
+
+            if (!matchesSameDaySameCourtsExplicit && !isHoliday(periodicDesire.getDate())) {
                 combined.add(periodicDesire);
             }
         }
@@ -45,11 +46,24 @@ public class DesireMaker {
         return combined;
     }
 
-    // todo remove redundant desire infra
+    // todo find similar one in DesireOrderPairer (maybe even more places) and extract common one?
     private void validateDesires(List<Desire> desires) {
-        boolean anyDateHasMoreThan2Desires = desires.stream().collect(Collectors.groupingBy(Desire::getDate, Collectors.counting()))
-                .values().stream().anyMatch(count -> count > 2);
-        if (anyDateHasMoreThan2Desires) throw new DuplicateDesiresException();
+        Collection<List<Desire>> desiresByDay = desires.stream()
+                .collect(Collectors.groupingBy(Desire::getDate))
+                .values();
+        for (List<Desire> daysDesires : desiresByDay) {
+            // todo can I use reduce to count indoor and outdoor at the same time?
+            List<Desire> in = new ArrayList<>();
+            List<Desire> out = new ArrayList<>();
+            for (Desire desire : daysDesires) {
+                // todo this works as long as addNext(count, dayOfWeek, DESIRE draft) is PRIVATE, i.e. only indoor/outdoor is possible to request. Later, specific court-id-subset verification will be needed
+                if (desire.getCourts().equals(Court.getIndoorIds())) in.add(desire);
+                if (desire.getCourts().equals(Court.getOutdoorIds())) out.add(desire);
+            }
+            LocalDate date = daysDesires.get(0).getDate();
+            if (in.size() > 1) throw new DuplicateDesiresException(date + " contains > 1 indoor desires");
+            if (out.size() > 1) throw new DuplicateDesiresException(date + " contains > 1 outdoor desires");
+        }
     }
 
     public DesireMaker addExplicitDesires() {
@@ -57,6 +71,15 @@ public class DesireMaker {
         return this;
     }
 
+    public DesireMaker addNextInAndOut(int count, DayOfWeek dayOfWeek) {
+        Desire indoorDesireDraft = new Desire(getNow(), Court.getIndoorIds());
+        Desire outdoorDesireDraft = new Desire(getNow(), Court.getOutdoorIds());
+        addNext(count, dayOfWeek, indoorDesireDraft);
+        addNext(count, dayOfWeek, outdoorDesireDraft);
+        return this;
+    }
+
+    // todo make it season-specific. Summer -- default outdoors (+ maybe indoors). Winter -- indoors
     public DesireMaker addNext(int count, DayOfWeek dayOfWeek) {
         Desire regularDesireDraft = new Desire(getNow(), Court.getIndoorIds());  // todo write a test  // fixme: (ctrl-f FOO1 for 2 identical comments): related
         return addNext(count, dayOfWeek, regularDesireDraft);
@@ -67,7 +90,15 @@ public class DesireMaker {
         return addNext(count, dayOfWeek, redundantDesireDraft);
     }
 
-    public DesireMaker addNext(int count, DayOfWeek dayOfWeek, Desire draft) {
+    // if we make this public, DesireOrderPairer and possibly DesireMaker would need extra tests, because
+    // currently maker can  add via addNext() and addNextInAndOut() which limit periodic desires to
+    //   - one-per-day
+    //   - 2 per day -- exactly 1 indoor (all indoor courts) and 1 outdoor (all outdoor courts)
+    // if we allow arbitrary court sets, extra tests and handling is needed.
+    // e.g.
+    //   - 2 specific courts in the shade outdoors + all indoors
+    //   - 2 in shade + all outdoors (there's overlap, should fail, or handle in priority order)
+    private DesireMaker addNext(int count, DayOfWeek dayOfWeek, Desire draft) {
         LocalDate startDate = getNow();
         List<Desire> result = new ArrayList<>();
         for (int i = 0; i < count; i++) {

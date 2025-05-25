@@ -15,9 +15,24 @@ import static com.butkus.tenniscrawler.ExtensionInterest.ANY;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * <h>General idea</h>
- * <li>NOT ALL Desires have orders (maybe I have a 99 periodic Desires way into the future)</li>
+ * <h2>General idea</h2>
+ * <li>NOT ALL Desires have orders (maybe I have 99 periodic Desires way into the future)</li>
  * <li>ALL Orders MUST HAVE Desires (If I don't want any 'better' orders for day/court, make a Desire with NONE)</li>
+ * <br/>
+ *
+ * <h2>Note</h2>
+ * DesireOrderPairer and DesireMaker have overlapping functionality. Here's why: <br/>
+ * DesireOrderPairer validates if there's stray Orders, ambiguous pairing options, and so on. <br/>
+ * DesireMaker validates for duplicate Desires, among doing other things. <br/>
+ * If we had non-destructive inputs, we could take them and validate once at first step. <br/>
+ * Perhaps we could do that, but instead, we have a 2-stage processing: <br/>
+ * <ol>
+ * <li>DesireMaker: cherry-pics and reduces input Desires to it's "effective" state, e.g. explicit desire supersedes a similar periodic one</li>
+ * <li>DesireOrderPairer takes resulting Desires, combines them with Orders and performs a validation from pairing point of view</li>
+ * </ol>
+ * As a result, separate validation is required at both steps, because 2 wrongs can make a right in a corner case.
+ * This may cause hard to debug bugs. Therefore, we want to ensure correct outputs at every step.
+ *
  */
 class DesireOrderPairerTest {
 
