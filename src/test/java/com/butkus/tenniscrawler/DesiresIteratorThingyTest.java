@@ -552,13 +552,6 @@ class DesiresIteratorThingyTest {
         return new ArrayList<>(List.of(desires));
     }
 
-    // todo remove redundant desire infra
-    private static List<Desire> stubDesires(String date, ExtensionInterest extensionInterest, List<Long> courtIds, List<Long> alternativeCourtIds) {
-        List<Desire> desires = new ArrayList<>();
-        desires.add(new Desire(LocalDate.parse(date), extensionInterest, courtIds, alternativeCourtIds));
-        return desires;
-    }
-
     private void fetchesAtLeastOnce() {
         verify(fetcher, atLeastOnce()).postTimeInfoBatch(courtsCaptor.capture(), dateCaptor.capture(), timeCaptor.capture());
     }

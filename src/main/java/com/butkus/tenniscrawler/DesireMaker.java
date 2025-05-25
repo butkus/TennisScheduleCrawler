@@ -85,11 +85,6 @@ public class DesireMaker {
         return addNext(count, dayOfWeek, regularDesireDraft);
     }
 
-    public DesireMaker addNextRedundant(int count, DayOfWeek dayOfWeek, List<Long> mainCourts, List<Long> alternativeCourts) {
-        Desire redundantDesireDraft = new Desire(getNow(), mainCourts, alternativeCourts);
-        return addNext(count, dayOfWeek, redundantDesireDraft);
-    }
-
     // if we make this public, DesireOrderPairer and possibly DesireMaker would need extra tests, because
     // currently maker can  add via addNext() and addNextInAndOut() which limit periodic desires to
     //   - one-per-day

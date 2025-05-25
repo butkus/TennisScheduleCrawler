@@ -58,7 +58,7 @@ FEATURES:
  -- Next++: adapt booking itself
         ? make current (single-booking) work strictly -- if inside, then search for inside only -- done?
         + make double booking simply by allowing another desire for same day with different court ids (may automatically work at this point) -- it did work automatically
-        - search for and remove:  // todo remove redundant desire infra
+        + search for and remove:  // todo remove redundant desire infra
         - calendar: make half-circle for 1/2 desires. Or Circle outline for 1/2 and filled-in circle for 2/2
         - make convenience methods
         - refactor: move all the stubbing/mocking helper methods from DesireIteratorThingyTest to base class and make it extend it.
