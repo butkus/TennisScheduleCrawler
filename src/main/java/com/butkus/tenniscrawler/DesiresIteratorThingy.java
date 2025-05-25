@@ -43,6 +43,10 @@ public class DesiresIteratorThingy {
         DesireOrderPairer pairer = new DesireOrderPairer(desires, orders);
         pairer.pair();
 
+//        System.out.println("--- desires:");
+//        desires.forEach(e -> System.out.println("  -- Desire: " + e));
+//        System.out.println();
+
         for (Desire desire : desires) {
             Vacancy vacancy = new Vacancy(desire, configurator);
             vacancy.find();

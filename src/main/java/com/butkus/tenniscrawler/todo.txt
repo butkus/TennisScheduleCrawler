@@ -59,8 +59,23 @@ FEATURES:
         ? make current (single-booking) work strictly -- if inside, then search for inside only -- done?
         + make double booking simply by allowing another desire for same day with different court ids (may automatically work at this point) -- it did work automatically
         + search for and remove:  // todo remove redundant desire infra
-        - calendar: make half-circle for 1/2 desires. Or Circle outline for 1/2 and filled-in circle for 2/2
+        + calendar: make half-circle for 1/2 desires. Or Circle outline for 1/2 and filled-in circle for 2/2
         - make convenience methods
+            - make 1 entry in DesiresExplicit to make NONE for all day (both court types)
+            - debug mode print desires not like this
+               -- Desire: Desire(date=2025-05-28, extensionInterest=NONE,
+              courts=[1, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 135, 137, 139, 141, 143, 145, 147, 59, 61, 63, 65, 67, 69],
+               order=Order(date=2025-05-28, court=H09, timeFrom=19:30, timeTo=20:30))
+             but like this:
+               -- Desire: Desire(2025-05-28, extensionInterest=NONE, courts=Inside, order=Order(2025-05-28, court=H09, 19:30-20:30))
+            - make calendar from
+                  - ◐ = IN or OUT
+                  - ● means IN+OUT
+                to
+                  - ◐ means IN only, and
+                  - ◑ means OUT only, and
+                  - ● means IN+OUT
+            - for summer, default desire maker with INSIDE = NONE because inside usually easy to get if needed
         - refactor: move all the stubbing/mocking helper methods from DesireIteratorThingyTest to base class and make it extend it.
  -- Even more Next: nice to haves
     - for summer, pick clay courts in the shade first

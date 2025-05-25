@@ -94,15 +94,17 @@ public class Calendar {
 
         boolean skipped = desires.stream()
                 .filter(e -> e.getDate().equals(dateBeingProcessed))
-                .anyMatch(e -> e.getExtensionInterest() == ExtensionInterest.NONE);
+                .anyMatch(e -> e.getExtensionInterest() == ExtensionInterest.NONE); // todo change to `allMatch()? because we now have up to 2 desires/orders per day
 
         if (dateBeingProcessed.isBefore(LocalDate.now())) {
             return "░░";
         } else if (isSingleBooked) {
-            return " ●";
             // todo find a one that works
-//            return " ◐";
-//            return " ◖";
+//            return " ●";
+            return " ◐";    // kinda ok. Not as glancable as filled-in circle, but not bad.
+//            return " ◖";  // kinda ok. Clean look, but non-centered visually (did not check if distorts calendar)
+//            return "○";   // ○ (White Circle) -- easy to miss (blends in with day numbers in calendar)
+//            return "◯";   // ◯ (Large Circle) -- easy to miss (blends in with day numbers in calendar)
         } else if (isDoubleBooked) {
             return " ●";
         } else if (skipped) {
