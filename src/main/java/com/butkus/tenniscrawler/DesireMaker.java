@@ -71,6 +71,14 @@ public class DesireMaker {
         return this;
     }
 
+    public DesireMaker addNextInAndClay(int count, DayOfWeek dayOfWeek) {
+        Desire indoorDesireDraft = new Desire(getNow(), Court.getIndoorIds());
+        Desire clayDesireDraft = new Desire(getNow(), Court.getClayIds());
+        addNext(count, dayOfWeek, indoorDesireDraft);
+        addNext(count, dayOfWeek, clayDesireDraft);
+        return this;
+    }
+
     public DesireMaker addNextInAndOut(int count, DayOfWeek dayOfWeek) {
         Desire indoorDesireDraft = new Desire(getNow(), Court.getIndoorIds());
         Desire outdoorDesireDraft = new Desire(getNow(), Court.getOutdoorIds());

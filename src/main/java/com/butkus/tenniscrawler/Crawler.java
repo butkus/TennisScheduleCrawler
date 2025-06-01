@@ -66,7 +66,7 @@ public class Crawler {
                 .addExplicitDesires()
                 .addNextInAndOut(2, WEDNESDAY)
 //                .addNextInAndOut(2, FRIDAY)
-                .addNextInAndOut(2, SUNDAY)
+                .addNextInAndOut(3, SUNDAY)
                 .make();
         desiresThingy.doWork(inputs);
     }
