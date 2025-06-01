@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.butkus.tenniscrawler.ExtensionInterest.EARLIER;
 import static com.butkus.tenniscrawler.ExtensionInterest.NONE;
 
 // todo rename maybe. legacy was "Input".
@@ -25,12 +26,6 @@ public class DesiresExplicit {
         //  this is perhaps a small overkill, but why not do it like Sony and make UX friendly
 
 
-        desires.add(new Desire(LocalDate.parse("2025-05-28"), NONE, IN));   // turiu
-        desires.add(new Desire(LocalDate.parse("2025-05-28"), NONE, OUT));  // nereikia
-
-        desires.add(new Desire(LocalDate.parse("2025-05-30"), NONE, IN));   // 1830 1.5h carpet
-        desires.add(new Desire(LocalDate.parse("2025-05-30"), NONE, OUT));  // 1800 1.5h clay
-
         desires.add(new Desire(LocalDate.parse("2025-06-01"), NONE, IN));  // 1800 2h, Sunday
         desires.add(new Desire(LocalDate.parse("2025-06-01"), NONE, OUT)); // 1800 2h grass, WANT CLAY
 
@@ -41,13 +36,13 @@ public class DesiresExplicit {
         desires.add(new Desire(LocalDate.parse("2025-06-06"), NONE, OUT));  // 1800 1.5h
 
         desires.add(new Desire(LocalDate.parse("2025-06-08"), NONE, IN));  // 1800 2h
-        desires.add(new Desire(LocalDate.parse("2025-06-08"), NONE, OUT)); // 1800 2h, Sunday, WANT CLAY
+        desires.add(new Desire(LocalDate.parse("2025-06-08"), EARLIER, OUT)); // 1800 2h, Sunday, WANT CLAY
 
         desires.add(new Desire(LocalDate.parse("2025-06-11"), NONE, IN));   // 1930 1h
         desires.add(new Desire(LocalDate.parse("2025-06-11"), NONE, OUT));  // wednesday, dont need
 
         desires.add(new Desire(LocalDate.parse("2025-06-15"), NONE, IN));   // 1800 2h, Sunday
-        desires.add(new Desire(LocalDate.parse("2025-06-15"), NONE, OUT));  // 1800 2h, WANT CLAY
+        desires.add(new Desire(LocalDate.parse("2025-06-15"), EARLIER, OUT));  // 1800 2h, WANT CLAY
 
         desires.add(new Desire(LocalDate.parse("2025-06-18"), NONE, IN));   // 1930 1h
         desires.add(new Desire(LocalDate.parse("2025-06-18"), NONE, OUT));  // wednesday, dont need
