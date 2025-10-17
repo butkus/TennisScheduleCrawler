@@ -8,6 +8,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.NonNull;
 import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
@@ -26,7 +27,8 @@ public class OutgoingRequestLoggingInterceptor implements ClientHttpRequestInter
     private static final Logger log = LoggerFactory.getLogger("com.butkus.tenniscrawler.RequestResponse");
 
     @Override
-    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+    @NonNull
+    public ClientHttpResponse intercept(@NonNull HttpRequest request, @NonNull byte[] body, @NonNull ClientHttpRequestExecution execution) throws IOException {
         HttpMethod method = request.getMethod();
         URI uri = request.getURI();
         HttpHeaders headers = request.getHeaders();
@@ -40,10 +42,10 @@ public class OutgoingRequestLoggingInterceptor implements ClientHttpRequestInter
 
         long duration = System.currentTimeMillis() - startTime;
 
-        String reason = null;
+        String reason;
         try {
-            reason = response.getStatusCode().getReasonPhrase();
-        } catch (IOException e) {
+            reason = response.getStatusText();
+        } catch (IOException _) {
             reason = "";
         }
 
@@ -56,7 +58,7 @@ public class OutgoingRequestLoggingInterceptor implements ClientHttpRequestInter
 
         if (debugMode) {
             log.info("http-response received (duration: {} ms)\nStatus: {} {}\nHeaders: {}\nBody: {}\n",
-                    duration, response.getRawStatusCode(), reason, response.getHeaders(), bodyString);
+                    duration, response.getStatusCode().value(), reason, response.getHeaders(), bodyString);
         }
 
         return response;

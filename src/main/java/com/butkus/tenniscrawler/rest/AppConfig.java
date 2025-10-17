@@ -1,8 +1,8 @@
 package com.butkus.tenniscrawler.rest;
 
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
@@ -23,11 +23,10 @@ public class AppConfig {
 
     @Bean
     public RestTemplate restTemplate() {
-        org.apache.http.client.HttpClient client = HttpClients.custom().build();
-        ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(client);
-        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder().requestFactory(
-                () -> new BufferingClientHttpRequestFactory(requestFactory));
-        RestTemplate restTemplate = restTemplateBuilder.build();
+        HttpClient client = HttpClients.createDefault();
+        ClientHttpRequestFactory requestFactory = new BufferingClientHttpRequestFactory(
+                new HttpComponentsClientHttpRequestFactory(client));
+        RestTemplate restTemplate = new RestTemplate(requestFactory);
         restTemplate.setInterceptors(Collections.singletonList(new OutgoingRequestLoggingInterceptor(debugMode)));
         return restTemplate;
     }

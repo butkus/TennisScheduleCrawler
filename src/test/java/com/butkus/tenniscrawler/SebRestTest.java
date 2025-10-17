@@ -6,44 +6,50 @@ import com.butkus.tenniscrawler.rest.orders.Order;
 import com.butkus.tenniscrawler.rest.orders.OrdersRspDto;
 import com.butkus.tenniscrawler.rest.placeinfobatch.PlaceInfoBatchRspDto;
 import com.butkus.tenniscrawler.rest.timeinfobatch.TimeInfoBatchRspDto;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Disabled("ADD ACTUAL SESSION TOKEN TO RUN TESTS")
 @ExtendWith(SpringExtension.class)
-@SpringBootTest
+@SpringBootTest(properties = {
+        "app.session-token=--- ADD ACTUAL SESSION TOKEN ---",
+})
 class SebRestTest {
+
+    private static final LocalDate TODAY = LocalDate.now();
+    private static final LocalDate TOMORROW = LocalDate.now().plusDays(1);
 
     @Autowired
     SebFetcher fetcher;
 
     @Test
     void testOptionsTimeInfoBatch() {
-        HttpStatus status = fetcher.optionsPlaceInfoBatch();
-        assertEquals(HttpStatus.OK, status);
+        HttpStatusCode status = fetcher.optionsPlaceInfoBatch();
+        assertTrue(status.is2xxSuccessful());
     }
 
     @Test
     void testTimeInfoBatch() {
         List<Long> ids = Court.getIds();
-        TimeInfoBatchRspDto timeInfoBatchRspDto = fetcher.postTimeInfoBatch(ids, LocalDate.parse("2023-09-14"), LocalTime.parse("19:00"));
+        TimeInfoBatchRspDto timeInfoBatchRspDto = fetcher.postTimeInfoBatch(ids, TOMORROW, LocalTime.parse("19:00"));
         assertNotNull(timeInfoBatchRspDto);
     }
 
     @Test
     void postPlaceInfoBatch() {
-        List<String> dates = List.of("2023-09-12", "2023-09-13", "2023-09-14", "2023-09-11", "2023-09-18");
-//        List<LocalDate> range = SebPlaceInfoConverter.getDateRange("2023-09-18", "2023-09-24");
+        List<String> dates = List.of(TODAY.toString(), TOMORROW.toString());
         PlaceInfoBatchRspDto actual = fetcher.postPlaceInfoBatch(dates, CourtType.getIds());
         assertNotNull(actual);
         String from = "20:00";
@@ -77,7 +83,7 @@ class SebRestTest {
 
     @Test
     void getOrders() {
-        OrdersRspDto dtoOrders = fetcher.getOrders("2023-09-16", "2023-09-30");
+        OrdersRspDto dtoOrders = fetcher.getOrders(TODAY.toString(), TOMORROW.toString());
 
         List<Order> convertedOrders = SebOrderConverter.toOrders(dtoOrders);
 

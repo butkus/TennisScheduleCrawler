@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.*;
@@ -31,6 +33,8 @@ public class Crawler {
         this.sleepUpTo = sleepUpTo;
         this.random = SecureRandom.getInstanceStrong();
         this.desiresThingy = desiresThingy;
+
+        System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
     }
 
     @Scheduled(cron = "${app.cron}")

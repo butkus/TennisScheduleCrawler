@@ -55,7 +55,7 @@ public class SebFetcher {
     }
 
     // todo this is a pre-flight request, don't think I need it
-    public HttpStatus optionsPlaceInfoBatch() {
+    public HttpStatusCode optionsPlaceInfoBatch() {
         String url = "https://ws.tenisopasaulis.lt/api/v1/placeInfoBatch";
         URI uri = URI.create(url);
         MultiValueMap<String, String> headers = new HttpHeaders();
@@ -65,7 +65,7 @@ public class SebFetcher {
         headers.add("Access-Control-Request-Method", "POST");
 
         RequestEntity<Void> requestEntity = new RequestEntity<>(null, headers, HttpMethod.OPTIONS, uri);
-        ResponseEntity<String> response = restTemplate.exchange(requestEntity, new ParameterizedTypeReference<String>() {
+        ResponseEntity<String> response = restTemplate.exchange(requestEntity, new ParameterizedTypeReference<>() {
         });
         return response.getStatusCode();
     }
@@ -122,11 +122,10 @@ public class SebFetcher {
         headers.add("Content-Type", "application/json");
 
         RequestEntity<TimeInfoBatchRqstDto> requestEntity = new RequestEntity<>(rqstDto, headers, HttpMethod.POST, uri);
-        ResponseEntity<TimeInfoBatchRspDto> response = restTemplate.exchange(requestEntity, new ParameterizedTypeReference<TimeInfoBatchRspDto>() {
+        ResponseEntity<TimeInfoBatchRspDto> response = restTemplate.exchange(requestEntity, new ParameterizedTypeReference<>() {
         });
 
-        TimeInfoBatchRspDto body = response.getBody();
-        return body;
+        return response.getBody();
     }
 
     public OrdersRspDto getOrders(String from, String to) {
