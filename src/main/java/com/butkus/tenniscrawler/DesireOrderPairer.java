@@ -17,7 +17,7 @@ import static com.butkus.tenniscrawler.ExtensionInterest.LATER;
 public class DesireOrderPairer {
 
     private static final List<Long> INDOOR_IDS = Court.getIndoorIds();    // cascading style 1 (more specific)
-    private static final List<Long> CLAY_IDS = Court.getClayIds();  // cascading style 1 (more specific)
+    private static final List<Long> OUTDOOR_IDS = Court.getOutdoorIds();  // cascading style 1 (more specific)
     private static final List<Long> ALL_IDS = Court.getNonSquashIds();    // cascading style 2 (less specific)  // todo what about squash booking same time as tennis?
     // the only arbitrary-courtId-set allowing method is
     // DesireMaker.addNext(int count, DayOfWeek dayOfWeek, Desire draft)
@@ -44,7 +44,14 @@ public class DesireOrderPairer {
 
     private void pairOrders() {
         for (Order order : orders) {
-            List<Desire> desiresByOut = findMatchingDesire(order, CLAY_IDS);
+
+            // todo: (don't remember strictly how it is/should be, but my thouhgts after a while):
+            //   `findMatchingDesire` is not that easy to read. It can appear redundant that it filters by courts twice.
+            //   what we could do is simply ..collect(Collectors.groupingBy(by clay/indoor/all))
+            //   would it be more readable?
+            //   desires `grouped by INDOOR_IDS` seems more clear than `findMatchingDesire` (less black-boxy and less doubt that it's correct)
+            //   Or maybe isn't more clear? filtering by date would still be needed
+            List<Desire> desiresByOut = findMatchingDesire(order, OUTDOOR_IDS);
             List<Desire> desiresByIn = findMatchingDesire(order, INDOOR_IDS);
             List<Desire> desiresByAll = findMatchingDesire(order, ALL_IDS);
 
@@ -81,7 +88,7 @@ public class DesireOrderPairer {
             for (Order order : ordersByDay) {
                 Long courtId = order.getCourt().getCourtId();
                 if (INDOOR_IDS.contains(courtId)) indoor.add(order);
-                if (CLAY_IDS.contains(courtId)) outdoor.add(order);
+                if (OUTDOOR_IDS.contains(courtId)) outdoor.add(order);
                 if (ALL_IDS.contains(courtId)) all.add(order);
 
                 if (indoor.size() > 1) throw new DuplicateOrdersException("More than 1 indoor Order for " + order.getDate());
