@@ -28,28 +28,15 @@ public class DesiresExplicit {
 
 
 //        desires.add(new Desire(LocalDate.parse("2025-10-22"), NONE, IN));  // 1900     // fixme: this ANY, NONE, NONE -> yields strike-out date in calendar
-//        desires.add(new Desire(LocalDate.parse("2025-10-22"), NONE, CLAY));
+//        desires.add(new Desire(LocalDate.parse("2025-10-22"), NONE, CLAY));            // CLAY was a HACK commit, now HACK reverted. CLAY-granularity not yet implemented.
 //        desires.add(new Desire(LocalDate.parse("2025-10-22"), NONE, OUT));
 
         desires.add(new Desire(LocalDate.parse("2025-10-26"), NONE, IN));
-        desires.add(new Desire(LocalDate.parse("2025-10-26"), NONE, CLAY));
-        desires.add(new Desire(LocalDate.parse("2025-10-26"), NONE, OUT));
-
         desires.add(new Desire(LocalDate.parse("2025-10-29"), LATER, IN));  // 1800
-        desires.add(new Desire(LocalDate.parse("2025-10-29"), NONE, CLAY));
-        desires.add(new Desire(LocalDate.parse("2025-10-29"), NONE, OUT));
-
         desires.add(new Desire(LocalDate.parse("2025-11-05"), NONE, IN));  // 1930
-        desires.add(new Desire(LocalDate.parse("2025-11-05"), NONE, CLAY));
-        desires.add(new Desire(LocalDate.parse("2025-11-05"), NONE, OUT));
-
         desires.add(new Desire(LocalDate.parse("2025-11-09"), NONE, IN));  // 1830
-        desires.add(new Desire(LocalDate.parse("2025-11-09"), NONE, CLAY));
-        desires.add(new Desire(LocalDate.parse("2025-11-09"), NONE, OUT));
-
         desires.add(new Desire(LocalDate.parse("2025-11-12"), NONE, IN));  // 1930
-        desires.add(new Desire(LocalDate.parse("2025-11-12"), NONE, CLAY));
-        desires.add(new Desire(LocalDate.parse("2025-11-12"), NONE, OUT));
+
         return desires;
     }
 }
