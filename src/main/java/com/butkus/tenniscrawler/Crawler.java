@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static java.time.DayOfWeek.SUNDAY;
+import static java.time.DayOfWeek.WEDNESDAY;
+
 @Component
 public class Crawler {
 
@@ -65,9 +68,8 @@ public class Crawler {
         DesireMaker desireMaker = new DesireMaker(CLOCK);
         List<Desire> inputs = desireMaker
                 .addExplicitDesires()
-//                .addNextInAndOut(2, WEDNESDAY)
-//                .addNextInAndOut(2, FRIDAY)
-//                .addNextInAndOut(3, SUNDAY)
+                .addNextInAndOut(12, WEDNESDAY)
+                .addNextInAndOut(12, SUNDAY)
                 .make();
         desiresThingy.doWork(inputs);
     }
