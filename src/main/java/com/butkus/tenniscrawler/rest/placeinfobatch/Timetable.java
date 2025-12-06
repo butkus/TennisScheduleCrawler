@@ -1,16 +1,19 @@
-
 package com.butkus.tenniscrawler.rest.placeinfobatch;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Accessors(chain = true)
+@Data
 @NoArgsConstructor
 public class Timetable {
 
@@ -86,7 +89,7 @@ public class Timetable {
     @JsonProperty("22:30:00")
     private HalfHour t2230;
 
-    private void getAll() {
+    private void populateAll() {
         this.all = new ArrayList<>();
         all.add(t0600);
         all.add(t0630);
@@ -127,7 +130,7 @@ public class Timetable {
     }
 
     public boolean hasVacancies(LocalTime requestedFrom, LocalTime requestedTo) {
-        getAll();
+        populateAll();
         for (HalfHour halfHour : all) {
             LocalTime currentFrom = halfHour.getFrom();
             LocalTime currentTo = halfHour.getTo();
@@ -141,5 +144,39 @@ public class Timetable {
             }
         }
         return false;
+    }
+
+    public boolean hasVacanciesExtended(LocalTime requestedFrom, LocalTime requestedTo) {
+        populateAll();
+
+        int startPositionFound = -1;
+        for (int i = 0; i < all.size(); i++) {
+            HalfHour halfHour = all.get(i);
+            if (halfHour.getFrom().equals(requestedFrom)) {
+                startPositionFound = all.indexOf(halfHour);
+            }
+        }
+
+        int endPositionFound = -1;
+        for (int i = all.size()-1; i >= 0; i--) {
+            HalfHour halfHour = all.get(i);
+            if (halfHour.getTo().equals(requestedTo)) {
+                endPositionFound = all.indexOf(halfHour);
+            }
+        }
+
+        boolean fromAndToFound = startPositionFound != -1 && endPositionFound != -1;
+        if (!fromAndToFound) {
+            return false;
+        }
+
+        boolean chainUnbroken = true;
+        for (int i = startPositionFound; i <= endPositionFound; i++) {
+            HalfHour current = all.get(i);
+            if (!current.getStatus().equals("free")) {
+                chainUnbroken = false;
+            }
+        }
+        return chainUnbroken;
     }
 }

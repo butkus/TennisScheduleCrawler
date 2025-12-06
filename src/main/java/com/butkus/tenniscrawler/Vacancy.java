@@ -88,7 +88,7 @@ public class Vacancy {
 
     private boolean searchForEarlier() {
         // extend existing reservation
-        boolean found = searchForReservation(getCourtId(), getOrderFromMinus30Min(), 30L);      // tries to extend (regardless if e.g. desired court is HARD instead of CLAY)
+        boolean found = searchForReservation(getCourtId(), getOrderFromMinus30Min(), 30L);      // tries to extend (regardless if e.g. desired court is HARD instead of CLAY). [LATER COMMENT ->] IS IT STILL TRUE? A CONCRETE COURT ID IS PASSED
         if (!found) {
             // find brand-new reservation
             found = repeatSearch(getOrderFromMinus30Min(), SUBTRACT_30_MIN, isBeforeEarlyBird);

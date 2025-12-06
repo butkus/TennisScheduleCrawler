@@ -81,4 +81,97 @@ FEATURES:
     - for summer, pick clay courts in the shade first
     - for winter, pick hard first, then carpet. Or maybe remove 2 booking-per-day limit and allow e.g. priority queue:
         - first new hards, then old hards, not-3-6-9-public ones, carpet ones, finally, if none above found, search for all other courts.
-        
+
+-- Priority queue:
+    1) enable multiple tiers
+        - Now we have Inside + Outside + All (Outside temporary Clay)
+        - Need support for more
+            - at first: Clay, Outside, Inside, All
+            - later: EarlySummer, LateSummer, Clay, Outside, Inside, All
+                EarlySummer(prefer shady clay), LateSummer(chasing evening light, avoid shade) -- these can be mutually exclusive if hard to implement
+    2) dynamic pairing
+        - make court priority queue
+        - after pairing, check if desire is satisfied
+            - if Outside ANY secured, upgrade initial desire from Outside to Clay, etc.
+            - run pairing again until no further upgrades can be done
+                - can probably just iterate the same desire/day until completion, i.e. don't run pairing again. In that case, probably a good idea to run pairer validation at the end
+        - "convenient" time will need to be better defined, incl. weekday/weekend separation. Reason being:
+            - assuming I have 20:00 Grass. Next preference will be Outside EARLIER
+                - if clay 20:00 (or even 19:30) appears, do I want my Desire be bumped to Clay ANY? Maybe Grass 18:30 is better for me?
+                - at this point I'm just brainstorming. Don't take this as a thought-out instructions.
+                - do I need not a priority queue but priority table (matrix)?
+                    - Grass 20:00 --> Grass 19:30 is obviously an upgrade
+                    - Grass 20:00 --> Clay 20:00 (or 19:30) is an upgrade
+                    - Grass 20:00 --> Clay 21:00. Which one is better?
+            - assume I have 19:00 Grass (early summer, shade is preferred) --> Desire is Clay EARLIER
+                 - also assume that we have categories:
+                    - ShadyClay -- courts 1 and 5 leftmost courts
+                    - SummerClay -- courts 1, 2, 5, 6 -- more or less in shade
+                 - Clay 6  18:30 appears --> upgrade to Desire to SummerClay EARLIER (maybe ANY at thispoint?)
+                 - Clay 5  18:00 appears --> upgrade to Desire ShadyClay EARLIER
+                 - at this point we have secured the best possible court, but maybe it's too early now? what can we do?
+                    - clarify strict, at 30 min intervals -- what is my priority queue for times
+                        - could be linear   e.g. 19:00 is perfect, then 18:30 and 19:30 would be equally next-best and 18:00 with 20:00 equally next-next best
+                        - could be explicit e.g. 19:00 is perfect, then 18:30, then 19:30, then 20:00, then 18:00
+                    - what if it's early summer sunday, not bound by work hours
+                        - I start with 19:00 Grass
+                        - upgrade Desire to ShitClay 18:30, and get the Order for it
+                        - upgrade to SummerClay 17:00, and get it
+                        - at this point I'm at Desire ShadyClay (let's ignore ExtensionInterest for a second), looking to upgrade
+                        - then, these appear
+                            - ShadyClay 15:00
+                            - Grass 18:00
+                            - ShitClay disappears
+                        - do I take the ShadyClay? It's pretty early
+                        - do I keep the SummerClay, which is kinda early as well?
+                        - ShitClay is no more
+                        - Grass starts to look attractive due to convenient time
+                        - courtType-to-time table should sort this and all other priority questions
+                    - NOW VS FUTURE
+                        - Now we have Vacancy which has the following logic:
+                            - if want earlier --> search for earlier, by 30 min increments
+                            - if want later   --> search for later, by 30 min increments
+                            - if want any     --> search for both earlier and later, by 30 min increments
+                        - We could have:
+                            - CascadingVacancy (CascadingDesire sounds better but then we'd need to move vacancy search logic to desire side)
+                            - it would have the logic, allowing to search for courts according to a priority table/matrix/cascading priorities, etc.
+                            - it would not have hardcoded values like earlyBird, LATER/EARLIER, etc.
+                            - rather it would have an ability to search according to a priority list/table/matrix
+                            - the cascading list/table/matrix itself would be defined separately and Cascading Vacancy would just use it
+                            - it could be called Recipe
+                            - well, following the logic, CascadingVacancy could be named Kitchen, but perhaps that's going too far
+                        - Or we could leave names as-is and simply extend ExtensionInterest class to have the cascading behavior
+                            - ExtensionInterest could be renamed to ExtensionRecipe or ExtensionLogic or ExtensionPlan
+                        - should I allow one-time EARLIER/LATER?
+                            - if I do, does it fallback to good-old behavior?
+                            - or perhaps it should work as a Recipe modifier?
+                                - Recipe could stay the same, but EARLIER/LATER enforced. How would it know which court is preferred though?
+                                - a) it could calculate average-per-30-min-slot weight. Hard 1800+1830+1900+1930+2000 / 5 = average weight. And then pick best.
+                                - b) best closest weight from Recipe. e.g. now is 2000 and grass is 10, clay shade is 4, clay summer is 5, clay rest is 7.
+                                    - then LATER would imply clay shade priority, with next fallback clay summer, etc.
+                            - or perhaps EARLIER/LATER becomes a court-time preference modifier?
+                                - regular recipe would have sth like resolvePreference(time)
+                                - extension interest could have forced resolvePreference() value, e.g.
+                                    - LATER = whatever court, just later.
+                                    - LATER+Clay = find later but only if can find clay
+
+
+        - explicit desires will (and should) be rarely needed, but if used, should take precedence
+
+    -- LATER but only by 30 mins -- LITTLE_LATER (good for when I have almost convenient time, but LATER gives me way later)
+    -- obv, same for EARLIER -- LITTLE_EARLIER
+
+
+temp:
+    - I now have
+        - timetable.hasVacanciesExtended(T18:00, T19:00)
+        - Recipe.next()
+    - I now need to [start with tests]
+        - test for: no orders exits
+            --> finds best possible if exists
+            --> finds second best if exists
+            --> finds last best if exists
+            --> does not find if none exists
+        - test for: 1 order exists
+            --> finds best possible if exists (is it redundant?)
+            --> searches up until current booked category and stops (e.g. if order is of weight 3, search for weight 1 and 2 only)
