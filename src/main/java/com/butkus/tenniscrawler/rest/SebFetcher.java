@@ -84,7 +84,7 @@ public class SebFetcher {
         headers.add("Content-Type", "application/json");
 
         PlaceInfoBatchRqstDto request = new PlaceInfoBatchRqstDto()
-                .setExcludeCourtName(Boolean.FALSE)     // todo set false for performance
+                .setExcludeCourtName(Boolean.TRUE)
                 .setExcludeInfoUrl(Boolean.TRUE)
                 .setPlaces(places)
                 .setDates(dates)

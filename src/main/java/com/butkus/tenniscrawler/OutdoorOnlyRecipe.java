@@ -14,6 +14,17 @@ import java.util.Map;
  * | clay summer  |    5   |    4   |    2   |    3   |    5   |
  * | clay rest    |    7   |    6   |    4   |    5   |    7   |
  */
+// todo rename to simply OutdoorRecipe --> because indoor+outdoor does not make sense as related.
+//  - I either want outdoor (if weather permits) or indoor
+//  - are there reasons were I would interchangeably want either/or?
+//  - also, currently I don't have the mechanism to allow such freedom. Reasons:
+//    - if I want both IN and OUT, I will make 1 desire IN + 1 desire OUT. This is supported.
+//    - if I want OutdoorAndIndoor recipe, then I probably need to allow 1 such order/desire per day and nothing else.
+//    - these would have to change (not necessarily full list):
+//      - DesireMaker (to allow such desires to be added)
+//      - DesireOrderPairer (to allow such desires to be paired properly)
+//        - now it's allowed to have 1 IN and 1 OUT per day. 2 of OutdoorAndIndoor would make pairing ambiguous
+//      - Vacancy pairer (to allow such desires to be processed properly)
 public class OutdoorOnlyRecipe extends Recipe {
 
     public static final LocalTime T1800 = LocalTime.parse("18:00");
@@ -62,5 +73,10 @@ public class OutdoorOnlyRecipe extends Recipe {
 
     public OutdoorOnlyRecipe() {
         super(map);
+    }
+
+    @Override
+    public List<Integer> getDurationPreference() {
+        return List.of(90, 60);
     }
 }

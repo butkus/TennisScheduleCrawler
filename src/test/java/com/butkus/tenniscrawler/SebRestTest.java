@@ -54,7 +54,7 @@ class SebRestTest {
         assertNotNull(actual);
         String from = "20:00";
         String to = "20:30";
-        System.out.printf("hasVacancies(%s - %s) = %s%n", from, to, actual.hasVacancies(from, to));
+        System.out.printf("hasVacancies(%s - %s) = %s%n", from, to, actual.hasVacanciesExtended(from, to));
     }
 
     // todo fixme (or remove)

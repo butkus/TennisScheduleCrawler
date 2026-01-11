@@ -93,6 +93,11 @@ public class DesireMaker {
         return addNext(count, dayOfWeek, regularDesireDraft);
     }
 
+    public DesireMaker addNext(int count, DayOfWeek dayOfWeek, Recipe recipe) {
+        Desire regularDesireDraft = new Desire(getNow(), recipe);
+        return addNext(count, dayOfWeek, regularDesireDraft);
+    }
+
     // if we make this public, DesireOrderPairer and possibly DesireMaker would need extra tests, because
     // currently maker can  add via addNext() and addNextInAndOut() which limit periodic desires to
     //   - one-per-day

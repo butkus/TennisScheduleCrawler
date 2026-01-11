@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalTime;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -105,17 +104,7 @@ public abstract class AbstractRecipeTest {
 
         @Test
         void allCourtsCovered() {
-            Set<CourtTypeCustom> allCourtTypeCustom = recipe.getMap().values().stream()
-                    .flatMap(Collection::stream)
-                    .map(CourtTypeAtHour::getCourtType)
-                    .collect(Collectors.toSet());
-
-            List<Long> actualCourtIds = new ArrayList<>();
-            for (CourtTypeCustom courtTypeCustom : allCourtTypeCustom) {
-                actualCourtIds.addAll(courtTypeCustom.getIds().stream().map(Court::getCourtId).toList());
-            }
-
-            Assertions.assertThat(getAllRelevantCourtIds()).containsExactlyInAnyOrderElementsOf(actualCourtIds);
+            Assertions.assertThat(recipe.getCourtIds()).containsExactlyInAnyOrderElementsOf(getAllRelevantCourtIds());
         }
 
     }

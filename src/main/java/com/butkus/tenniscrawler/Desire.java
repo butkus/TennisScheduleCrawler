@@ -14,9 +14,22 @@ import java.util.List;
 public class Desire {
 
     private LocalDate date;
+    private Order order;
+
+    // OLD
     private ExtensionInterest extensionInterest;
     private List<Long> courts;
-    private Order order;
+
+    // NEW -- extensionInterest + courts --> one single Recipe
+    private Recipe recipe;
+
+
+    public Desire(LocalDate date, Recipe recipe) {
+        this.date = date;
+        this.recipe = recipe;
+
+        this.courts = recipe.getCourtIds(); // todo after OLD way is decomissioned, this.courts will be redundant (it is alredy now, but kept for backward compatibility)
+    }
 
     public Desire(LocalDate date, ExtensionInterest extensionInterest, List<Long> courts) {
         this.date = date;

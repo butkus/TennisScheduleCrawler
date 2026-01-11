@@ -49,4 +49,9 @@ public class IndoorSimpleRecipe extends Recipe {
     public IndoorSimpleRecipe() {
         super(map);
     }
+
+    @Override
+    public List<Integer> getDurationPreference() {
+        return List.of(60);
+    }
 }

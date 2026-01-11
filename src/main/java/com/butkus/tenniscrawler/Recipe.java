@@ -37,6 +37,26 @@ public abstract class Recipe implements Iterator<Map.Entry<Integer, List<CourtTy
 
     public List<CourtTypeAtHour> nextCourtTypeAtHour() {
         return next().getValue();
-
     }
+
+    public List<Long> getCourtIds() {
+        return map.values().stream()
+                .flatMap(List::stream)
+                .flatMap(e -> e.getCourtType().getIds().stream())       // fixme: getIds() here actually refer to `Court` type
+                .map(Court::getCourtId)
+                .distinct()
+                .toList();
+    }
+
+    public List<Integer> getCourtTypeIds() {
+        return map.values().stream()
+                .flatMap(List::stream)
+                .flatMap(e -> e.getCourtType().getIds().stream())   // fixme: (search for fooFix): `ids` are actually or type `Court`
+                .map(Court::getCourtType)
+                .distinct()
+                .map(CourtType::getCourtTypeId)
+                .toList();
+    }
+
+    public abstract List<Integer> getDurationPreference();
 }

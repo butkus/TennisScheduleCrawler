@@ -1,7 +1,8 @@
-
 package com.butkus.tenniscrawler.rest.placeinfobatch;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,7 +19,7 @@ public class PlaceInfoBatchRspDto {
     @JsonProperty("status")
     private String status;
 
-    public boolean hasVacancies(String timeFrom, String timeTo) {
+    public boolean hasVacanciesExtended(String timeFrom, String timeTo) {
         LocalTime from = LocalTime.parse(timeFrom);
         LocalTime to = LocalTime.parse(timeTo);
 
@@ -30,7 +31,7 @@ public class PlaceInfoBatchRspDto {
             for (List<DataInner> inner : outer.getData()) {
                 // single courtID + timetable (timetable of certain courtID on certain date)
                 for (DataInner dataInner : inner) {
-                    boolean hasVacancies = dataInner.getTimetable().hasVacancies(from, to);
+                    boolean hasVacancies = dataInner.getTimetable().hasVacanciesExtended(from, to);
                     if (hasVacancies) return true;
                 }
             }
@@ -39,6 +40,11 @@ public class PlaceInfoBatchRspDto {
         return false;
     }
 
+    public static PlaceInfoBatchRspDto fromJson(String json) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper.readValue(json, PlaceInfoBatchRspDto.class);
+    }
 }
 
 // FOR NICER REFERENCE SEE  com.butkus.tenniscrawler.rest.placeinfobatch.PlaceInfoBatchRspDto

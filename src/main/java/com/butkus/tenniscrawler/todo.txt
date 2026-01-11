@@ -162,16 +162,76 @@ FEATURES:
     -- obv, same for EARLIER -- LITTLE_EARLIER
 
 
-temp:
-    - I now have
-        - timetable.hasVacanciesExtended(T18:00, T19:00)
-        - Recipe.next()
-    - I now need to [start with tests]
-        - test for: no orders exits
-            --> finds best possible if exists
-            --> finds second best if exists
-            --> finds last best if exists
-            --> does not find if none exists
-        - test for: 1 order exists
-            --> finds best possible if exists (is it redundant?)
-            --> searches up until current booked category and stops (e.g. if order is of weight 3, search for weight 1 and 2 only)
+next:
+    + read all the RECIPE_BASED ***TESTS*** so far.
+    + think of what's missing and document here
+    + read the ***PROD CODE*** so far
+    + think of missing pieces and document here
+    + read the above notes.
+    + combine the findings and refine
+    + ALL ABOVE DONE
+    - NEXT: THIS FROM ABOVE IS WORTH RE-READING WHEN DESIGNING "OVERRIDE" FEATURE
+            - should I allow one-time EARLIER/LATER?
+                - if I do, does it fallback to good-old behavior?
+                - or perhaps it should work as a Recipe modifier?
+                    - Recipe could stay the same, but EARLIER/LATER enforced. How would it know which court is preferred though?
+                    - a) it could calculate average-per-30-min-slot weight. Hard 1800+1830+1900+1930+2000 / 5 = average weight. And then pick best.
+                    - b) best closest weight from Recipe. e.g. now is 2000 and grass is 10, clay shade is 4, clay summer is 5, clay rest is 7.
+                        - then LATER would imply clay shade priority, with next fallback clay summer, etc.
+                - or perhaps EARLIER/LATER becomes a court-time preference modifier?
+                    - regular recipe would have sth like resolvePreference(time)
+                    - extension interest could have forced resolvePreference() value, e.g.
+                        - LATER = whatever court, just later.
+                        - LATER+Clay = find later but only if can find clay
+
+for now:
+    - check what SEB calls are made when reservations/available are loaded
+        - 8 days
+        - all court types
+        - {"excludeCourtName":true,"excludeInfoUrl":true,"places":[2,18,5,20,8],"dates":["2026-01-01","2026-01-02","2026-01-03","2026-01-04","2026-01-05","2026-01-06","2026-01-07","2026-01-08"],"salePoint":11,"sessionToken":"93b25e67d079e4871686c18b02fe62f9"}
+    - use that info (not necessarily as a step 2) to build our solution
+    + fix the todo-comments in searchForReservationWithRecipe() and getOrderWeight()
+    + make DesiresIteratorThingyTest.Durations.NoPriorOrder._90Available_finds() pass
+    + continue with tests
+
+    - [big picture stuff]
+        - ***FIRST*** let's try to describe the rules of the game in 3 levels of detail
+        a) in simple terms, I want this: search for weights, then pick any withing the weight, try to respect duration preference
+        b) more detailed, in order:
+            - let's assume durationPreference = 90, 60
+            - pick weights, in order
+            - within a weight, find any vacancy and take it
+            - if it's of best duration, stop here. we've found our pick. other weight's options don't matter
+            - if, however, duration is 60, keep looking within the same weight for 90-min vacancy
+            - if found, stop here.
+            - if not found, pick next weight and repeat
+        c) order of steps:
+            1. weight -- most important: if we find anything in weight 1, it will be better than anything anywhere
+               - more important than duration or place within a weight
+            2. duration -- 2nd most important: if we find 90 at the bottom of weight 1 it's better than 60 at the top
+            3. first-match: take first item within a weight, find matching vacancy. If found, stop. else iterate further.
+
+        -  ***NEXT*** if we can make the tests more readable
+            - as uncle Bob says, tests are (can be) documentation. As his bowling result example shows,
+                reading tests (and/or prod code) can be almost the same as reading rules of the game
+            - would be nice to have some of that in prod code and/or in tests
+            - re-watch that episode and see if can apply
+
+
+
+
+     So now we have WEIGHT, then DURATION PREFERENCE, then MATCH logic.
+     There's a drawback (let's assume it's weekend. 90 desirable but 60 acceptable):
+       - if 90 is aquired but it is of last weight, and then weight 1 of 60 min appears, should we take it?
+       - currently, we can't
+       - how can we do it?
+            - to cover all cases, looks like we need a full table-worth of classification to fullfill this properly.
+            - this is rather complex logic. To write and maintain (and read)
+            - For now, let's leave it as that. For overrides, let's just replace IndoorRecipe60 with IndoorRecipe90 etc.
+
+todo -- check if desire resolver correcrly assuems that NEW explictit desire overrides NEW implicit one
+
+
+-- later:
+    - crawler wrapped
+    - sugalvot geresni pavadinima appsui

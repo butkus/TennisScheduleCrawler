@@ -1,8 +1,12 @@
-package com.butkus.tenniscrawler;
+package com.butkus.tenniscrawler.desireorderpairer;
 
+import com.butkus.tenniscrawler.*;
 import com.butkus.tenniscrawler.rest.orders.Order;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -41,60 +45,112 @@ class DesireOrderPairerTest {
     public static final LocalTime TIME_1800 = LocalTime.parse("18:00");
     public static final LocalTime TIME_1900 = LocalTime.parse("19:00");
 
-    @Test
-    void orderMatchesDesire_byDayAndCourt_ok() {
+    public static final Recipe INDOOR_RECIPE = new IndoorSimpleRecipe();
+    public static final Recipe OUTDOOR_RECIPE = new OutdoorOnlyRecipe();
+
+    @ParameterizedTest
+    @MethodSource("orderMatchesDesire_byDayAndCourt_args")
+    void orderMatchesDesire_byDayAndCourt_ok(Desire desire) {
         Order order = new Order(DAY, Court.H01, TIME_1800, TIME_1900);
-        Desire desire = new Desire(DAY, ANY, Court.getIndoorIds());
         DesireOrderPairer pairer = new DesireOrderPairer(listOf(desire), listOf(order));
         pairer.pair();
         assertEquals(order, desire.getOrder());
     }
+    static List<Desire> orderMatchesDesire_byDayAndCourt_args() {
+        return List.of(
+                new Desire(DAY, ANY, Court.getIndoorIds()),
+                new Desire(DAY, INDOOR_RECIPE)
+        );
+    }
 
-    @Test
-    void orderDoesNotHaveDesire_byDay_throws() {
+
+    @ParameterizedTest
+    @MethodSource("orderDoesNotHaveDesire_byDay_args")
+    void orderDoesNotHaveDesire_byDay_throws(Desire desire) {
         Order order = new Order(DAY, Court.H01, TIME_1800, TIME_1900);
-        Desire desire = new Desire(NEXT_DAY, ANY, Court.getIndoorIds());
         DesireOrderPairer pairer = new DesireOrderPairer(listOf(desire), listOf(order));
         assertThrows(OrderWithoutDesireException.class, pairer::pair);
     }
+    static List<Desire> orderDoesNotHaveDesire_byDay_args() {
+        return Arrays.asList(
+                new Desire(NEXT_DAY, ANY, Court.getIndoorIds()),
+                new Desire(NEXT_DAY, INDOOR_RECIPE)
+        );
+    }
 
-    @Test
-    void orderDoesNotHaveDesire_byCourt_throws() {
+
+    @ParameterizedTest
+    @MethodSource("orderDoesNotHaveDesire_byCourt_args")
+    void orderDoesNotHaveDesire_byCourt_throws(Desire desire) {
         Order order = new Order(DAY, Court.H01, TIME_1800, TIME_1900);
-        Desire desire = new Desire(DAY, ANY, Court.getOutdoorIds());
         DesireOrderPairer pairer = new DesireOrderPairer(listOf(desire), listOf(order));
         assertThrows(OrderWithoutDesireException.class, pairer::pair);
     }
+    static List<Desire> orderDoesNotHaveDesire_byCourt_args() {
+        return Arrays.asList(
+                new Desire(DAY, ANY, Court.getOutdoorIds()),
+                new Desire(DAY, OUTDOOR_RECIPE)
+        );
+    }
+
 
     @Nested
     class Cat1_moreDesiresThanOrders {
 
-        // todo refactor those 2 tests into 1?
-        @Test
-        void desireIn_and_desireOut_orderIn_pairsToIn() {
-            Desire desireIn = new Desire(DAY, ANY, Court.getIndoorIds());
-            Desire desireOut = new Desire(DAY, ANY, Court.getOutdoorIds());
-            Order orderIn = new Order(DAY, Court.H01, TIME_1800, TIME_1900);
-            DesireOrderPairer pairer = new DesireOrderPairer(listOf(desireIn, desireOut), listOf(orderIn));
+        // NOTE: these desires cloned for each test iteration by new DesireOrderPairTestCase()...build() method
+        // If we want to move them to the top of root class, we need to ensure cloning or resetting before/after each test
+        public static final Desire DESIRE_IN = new Desire(DAY, ANY, Court.getIndoorIds());
+        public static final Desire DESIRE_OUT = new Desire(DAY, ANY, Court.getOutdoorIds());
+        public static final Desire DESIRE_RECIPE_IN = new Desire(DAY, INDOOR_RECIPE);
+        public static final Desire DESIRE_RECIPE_OUT = new Desire(DAY, OUTDOOR_RECIPE);
+        public static final Order ORDER_OUT = new Order(DAY, Court.G1, TIME_1800, TIME_1900);
+        public static final Order ORDER_IN = new Order(DAY, Court.H01, TIME_1800, TIME_1900);
+
+        @ParameterizedTest
+        @MethodSource("desireOrderPairTestCases")
+        void _2desires_1order_pairsOne(DesireOrderPairTestCase testCase) {
+            DesireOrderPairer pairer = new DesireOrderPairer(listOf(testCase.desireIn, testCase.desireOut), listOf(testCase.order));
             pairer.pair();
-            assertEquals(desireIn.getOrder(), orderIn);
-            assertNull(desireOut.getOrder());
+            assertEquals(testCase.expected.getOrder(), testCase.order);
+            assertNull(testCase.unexpected.getOrder());
         }
 
-        @Test
-        void desireIn_and_desireOut_orderOut_pairsToOut() {
-            Desire desireIn = new Desire(DAY, ANY, Court.getIndoorIds());
-            Desire desireOut = new Desire(DAY, ANY, Court.getOutdoorIds());
-            Order orderOut = new Order(DAY, Court.G1, TIME_1800, TIME_1900);
-            DesireOrderPairer pairer = new DesireOrderPairer(listOf(desireIn, desireOut), listOf(orderOut));
-            pairer.pair();
-            assertNull(desireIn.getOrder());
-            assertEquals(desireOut.getOrder(), orderOut);
+        static List<DesireOrderPairTestCase> desireOrderPairTestCases() {
+            return List.of(
+                    new DesireOrderPairTestCase().desireIn(DESIRE_IN).desireOut(DESIRE_OUT)
+                            .order(ORDER_IN)
+                            .expected(DESIRE_IN).unexpected(DESIRE_OUT).build(),
+                    new DesireOrderPairTestCase().desireIn(DESIRE_RECIPE_IN).desireOut(DESIRE_RECIPE_OUT)
+                            .order(ORDER_IN)
+                            .expected(DESIRE_RECIPE_IN).unexpected(DESIRE_RECIPE_OUT).build(),
+                    new DesireOrderPairTestCase()
+                            .desireIn(DESIRE_IN).desireOut(DESIRE_OUT)
+                            .order(ORDER_OUT)
+                            .expected(DESIRE_OUT).unexpected(DESIRE_IN).build(),
+                    new DesireOrderPairTestCase()
+                            .desireIn(DESIRE_RECIPE_IN).desireOut(DESIRE_RECIPE_OUT)
+                            .order(ORDER_OUT)
+                            .expected(DESIRE_RECIPE_OUT).unexpected(DESIRE_RECIPE_IN).build()
+            );
         }
     }
 
+
     @Nested
     class Cat2_moreOrdersThanDesires {
+
+        // NOTE: the following test does not have Desire-with-Recipe variant.
+        //  this test is kind of superfluous in any case, but with Recipes it just does not work.
+        //  it works with old Desire format because Desire's court list is just a list of court id's
+        //  with Recipes, I differentiated outside vs inside.
+        //  I don't expect to change that because if weather's good, I want outside. If weather's bad, I want inside.
+        //  As a result, there's no InsideAndOutsideRecipe, thus I can't write similar test with Recipes.
+        //  I could change this test to have 2 orders outside (or 2 orders inside) but that would throw
+        //  DuplicateOrdersException instead of OrderWithoutDesireException, thus changing the nature of the test.
+        //  Again, this is a rather contrived test, made in part to show that Cat2_moreOrdersThanDesires is considered.
+        //  Lastly, OrderWithoutDesireException is covered in 2 tests above already:
+        //    - orderDoesNotHaveDesire_byDay_throws()
+        //    - orderDoesNotHaveDesire_byCourt_throws()
 
         @Test
         void twoOrders_oneDesire_throws() {
@@ -106,15 +162,16 @@ class DesireOrderPairerTest {
         }
     }
 
+
     @Nested
     class Cat3_sameAmountOrdersAndDesires {
 
-        @Test
-        void orderIn_orderOut_and_desireIn_desireOut_shouldMatchRegardlessOfOrder() {
+        @ParameterizedTest
+        @MethodSource("_2orders_2desires_pairing_args")
+        void orderIn_orderOut_and_desireIn_desireOut_shouldMatchRegardlessOfOrder(Desire desireIn, Desire desireOut) {
             Order orderIn = new Order(DAY, Court.H01, TIME_1800, TIME_1900);
             Order orderOut = new Order(DAY, Court.G2, TIME_1800, TIME_1900);
-            Desire desireIn = new Desire(DAY, ANY, Court.getIndoorIds());
-            Desire desireOut = new Desire(DAY, ANY, Court.getOutdoorIds());
+
             DesireOrderPairer pairerInOrder = new DesireOrderPairer(listOf(desireIn, desireOut), listOf(orderIn, orderOut));
             pairerInOrder.pair();
             assertEquals(desireIn.getOrder(), orderIn);
@@ -127,7 +184,20 @@ class DesireOrderPairerTest {
             assertEquals(desireIn.getOrder(), orderIn);
             assertEquals(desireOut.getOrder(), orderOut);
         }
+        private static List<Arguments> _2orders_2desires_pairing_args() {
+            Desire desireIn = new Desire(DAY, ANY, Court.getIndoorIds());
+            Desire desireOut = new Desire(DAY, ANY, Court.getOutdoorIds());
+            Desire desireRecipeIn = new Desire(DAY, INDOOR_RECIPE);
+            Desire desireRecipeOut = new Desire(DAY, OUTDOOR_RECIPE);
+            return List.of(
+                    Arguments.of(desireIn, desireOut),
+                    Arguments.of(desireRecipeIn, desireRecipeOut)
+            );
+        }
 
+
+        // NOTE: the following test does not have Desire-with-Recipe variant because RecipeAny does not exist.
+        //   see comment above twoOrders_oneDesire_throws() test.
         @Test
         void orderIn_orderOut_and_desireIn_desireAny_shouldMatchRegardlessOfOrder() {
             Order orderIn = new Order(DAY, Court.H01, TIME_1800, TIME_1900);
@@ -151,6 +221,8 @@ class DesireOrderPairerTest {
         @Nested
         class Ambiguous {
 
+            // NOTE: the following test does not have Desire-with-Recipe variant because RecipeAny does not exist.
+            //   see comment above twoOrders_oneDesire_throws() test.
             // ambiguous ORDERS: order 1 can be mapped to any desire; so does order 2. therefore pairing cannot be made canonical
             @Test
             void orderIn_orderIn_and_desireIn_desireAny_shouldThrowBecauseAmbiguous() {
@@ -179,16 +251,24 @@ class DesireOrderPairerTest {
 
             // not Cat3, but kinda belongs here. Plus, if/when we have more than indoor/outdoor categories, it will be easy to refactor it so it is Cat3 and test will perform the same
             // ambiguous DESIRES: even though order is just 1, it is not clear which desire should be paired with it
-            @Test
-            void orderHard_desireIn_desireIn_shouldFailBecauseAmbiguous() {
+            @ParameterizedTest
+            @MethodSource("orderHard_desireIn_desireIn_shouldFailBecauseAmbiguous_args")
+            void orderHard_desireIn_desireIn_shouldFailBecauseAmbiguous(Desire desireIn1, Desire desireIn2) {
                 Order orderHard = new Order(DAY, Court.H01, TIME_1800, TIME_1900);
-                Desire desireIn1 = new Desire(DAY, ANY, Court.getIndoorIds());
-                Desire desireIn2 = new Desire(DAY, ANY, Court.getIndoorIds());
                 DesireOrderPairer pairer = new DesireOrderPairer(listOf(desireIn1, desireIn2), listOf(orderHard));
                 assertThrows(DuplicateDesiresException.class, pairer::pair);
             }
+            private static List<Arguments> orderHard_desireIn_desireIn_shouldFailBecauseAmbiguous_args() {
+                Desire desireIn1 = new Desire(DAY, ANY, Court.getIndoorIds());
+                Desire desireIn2 = new Desire(DAY, ANY, Court.getIndoorIds());
+                Desire desireRecipeIn1 = new Desire(DAY, INDOOR_RECIPE);
+                Desire desireRecipeIn2 = new Desire(DAY, INDOOR_RECIPE);
+                return List.of(
+                        Arguments.of(desireIn1, desireIn2),
+                        Arguments.of(desireRecipeIn1, desireRecipeIn2)
+                );
+            }
         }
-
 
     }
 

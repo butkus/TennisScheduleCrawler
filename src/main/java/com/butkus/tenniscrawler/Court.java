@@ -120,6 +120,13 @@ public enum Court {
         throw new RuntimeException(String.format("Court by name %s not found", name));
     }
 
+    public static Court getByCourtId(long id) {
+        for (Court value : values()) {
+            if (value.courtId == id) return value;
+        }
+        throw new RuntimeException(String.format("Court by courtId %s not found", id));
+    }
+
     public static List<Long> getByCourtTypes(List<Integer> courtTypes) {
         return Arrays.stream(values())
                 .filter(e -> courtTypes.contains(e.getCourtType().getCourtTypeId()))

@@ -38,4 +38,9 @@ public enum CourtType {
                 .map(CourtType::getCourtTypeId)
                 .collect(Collectors.toList());
     }
+
+    public static List<Integer> getIdsForPlaceFetcher() {
+//        - {"excludeCourtName":true,"excludeInfoUrl":true,"places":[2,18,5,20,8],"dates":["2026-01-01","2026-01-02","2026-01-03","2026-01-04","2026-01-05","2026-01-06","2026-01-07","2026-01-08"],"salePoint":11,"sessionToken":"93b25e67d079e4871686c18b02fe62f9"}
+        return List.of(HARD.courtTypeId, HARD_2.courtTypeId, CLAY.courtTypeId, GRASS.courtTypeId, CARPET.courtTypeId);
+    }
 }

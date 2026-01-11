@@ -23,7 +23,7 @@ public enum CourtTypeCustom {
     CARPET_FAR("carpet far", Constants.CARPET_FAR_COURTS);
 
     private final String name;
-    private final Collection<Court> ids;
+    private final Collection<Court> ids;    // todo: in a separate commit: rename to `courts` (and related variable names as well) -- (search for fooFix)
 
     private static class Constants {
         static final List<Court> ALL_HARD_COURTS;

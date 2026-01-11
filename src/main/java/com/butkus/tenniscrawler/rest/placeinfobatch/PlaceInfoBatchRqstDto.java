@@ -11,9 +11,6 @@ import java.util.List;
 @Data
 public class PlaceInfoBatchRqstDto {
 
-    @JsonProperty("dates")
-    private List<String> dates;
-
     /**
      * e.g. BS 11 sint. žolė
      */
@@ -28,6 +25,9 @@ public class PlaceInfoBatchRqstDto {
 
     @JsonProperty("places")
     private List<Integer> places;
+
+    @JsonProperty("dates")
+    private List<String> dates;
 
     @JsonProperty("salePoint")
     private Long salePoint;

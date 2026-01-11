@@ -120,6 +120,6 @@ public class DesireOrderPairer {
                 .filter(desire -> new HashSet<>(courtListCategory).containsAll(desire.getCourts()))
                 .filter(desire -> desire.getDate().equals(order.getDate()))
                 .filter(desire -> desire.getCourts().contains(order.getCourt().getCourtId()))
-                .collect(Collectors.toList());
+                .toList();
     }
 }

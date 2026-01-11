@@ -26,8 +26,10 @@ repositories {
 
 dependencies {
     annotationProcessor("org.projectlombok:lombok:${Versions.lombok}")
+    testAnnotationProcessor("org.projectlombok:lombok:${Versions.lombok}")
 
     compileOnly("org.projectlombok:lombok:${Versions.lombok}")
+    testCompileOnly("org.projectlombok:lombok:${Versions.lombok}")
 
     implementation("org.springframework.boot:spring-boot-starter-web:${Versions.springBoot}")
     implementation("org.apache.httpcomponents.client5:httpclient5:${Versions.http5Client}")

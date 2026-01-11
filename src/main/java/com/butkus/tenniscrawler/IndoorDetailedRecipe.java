@@ -84,4 +84,9 @@ public class IndoorDetailedRecipe extends Recipe {
     public IndoorDetailedRecipe() {
         super(map);
     }
+
+    @Override
+    public List<Integer> getDurationPreference() {
+        return List.of(60);
+    }
 }
