@@ -45,6 +45,12 @@ public class Calendar {
         }
 
         System.out.println();
+        System.out.println(">> Artimiausios rezervacijos:");
+        System.out.println(orders.get(0).getPrintableString());
+        System.out.println(orders.get(1).getPrintableString());
+
+
+        System.out.println();
         for (String lineByLine : bothMonths) {
             System.out.println(lineByLine);
         }
