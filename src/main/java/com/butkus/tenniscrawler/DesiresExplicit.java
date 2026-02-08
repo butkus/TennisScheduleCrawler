@@ -26,13 +26,21 @@ public class DesiresExplicit {
         //  this is perhaps a small overkill, but why not do it like Sony and make UX friendly
 
 
-        desires.add(new Desire(LocalDate.parse("2025-06-08"), NONE, IN));  // 1800 2h
-        desires.add(new Desire(LocalDate.parse("2025-06-08"), NONE, CLAY)); // 1900 2h, Sunday, WANT EARLIER
-        desires.add(new Desire(LocalDate.parse("2025-06-08"), NONE, OUT)); // don't want
+        desires.add(new Desire(LocalDate.parse("2025-06-01"), NONE, IN));  // 1800 2h, Sunday
+        desires.add(new Desire(LocalDate.parse("2025-06-01"), NONE, CLAY)); // 1800 2h grass, WANT CLAY
+        desires.add(new Desire(LocalDate.parse("2025-06-01"), NONE, OUT)); // 1800 2h grass, WANT CLAY
 
-        desires.add(new Desire(LocalDate.parse("2025-06-10"), EARLIER, IN));  // 1930 1,5
-        desires.add(new Desire(LocalDate.parse("2025-06-10"), EARLIER, CLAY)); // 2030 1,5
-        desires.add(new Desire(LocalDate.parse("2025-06-10"), NONE, OUT)); // don't want
+        desires.add(new Desire(LocalDate.parse("2025-06-04"), NONE, IN));   // 1930 1h hard
+        desires.add(new Desire(LocalDate.parse("2025-06-04"), EARLIER, CLAY));  // 2030 1h, WANT EARLIER
+        desires.add(new Desire(LocalDate.parse("2025-06-04"), NONE, OUT));  // wednesday, dont need
+
+        desires.add(new Desire(LocalDate.parse("2025-06-06"), NONE, IN));   // 1900 1.5h friday
+        desires.add(new Desire(LocalDate.parse("2025-06-06"), NONE, CLAY));  // 1800 1.5h
+        desires.add(new Desire(LocalDate.parse("2025-06-06"), NONE, OUT));  // don't want
+
+        desires.add(new Desire(LocalDate.parse("2025-06-08"), NONE, IN));  // 1800 2h
+        desires.add(new Desire(LocalDate.parse("2025-06-08"), EARLIER, CLAY)); // 1900 2h, Sunday, WANT EARLIER
+        desires.add(new Desire(LocalDate.parse("2025-06-08"), NONE, OUT)); // don't want
 
         desires.add(new Desire(LocalDate.parse("2025-06-11"), NONE, IN));   // 1930 1h
         desires.add(new Desire(LocalDate.parse("2025-06-11"), NONE, CLAY));  // wednesday, dont need
