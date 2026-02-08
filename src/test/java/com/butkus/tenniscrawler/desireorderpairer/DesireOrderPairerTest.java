@@ -45,7 +45,7 @@ class DesireOrderPairerTest {
     public static final LocalTime TIME_1800 = LocalTime.parse("18:00");
     public static final LocalTime TIME_1900 = LocalTime.parse("19:00");
 
-    public static final Recipe INDOOR_RECIPE = new IndoorSimpleRecipe();
+    public static final Recipe INDOOR_RECIPE = new IndoorSimple();
     public static final Recipe OUTDOOR_RECIPE = new OutdoorOnlyRecipe();
 
     @ParameterizedTest
@@ -63,34 +63,31 @@ class DesireOrderPairerTest {
         );
     }
 
+    @Nested
+    class OrderDoesNotHaveDesire {
 
-    @ParameterizedTest
-    @MethodSource("orderDoesNotHaveDesire_byDay_args")
-    void orderDoesNotHaveDesire_byDay_throws(Desire desire) {
-        Order order = new Order(DAY, Court.H01, TIME_1800, TIME_1900);
-        DesireOrderPairer pairer = new DesireOrderPairer(listOf(desire), listOf(order));
-        assertThrows(OrderWithoutDesireException.class, pairer::pair);
-    }
-    static List<Desire> orderDoesNotHaveDesire_byDay_args() {
-        return Arrays.asList(
-                new Desire(NEXT_DAY, ANY, Court.getIndoorIds()),
-                new Desire(NEXT_DAY, INDOOR_RECIPE)
-        );
-    }
+        @ParameterizedTest
+        @MethodSource("orderDoesNotHaveDesire_byDay_args")
+        @MethodSource("orderDoesNotHaveDesire_byCourt_args")
+        void orderDoesNotHaveDesire_throws(Desire desire) {
+            Order order = new Order(DAY, Court.H01, TIME_1800, TIME_1900);
+            DesireOrderPairer pairer = new DesireOrderPairer(listOf(desire), listOf(order));
+            assertThrows(OrderWithoutDesireException.class, pairer::pair);
+        }
 
+        static List<Desire> orderDoesNotHaveDesire_byDay_args() {
+            return Arrays.asList(
+                    new Desire(NEXT_DAY, ANY, Court.getIndoorIds()),
+                    new Desire(NEXT_DAY, INDOOR_RECIPE)
+            );
+        }
+        static List<Desire> orderDoesNotHaveDesire_byCourt_args() {
+            return Arrays.asList(
+                    new Desire(DAY, ANY, Court.getOutdoorIds()),
+                    new Desire(DAY, OUTDOOR_RECIPE)
+            );
+        }
 
-    @ParameterizedTest
-    @MethodSource("orderDoesNotHaveDesire_byCourt_args")
-    void orderDoesNotHaveDesire_byCourt_throws(Desire desire) {
-        Order order = new Order(DAY, Court.H01, TIME_1800, TIME_1900);
-        DesireOrderPairer pairer = new DesireOrderPairer(listOf(desire), listOf(order));
-        assertThrows(OrderWithoutDesireException.class, pairer::pair);
-    }
-    static List<Desire> orderDoesNotHaveDesire_byCourt_args() {
-        return Arrays.asList(
-                new Desire(DAY, ANY, Court.getOutdoorIds()),
-                new Desire(DAY, OUTDOOR_RECIPE)
-        );
     }
 
 

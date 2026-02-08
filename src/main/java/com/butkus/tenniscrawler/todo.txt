@@ -232,6 +232,35 @@ for now:
 todo -- check if desire resolver correcrly assuems that NEW explictit desire overrides NEW implicit one
 
 
+-- NOW
+    - fullsell check
+        - K4 at 2026-01-18 at 1800 was only available to book 2-hour-only. Why?
+        - let's explain with K4 at 1700 at 1-hour-only because situation changed whilst researching
+        - so
+            - SEB themselves do not know from the timetable (**** placeInfo **** call)
+            - in our example, K4 was fullsell in all slots from 1700 through 19300
+            - only when you click on 1700, you can see that 60-min-only is available
+            - if you click on 1730, it says "Deja šis laikas yra rezervuotas", even though it is fullsell
+            - reason is that when you click on a time, it does a **** timeInfo call **** and finds out the specifics
+            - and specifics this time was that 1700-1800 was only sellable as 1 chunk, not by 30-min chunks
+        - let's write some tests
+            - let's no do integration testing. well, would be nice, bet perhaps, let's test units
+            - when within 48 hours
+                - fullsell to be considered as free
+                - every weight, "available" according to placeInfo(), to be tested with timeInfo()
+                    - "available" means for all required 30-min slots, must be either "free" or "fullsell"
+                    - e.g. for durationPreference of 90 mins, placeInfo() must have 3 consecutive 30-min slots of
+                      either "free" or "fullsell" in order to be considered eligible for timeInfo() check
+
+
 -- later:
     - crawler wrapped
+        - how many courts it helped find (add max 1 per day in winter season, max 2 per day in summer (can be 1 indoor and 1 outdoor simultaneously)
+        - most improved/max bookings per reservation -- how many times a reservation was booked, cancelled, rebooked because a better one was found for the same day
     - sugalvot geresni pavadinima appsui
+    - release notes (maybe not release notes per se, but mark milestones for posterity/curiosity. I think this is a 5th major-is rewrite (recipes)
+
+new way:
+    - before        65 sec  (all ANY/EARLIER/LATER)
+    - intermediate  25 sec  (ANY/EARLIER/LATER for weekends, Recipe for weekdays)
+    - after         15 sec  (all Recipe)

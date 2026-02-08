@@ -171,10 +171,12 @@ public class Timetable {
         }
 
         boolean chainUnbroken = true;
+        List<String> sellable = List.of("free", "fullsell");
         for (int i = startPositionFound; i <= endPositionFound; i++) {
             HalfHour current = all.get(i);
-            if (!current.getStatus().equals("free")) {
+            if (!sellable.contains(current.getStatus())) {
                 chainUnbroken = false;
+                break;
             }
         }
         return chainUnbroken;

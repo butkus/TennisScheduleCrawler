@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
@@ -94,6 +95,11 @@ public class DesiresIteratorThingy {
     }
 
 
+    public LocalDateTime getNow() {
+        return LocalDateTime.now(configurator.getClock());
+    }
 
-
+    public LocalDateTime get48HoursAgo() {
+        return LocalDateTime.now(configurator.getClock()).minusHours(48);
+    }
 }

@@ -1,11 +1,7 @@
 package com.butkus.tenniscrawler;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.butkus.tenniscrawler.ExtensionInterest.EARLIER;
-import static com.butkus.tenniscrawler.ExtensionInterest.NONE;
 
 // todo rename maybe. legacy was "Input".
 // todo rename other new ones too
@@ -33,25 +29,8 @@ public class DesiresExplicit {
 
         // todo if 2 ordeers are place same day same court (it courrenlty says DuplicateOrdersException: More than 1 indoor Order for 2025-10-29) -- ignore that day
 
+//        desires.add(new Desire(LocalDate.parse("2026-02-08"), NONE, IN));
 
-
-        desires.add(new Desire(LocalDate.parse("2026-01-18"), NONE, IN));                       // S 1830
-        desires.add(new Desire(LocalDate.parse("2026-01-21"), new IndoorDetailedRecipe()));     // T 1800
-        desires.add(new Desire(LocalDate.parse("2026-01-25"), EARLIER, IN));                    // S 1900
-        desires.add(new Desire(LocalDate.parse("2026-02-01"), EARLIER, IN));                    // S 1900
-        desires.add(new Desire(LocalDate.parse("2026-02-04"), new IndoorDetailedRecipe()));     // T 1930
-        desires.add(new Desire(LocalDate.parse("2026-02-08"), EARLIER, IN));                    // S 1900
-        desires.add(new Desire(LocalDate.parse("2026-02-11"), new IndoorDetailedRecipe()));     // T
-        desires.add(new Desire(LocalDate.parse("2026-02-15"), EARLIER, IN));                    // S 1900
-        desires.add(new Desire(LocalDate.parse("2026-02-18"), new IndoorDetailedRecipe()));     // T
-        desires.add(new Desire(LocalDate.parse("2026-02-22"), EARLIER, IN));                    // S 1900
-        desires.add(new Desire(LocalDate.parse("2026-03-01"), EARLIER, IN));                    // S 1900
-        desires.add(new Desire(LocalDate.parse("2026-03-08"), EARLIER, IN));                    // S 1900
-        desires.add(new Desire(LocalDate.parse("2026-03-15"), EARLIER, IN));                    // S 1900
-        desires.add(new Desire(LocalDate.parse("2026-03-22"), EARLIER, IN));                    // S 1830 K2
-        desires.add(new Desire(LocalDate.parse("2026-03-29"), EARLIER, IN));                    // S 1930 K2
-        desires.add(new Desire(LocalDate.parse("2026-04-01"), new IndoorDetailedRecipe()));     // T 1800
-        desires.add(new Desire(LocalDate.parse("2026-04-05"), EARLIER, IN));                    // S 1830
 
         return desires;
     }

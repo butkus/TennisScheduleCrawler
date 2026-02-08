@@ -7,6 +7,7 @@ import com.butkus.tenniscrawler.rest.placeinfobatch.Timetable;
 import com.butkus.tenniscrawler.rest.timeinfobatch.DataTimeInfo;
 import com.butkus.tenniscrawler.rest.timeinfobatch.TimeInfoBatchRspDto;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjuster;
@@ -32,6 +33,7 @@ public class Vacancy {
 
     private AudioPlayer audioPlayer;
     private SebFetcher fetcher;
+    private Clock clock;
 
     private final Order order;
 
@@ -56,6 +58,7 @@ public class Vacancy {
 
         this.audioPlayer = bookingConfigurator.getAudioPlayer();
         this.fetcher = bookingConfigurator.getFetcher();
+        this.clock = bookingConfigurator.getClock();
 
         this.order = desire.getOrder();
 
@@ -163,8 +166,23 @@ public class Vacancy {
                             boolean courtMatches = recipeIds.contains(courtId);
                             found = timeMatches && courtMatches;
                             if (found) {
-                                vacancyFound = new VacancyFound(courtId, day, recipeFrom, recipeTo);
-                                break;  // todo: refactor: both "continue and "break" are too much
+                                // todo check how SEB forms request -- and then mimic it
+                                // todo should not add `if volatile, then timeInfoBatch` because test for that is not yet
+                                if (isVolatile()) {
+                                    boolean found2 = searchForReservation(List.of(courtId), recipeFrom, MINUTES.between(recipeFrom, recipeTo));
+                                    if (found2) {
+                                        vacancyFound = new VacancyFound(courtId, day, recipeFrom, recipeTo);
+                                    } else {
+                                        found = false;
+                                        // do not break;
+                                    }
+                                } else {
+                                    vacancyFound = new VacancyFound(courtId, day, recipeFrom, recipeTo);
+                                    break;  // todo: refactor: both "continue and "break" are too much
+                                }
+
+//                                vacancyFound = new VacancyFound(courtId, day, recipeFrom, recipeTo);
+//                                break;  // todo: refactor: both "continue and "break" are too much
                             }
                         }
                     }
@@ -269,4 +287,12 @@ public class Vacancy {
         return found;
     }
 
+    public boolean isVolatile() {
+        List<LocalDate> acceptableDates = List.of(
+                LocalDate.now(clock),
+                LocalDate.now(clock).plusDays(1),
+                LocalDate.now(clock).plusDays(2)
+        );
+        return acceptableDates.contains(this.day);
+    }
 }

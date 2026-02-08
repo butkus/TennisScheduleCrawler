@@ -68,8 +68,8 @@ public class Crawler {
         DesireMaker desireMaker = new DesireMaker(CLOCK);
         List<Desire> inputs = desireMaker
                 .addExplicitDesires()
-                .addNext(12, WEDNESDAY, new IndoorDetailedRecipe())
-                .addNext(12, SUNDAY, new IndoorDetailedRecipe())
+                .addNext(12, WEDNESDAY, new IndoorMonFri())
+                .addNext(12, SUNDAY, new IndoorWeekend())
                 .make();
         desiresThingy.doWork(inputs);
     }

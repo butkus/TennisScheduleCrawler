@@ -13,11 +13,11 @@ import static com.butkus.tenniscrawler.CourtTypeCustom.HARD;
  * | hard         |    4   |    3   |    2   |    1   |    3   |
  * | carpet       |    5   |    4   |    3   |    2   |    4   |
  */
-class IndoorSimpleRecipeTest extends AbstractRecipeTest {
+class IndoorSimpleTest extends AbstractRecipeTest {
 
     @Override
     Recipe getRecipe() {
-        return new IndoorSimpleRecipe();
+        return new IndoorSimple();
     }
 
     @Override

@@ -20,15 +20,18 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static com.butkus.tenniscrawler.ExtensionInterest.ANY;
 import static com.butkus.tenniscrawler.ExtensionInterest.NONE;
+import static java.time.ZoneOffset.UTC;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -39,10 +42,19 @@ class DesiresIteratorThingyTest {
     public static final String DAY = "2023-10-01";
 
     public static final String DAY_1 = "2023-10-01";
+    public static final String DAY_2 = "2023-10-02";
+    public static final String DAY_3 = "2023-10-03";
+    public static final String DAY_4 = "2023-10-04";
     public static final String DAY_8 = "2023-10-08";
     public static final String DAY_9 = "2023-10-09";
+    public static final String DAY_11 = "2023-10-11";
+    public static final String DAY_12 = "2023-10-12";
     public static final String DAY_16 = "2023-10-16";
     public static final String DAY_17 = "2023-10-17";
+    public static final String DAY_18 = "2023-10-18";
+    public static final String DAY_19 = "2023-10-19";
+    public static final String DAY_26 = "2023-10-26";
+    public static final String DAY_27 = "2023-10-27";
 
     public static final String RECIPE_BASED = "recipe-based";
 
@@ -61,9 +73,11 @@ class DesiresIteratorThingyTest {
 
     @Mock private AudioPlayer audioPlayer;
     @Mock private SebFetcher fetcher;
+    private static final Clock CLOCK = Clock.fixed(Instant.parse("2023-10-01T12:00:00Z"), UTC);
 
     private DesiresIteratorThingy thingy;
     //    @InjectMocks private DesiresIteratorThingy thingy;
+
 
     private MockedStatic<SebOrderConverter> orderConverterMockedStatic;
 
@@ -88,9 +102,9 @@ class DesiresIteratorThingyTest {
     @BeforeEach
     void setUp() throws Exception {
         orderConverterMockedStatic = mockStatic(SebOrderConverter.class);
-        BookingConfigurator configurator = new BookingConfigurator(audioPlayer, fetcher);
+        BookingConfigurator configurator = new BookingConfigurator(audioPlayer, fetcher, CLOCK);
         thingy = spy(new DesiresIteratorThingy(configurator));
-        when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(Stubs.stubPlaceInfoFull());
+        when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoFull());
     }
 
     @AfterEach
@@ -164,36 +178,36 @@ class DesiresIteratorThingyTest {
 
         @BeforeEach
         void setUp() throws Exception {
-            when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(Stubs.stubPlaceInfo7Days());
+            when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfo7Days());
         }
 
         @Test
         void desiresSpan1day_fetchesOnce() {
-            thingy.doWork(stubDesireForDays(DAY_1));
+            thingy.doWork(stubDesireForDays(DAY_11));
             fetchesOncePlaces();
         }
 
         @Test
         void desiresSpan8days_fetchesOnce() {
-            thingy.doWork(stubDesireForDays(DAY_1, DAY_8));
+            thingy.doWork(stubDesireForDays(DAY_11, DAY_18));
             fetchesOncePlaces();
         }
 
         @Test
         void desiresSpan9days_fetches2times() {
-            thingy.doWork(stubDesireForDays(DAY_1, DAY_9));
+            thingy.doWork(stubDesireForDays(DAY_11, DAY_19));
             fetchesPlaces(2);
         }
 
         @Test
         void desiresSpan16days_fetches2times() {
-            thingy.doWork(stubDesireForDays(DAY_1, DAY_16));
+            thingy.doWork(stubDesireForDays(DAY_11, DAY_26));
             fetchesPlaces(2);
         }
 
         @Test
         void desiresSpan17days_fetches3times() {
-            thingy.doWork(stubDesireForDays(DAY_1, DAY_17));
+            thingy.doWork(stubDesireForDays(DAY_11, DAY_27));
             fetchesPlaces(3);
         }
 
@@ -206,13 +220,53 @@ class DesiresIteratorThingyTest {
         }
 
 
-        // todo rename
         @Test
-        void passes1daysDtosToVacancyScanner() {
-            thingy.doWork(stubDesireForDays(DAY_1));
+        void desiresFor2days_passes1daysDtosToVacancyScanner() {
+            // whatever you ask, there's NO booking
+            when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoOccupied());
+
+            thingy.doWork(stubDesireForDays(DAY_1, DAY_2));
             assertCourtDtosFilteredFor1day();
             // todo check that that 1 day is today
         }
+    }
+
+
+    // todo maybe group with some other tests. This verifies if post__TIME___InfoBatch is called for 48-hour desires
+    @Tag(RECIPE_BASED)
+    @Test
+    void desireToday_WhenPlaceInfoFindsVacancy_ThenTimeInfoCalled() throws Exception {
+        mockOrders(new ArrayList<>());
+
+        // todo DAY_2 and DAY_3 also -- because tomorrow is always within 48 hours; day 3 may or may not be within 48 hours and for orders we have we can know if they are in- or out- 48-hours, but for timeInfoBatch we cannot pass time parameter, only date, therefore, we assume that day 3 is also volatile (and DAY4 does not do timeInfoBActch -- another test)
+        //   OR don't check days, but mock volatile true (with this test) and false (with another test) --> less integration-test-y to only check 1 module (VacancyTest already checks which days are volatile)
+        List<Desire> desires = Stubs.stubDesiresRecipe(DAY, new IndoorSimple());
+
+        // fullsell at 19:30, 20:00, and 21:30 slots.
+        // They might be sellable in 30-min slots, but maybe in 30+60/60+30 or maybe 90-min-only, we don't know yet. placeInfoBatch does not tell us that
+        when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoHard01at1930fullsell90Mins());
+
+        // timeInfoBach does tell if aviable duration is 90-min only, or 30+60, or 60+30, or 30+30+30
+        // todo: this stubs 20:00-21:00 unequivocally free (60-min-only slot). Need to cover other options too (or make it clear that they are not relevant to cover)
+        // todo: this is a bit false because 19:30-20:00 is not accounted for
+        stubOccupiedExcept(List.of(Court.H01.getCourtId()), Court.H01, LocalTime.parse("20:00"), 60L);
+
+        assertDoesNotThrow(() -> thingy.doWork(desires));
+
+        fetchesOncePlaces();    // placeInfoBatch (todo rename. maybe fetchesPlaceOnce()?
+
+        fetchesTwice();         // timeInfoBatch  (todo rename. maybe fetchesTimeTwice()?
+        // based on placeInfoBatch response (fullsell 19:30-21:00)
+        //   - checks weight 1 (HARD, 19:30), calls timeInfoBatch(HARD, 19:30, 60 mins), does not find. Then,
+        //   - does not check weight 2 because (fullsell 19:30-21:00 hard) says there's nothing for it. Then,
+        //   - checks weight 3
+        //          - does not check first in line (HARD, 18:30)
+        //          - checks second in line -- (HARD 20:00) and finds.
+        assertThat(timeCaptor.getAllValues()).containsExactly(T1930, T2000);
+        assertThat(dateCaptor.getAllValues()).containsExactly(LocalDate.parse(DAY), LocalDate.parse(DAY));
+        assertThat(courtsCaptor.getAllValues()).containsExactly(List.of(1L), List.of(1L));
+
+        assertVacancyFound(new VacancyFound(Court.H01.getCourtId(), LocalDate.parse(DAY), T2000, T2100));
     }
 
 //   postPlaceInfoBatch tests  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -231,7 +285,7 @@ class DesiresIteratorThingyTest {
 
         mockOrders(new ArrayList<>());
 
-        List<Desire> desires = stubDesires(DAY, ANY, Court.getClayIds());
+        List<Desire> desires = Stubs.stubDesires(DAY, ANY, Court.getClayIds());
 
         // whatever you ask, there's NO booking
         when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoOccupied());
@@ -258,8 +312,8 @@ class DesiresIteratorThingyTest {
     @Test
     void noPriorOrders_OutdoorRecipe_nothingExists_doesNotFind() throws Exception {
         mockOrders(new ArrayList<>());
-        List<Desire> desires = stubDesiresRecipe(DAY, new OutdoorOnlyRecipe());
-        when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(Stubs.stubPlaceInfoFull());
+        List<Desire> desires = Stubs.stubDesiresRecipe(DAY, new OutdoorOnlyRecipe());
+        when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoFull());
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -272,10 +326,10 @@ class DesiresIteratorThingyTest {
     void noPriorOrders_IndoorRecipe_nothingExists_doesNotFind() throws Exception {
         mockOrders(new ArrayList<>());
 
-        List<Desire> desires = stubDesiresRecipe(DAY, new IndoorSimpleRecipe());
+        List<Desire> desires = Stubs.stubDesiresRecipe(DAY, new IndoorSimple());
 
         // wrong stub (Outdoor vacancy) -- should result in "nothing found"
-        when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(Stubs.stubPlaceInfoFull());
+        when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoFull());
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -289,12 +343,13 @@ class DesiresIteratorThingyTest {
     @Test
     void noPriorOrders_bestCourtIsFree_finds() throws Exception {
         mockOrders(new ArrayList<>());
-        List<Desire> desires = stubDesiresRecipe(DAY, new OutdoorOnlyRecipe());
-        when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(Stubs.stubPlaceInfoClay01at1900free());
+        String day = DAY_11;
+        List<Desire> desires = Stubs.stubDesiresRecipe(day, new OutdoorOnlyRecipe());
+        when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1900free());
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
-        assertVacancyFound(new VacancyFound(Court.C01.getCourtId(), LocalDate.parse(DAY), T1900, T2000));
+        assertVacancyFound(new VacancyFound(Court.C01.getCourtId(), LocalDate.parse(day), T1900, T2000));
     }
 
     @Nested
@@ -311,13 +366,14 @@ class DesiresIteratorThingyTest {
         void firstOption_claySummerAt1830() throws Exception {
             mockOrders(new ArrayList<>());
 
-            List<Desire> desires = stubDesiresRecipe(DAY, new OutdoorOnlyRecipe());
+            String day = DAY_11;
+            List<Desire> desires = Stubs.stubDesiresRecipe(day, new OutdoorOnlyRecipe());
 
-            when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(Stubs.stubPlaceInfoClay01at1830free());
+            when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1830free());
 
             assertDoesNotThrow(() -> thingy.doWork(desires));
 
-            assertVacancyFound(new VacancyFound(44L, LocalDate.parse(DAY), T1830, T1930));
+            assertVacancyFound(new VacancyFound(44L, LocalDate.parse(day), T1830, T1930));
         }
 
         @Tag(RECIPE_BASED)
@@ -325,14 +381,15 @@ class DesiresIteratorThingyTest {
         void secondOption_clayRestAt1900() throws Exception {
             mockOrders(new ArrayList<>());
 
-            List<Desire> desires = stubDesiresRecipe(DAY, new OutdoorOnlyRecipe());
+            String day = DAY_11;
+            List<Desire> desires = Stubs.stubDesiresRecipe(day, new OutdoorOnlyRecipe());
 
-            when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(Stubs.stubPlaceInfoClay10at1900free());
+            when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay10at1900free());
 
             assertDoesNotThrow(() -> thingy.doWork(desires));
 
             Long id53 = Court.C10.getCourtId();
-            assertVacancyFound(new VacancyFound(id53, LocalDate.parse(DAY), T1900, T2000));
+            assertVacancyFound(new VacancyFound(id53, LocalDate.parse(day), T1900, T2000));
         }
     }
 
@@ -340,7 +397,7 @@ class DesiresIteratorThingyTest {
     @Test
     void requestedAny_noPriorOrders_allYouAskIsVacant_searches_1_timeAndFinds() {
         mockOrders(new ArrayList<>());
-        List<Desire> desires = stubDesires(DAY, ANY, Court.getClayIds());
+        List<Desire> desires = Stubs.stubDesires(DAY, ANY, Court.getClayIds());
 
         // whatever you ask, there's a booking
         when(fetcher.postTimeInfoBatch(any(), any(), any())).thenAnswer(e -> stubTimeInfo(e.getArgument(1), e.getArgument(2)));
@@ -358,18 +415,18 @@ class DesiresIteratorThingyTest {
     static Stream<Order> weight4orders() {
         return Stream.of(
                 // CLAY_SUMMER 18:30
-                new Order(LocalDate.parse(DAY), Court.C01, T1830, T1930),
-                new Order(LocalDate.parse(DAY), Court.C02, T1830, T1930),
-                new Order(LocalDate.parse(DAY), Court.C05, T1830, T1930),
-                new Order(LocalDate.parse(DAY), Court.C06, T1830, T1930),
+                new Order(LocalDate.parse(DAY_11), Court.C01, T1830, T1930),
+                new Order(LocalDate.parse(DAY_11), Court.C02, T1830, T1930),
+                new Order(LocalDate.parse(DAY_11), Court.C05, T1830, T1930),
+                new Order(LocalDate.parse(DAY_11), Court.C06, T1830, T1930),
 
                 // CLAY REST 19:00
-                new Order(LocalDate.parse(DAY), Court.C03, T1900, T2000),
-                new Order(LocalDate.parse(DAY), Court.C04, T1900, T2000),
-                new Order(LocalDate.parse(DAY), Court.C07, T1900, T2000),
-                new Order(LocalDate.parse(DAY), Court.C08, T1900, T2000),
-                new Order(LocalDate.parse(DAY), Court.C09, T1900, T2000),
-                new Order(LocalDate.parse(DAY), Court.C10, T1900, T2000)
+                new Order(LocalDate.parse(DAY_11), Court.C03, T1900, T2000),
+                new Order(LocalDate.parse(DAY_11), Court.C04, T1900, T2000),
+                new Order(LocalDate.parse(DAY_11), Court.C07, T1900, T2000),
+                new Order(LocalDate.parse(DAY_11), Court.C08, T1900, T2000),
+                new Order(LocalDate.parse(DAY_11), Court.C09, T1900, T2000),
+                new Order(LocalDate.parse(DAY_11), Court.C10, T1900, T2000)
         );
     }
 
@@ -394,10 +451,10 @@ class DesiresIteratorThingyTest {
     @MethodSource("weight4orders")
     void hasOrderOfWeight4_existsVacancyOfWeight5_doesNotFind(Order order) throws Exception {
         mockOrders(List.of(order));
-        List<Desire> desires = stubDesiresRecipe(DAY, new OutdoorOnlyRecipe());
+        List<Desire> desires = Stubs.stubDesiresRecipe(DAY_11, new OutdoorOnlyRecipe());
 
         // weight 5: Clay 1 at 18:00
-        when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(Stubs.stubPlaceInfoClay01at1800free());
+        when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1800free());
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -409,10 +466,10 @@ class DesiresIteratorThingyTest {
     @MethodSource("weight4orders")
     void hasOrderOfWeight4_existsAnotherVacancyOfWeight4_doesNotFind(Order order) throws Exception {
         mockOrders(List.of(order));
-        List<Desire> desires = stubDesiresRecipe(DAY, new OutdoorOnlyRecipe());
+        List<Desire> desires = Stubs.stubDesiresRecipe(DAY_11, new OutdoorOnlyRecipe());
 
         // weight 4: Clay 10 at 19:00
-        when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(Stubs.stubPlaceInfoClay10at1900free());
+        when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay10at1900free());
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -424,15 +481,16 @@ class DesiresIteratorThingyTest {
     @MethodSource("weight4orders")
     void hasOrderOfWeight4_existsVacancyOfWeight3_finds(Order order) throws Exception {
         mockOrders(List.of(order));
-        List<Desire> desires = stubDesiresRecipe(DAY, new OutdoorOnlyRecipe());
+        String day = DAY_11;
+        List<Desire> desires = Stubs.stubDesiresRecipe(day, new OutdoorOnlyRecipe());
 
         // weight 3: Clay 1 at 19:30
-        when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(Stubs.stubPlaceInfoClay01at1930free());
+        when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1930free());
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
         Long id44 = Court.C01.getCourtId();
-        assertVacancyFound(new VacancyFound(id44, LocalDate.parse(DAY), T1930, T2030));
+        assertVacancyFound(new VacancyFound(id44, LocalDate.parse(day), T1930, T2030));
     }
 
     @Tag(RECIPE_BASED)
@@ -440,15 +498,16 @@ class DesiresIteratorThingyTest {
     @MethodSource("weight4orders")
     void hasOrderOfWeight4_existsVacancyOfWeight2_finds(Order order) throws Exception {
         mockOrders(List.of(order));
-        List<Desire> desires = stubDesiresRecipe(DAY, new OutdoorOnlyRecipe());
+        String day = DAY_11;
+        List<Desire> desires = Stubs.stubDesiresRecipe(day, new OutdoorOnlyRecipe());
 
         // weight 2: Clay 1 at 19:00
-        when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(Stubs.stubPlaceInfoClay01at1900free());
+        when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1900free());
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
         Long id44 = Court.C01.getCourtId();
-        assertVacancyFound(new VacancyFound(id44, LocalDate.parse(DAY), T1900, T2000));
+        assertVacancyFound(new VacancyFound(id44, LocalDate.parse(day), T1900, T2000));
     }
 
 
@@ -456,21 +515,22 @@ class DesiresIteratorThingyTest {
     @ParameterizedTest
     @MethodSource("weight2And3Vacancy")
     void hasOrderOfWeight4_existsVacancyOfWeight2and3_sameCourtType_finds2InAnyOrder(PlaceInfoBatchRspDto placeInfoBatchRspDto) {
-        mockOrders(List.of(new Order(LocalDate.parse(DAY), Court.C01, T1830, T1930)));
-        List<Desire> desires = stubDesiresRecipe(DAY, new OutdoorOnlyRecipe());
+        String day = DAY_11;
+        mockOrders(List.of(new Order(LocalDate.parse(day), Court.C01, T1830, T1930)));
+        List<Desire> desires = Stubs.stubDesiresRecipe(day, new OutdoorOnlyRecipe());
 
         when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(placeInfoBatchRspDto);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
         Long id44 = Court.C01.getCourtId();
-        assertVacancyFound(new VacancyFound(id44, LocalDate.parse(DAY), T1900, T2000));
+        assertVacancyFound(new VacancyFound(id44, LocalDate.parse(day), T1900, T2000));
     }
 
     static Stream<PlaceInfoBatchRspDto> weight2And3Vacancy() throws Exception {
         return Stream.of(
-                Stubs.stubPlaceInfoClay01at1900free_then_Clay02at1930free(),    // weight 2, then 3
-                Stubs.stubPlaceInfoClay02at1930free_then_Clay01at1900free()     // weight 3, then 2
+                SebStubs.stubPlaceInfoClay01at1900free_then_Clay02at1930free(),    // weight 2, then 3
+                SebStubs.stubPlaceInfoClay02at1930free_then_Clay01at1900free()     // weight 3, then 2
         );
     }
 
@@ -478,21 +538,22 @@ class DesiresIteratorThingyTest {
     @ParameterizedTest
     @MethodSource("weight6And7Vacancy")
     void hasOrderOfWeight8_existsVacancyOfWeight6and7_differentCourtTypes_finds6InAnyOrder(PlaceInfoBatchRspDto placeInfoBatchRspDto) {
-        mockOrders(List.of(new Order(LocalDate.parse(DAY), Court.G1, T1930, T2030)));
-        List<Desire> desires = stubDesiresRecipe(DAY, new OutdoorOnlyRecipe());
+        String day = DAY_11;
+        mockOrders(List.of(new Order(LocalDate.parse(day), Court.G1, T1930, T2030)));
+        List<Desire> desires = Stubs.stubDesiresRecipe(day, new OutdoorOnlyRecipe());
 
         when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(placeInfoBatchRspDto);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
         Long id52 = Court.C09.getCourtId();
-        assertVacancyFound(new VacancyFound(id52, LocalDate.parse(DAY), T1830, T1930));
+        assertVacancyFound(new VacancyFound(id52, LocalDate.parse(day), T1830, T1930));
     }
 
     static Stream<PlaceInfoBatchRspDto> weight6And7Vacancy() throws Exception {
         return Stream.of(
-                Stubs.stubPlaceInfoClay09at1830free_then_Grass01at1900free(),    // weight 6, then 7
-                Stubs.stubPlaceInfoGrass01at1900free_then_Clay09at1830free()     // weight 7, then 6
+                SebStubs.stubPlaceInfoClay09at1830free_then_Grass01at1900free(),    // weight 6, then 7
+                SebStubs.stubPlaceInfoGrass01at1900free_then_Clay09at1830free()     // weight 7, then 6
         );
     }
 
@@ -500,14 +561,18 @@ class DesiresIteratorThingyTest {
     @Nested
     class Durations {
 
+        public static final String TODAY = DAY_11;
+
+        ///  The following tests assume getDurationPreference = List.of(90, 60);
+
         @Nested
         class NoPriorOrder {
 
             @Test
             void _30Available_doesNotFind() throws Exception {
                 mockOrders(new ArrayList<>());
-                List<Desire> desires = stubDesiresRecipe(DAY, new OutdoorOnlyRecipe());
-                when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(Stubs.stubPlaceInfoClay01at1800has30minFree());
+                List<Desire> desires = Stubs.stubDesiresRecipe(TODAY, new OutdoorOnlyRecipe());
+                when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1800has30minFree());
 
                 assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -518,23 +583,23 @@ class DesiresIteratorThingyTest {
             @Test
             void _60Available_finds() throws Exception {
                 mockOrders(new ArrayList<>());
-                List<Desire> desires = stubDesiresRecipe(DAY, new OutdoorOnlyRecipe());
-                when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(Stubs.stubPlaceInfoClay01at1800free());
+                List<Desire> desires = Stubs.stubDesiresRecipe(TODAY, new OutdoorOnlyRecipe());
+                when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1800free());
 
                 assertDoesNotThrow(() -> thingy.doWork(desires));
 
-                assertVacancyFound(new VacancyFound(Court.C01.getCourtId(), LocalDate.parse(DAY), T1800, T1900));
+                assertVacancyFound(new VacancyFound(Court.C01.getCourtId(), LocalDate.parse(TODAY), T1800, T1900));
             }
 
             @Test
             void _90Available_finds() throws Exception {
                 mockOrders(new ArrayList<>());
-                List<Desire> desires = stubDesiresRecipe(DAY, new OutdoorOnlyRecipe());
-                when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(Stubs.stubPlaceInfoClay01at1930has90minFree());
+                List<Desire> desires = Stubs.stubDesiresRecipe(TODAY, new OutdoorOnlyRecipe());
+                when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1930has90minFree());
 
                 assertDoesNotThrow(() -> thingy.doWork(desires));
 
-                assertVacancyFound(new VacancyFound(Court.C01.getCourtId(), LocalDate.parse(DAY), T1930, T2100));
+                assertVacancyFound(new VacancyFound(Court.C01.getCourtId(), LocalDate.parse(TODAY), T1930, T2100));
             }
 
 
@@ -542,7 +607,7 @@ class DesiresIteratorThingyTest {
             @MethodSource("_90and60available_sameWeight_picks90inAnyOrder_args")
             void _90and60available_sameWeight_picks90inAnyOrder(PlaceInfoBatchRspDto dtoStub, VacancyFound vacancyFoundExpected) {
                 mockOrders(new ArrayList<>());
-                List<Desire> desires = stubDesiresRecipe(DAY, new OutdoorOnlyRecipe());
+                List<Desire> desires = Stubs.stubDesiresRecipe(TODAY, new OutdoorOnlyRecipe());
                 when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(dtoStub);
 
                 assertDoesNotThrow(() -> thingy.doWork(desires));
@@ -552,20 +617,20 @@ class DesiresIteratorThingyTest {
 
             static List<Arguments> _90and60available_sameWeight_picks90inAnyOrder_args() throws Exception {
                 return List.of(
-                        Arguments.of(Stubs.stubWeight5_60min90min60min(), new VacancyFound(Court.C01.getCourtId(), LocalDate.parse(DAY), T2000, T2130)),
-                        Arguments.of(Stubs.stubWeight5_60min60min90min(), new VacancyFound(Court.C09.getCourtId(), LocalDate.parse(DAY), T1930, T2100))
+                        Arguments.of(SebStubs.stubWeight5_60min90min60min(), new VacancyFound(Court.C01.getCourtId(), LocalDate.parse(TODAY), T2000, T2130)),
+                        Arguments.of(SebStubs.stubWeight5_60min60min90min(), new VacancyFound(Court.C09.getCourtId(), LocalDate.parse(TODAY), T1930, T2100))
                 );
             }
 
             @Test
             void _120Available_finds90() throws Exception {
                 mockOrders(new ArrayList<>());
-                List<Desire> desires = stubDesiresRecipe(DAY, new OutdoorOnlyRecipe());
-                when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(Stubs.stubPlaceInfoClay09at1930has120minFree());
+                List<Desire> desires = Stubs.stubDesiresRecipe(TODAY, new OutdoorOnlyRecipe());
+                when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay09at1930has120minFree());
 
                 assertDoesNotThrow(() -> thingy.doWork(desires));
 
-                assertVacancyFound(new VacancyFound(Court.C09.getCourtId(), LocalDate.parse(DAY), T1930, T2100));
+                assertVacancyFound(new VacancyFound(Court.C09.getCourtId(), LocalDate.parse(TODAY), T1930, T2100));
             }
 
         }
@@ -577,22 +642,22 @@ class DesiresIteratorThingyTest {
 
             @BeforeEach
             void setUp() {
-                mockOrders(List.of(new Order(LocalDate.parse(DAY), Court.G1, T1800, T1900)));       // last weight
-                desires = stubDesiresRecipe(DAY, new OutdoorOnlyRecipe());
+                mockOrders(List.of(new Order(LocalDate.parse(TODAY), Court.G1, T1800, T1900)));       // last weight
+                desires = Stubs.stubDesiresRecipe(TODAY, new OutdoorOnlyRecipe());
             }
 
             @Test
             void _60Available_finds() throws Exception {
-                when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(Stubs.stubPlaceInfoClay01at1800free());
+                when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1800free());
                 assertDoesNotThrow(() -> thingy.doWork(desires));
-                assertVacancyFound(new VacancyFound(Court.C01.getCourtId(), LocalDate.parse(DAY), T1800, T1900));
+                assertVacancyFound(new VacancyFound(Court.C01.getCourtId(), LocalDate.parse(TODAY), T1800, T1900));
             }
 
             @Test
             void _90Available_finds() throws Exception {
-                when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(Stubs.stubPlaceInfoClay01at1930has90minFree());
+                when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1930has90minFree());
                 assertDoesNotThrow(() -> thingy.doWork(desires));
-                assertVacancyFound(new VacancyFound(Court.C01.getCourtId(), LocalDate.parse(DAY), T1930, T2100));
+                assertVacancyFound(new VacancyFound(Court.C01.getCourtId(), LocalDate.parse(TODAY), T1930, T2100));
             }
 
         }
@@ -604,26 +669,59 @@ class DesiresIteratorThingyTest {
 
             @BeforeEach
             void setUp() {
-                mockOrders(List.of(new Order(LocalDate.parse(DAY), Court.G1, T1800, T1930)));       // last weight
-                desires = stubDesiresRecipe(DAY, new OutdoorOnlyRecipe());
+                mockOrders(List.of(new Order(LocalDate.parse(TODAY), Court.G1, T1800, T1930)));       // last weight
+                desires = Stubs.stubDesiresRecipe(TODAY, new OutdoorOnlyRecipe());
             }
 
             @Test
             void _60Available_doesNotFind() throws Exception {
-                when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(Stubs.stubPlaceInfoClay01at1800free());
+                when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1800free());
                 assertDoesNotThrow(() -> thingy.doWork(desires));
                 assertVacancyNotFound();
             }
 
             @Test
             void _90Available_finds() throws Exception {
-                when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(Stubs.stubPlaceInfoClay01at1930has90minFree());
+                when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1930has90minFree());
                 assertDoesNotThrow(() -> thingy.doWork(desires));
-                assertVacancyFound(new VacancyFound(Court.C01.getCourtId(), LocalDate.parse(DAY), T1930, T2100));
+                assertVacancyFound(new VacancyFound(Court.C01.getCourtId(), LocalDate.parse(TODAY), T1930, T2100));
             }
 
         }
     }
+
+
+    // Maybe we'll need this when dealing with orders (cancelling, reminding of cancellation). Because they are exactly 48-hour long.
+    // todo move to OrderTest? It will only be used for orders
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    @Nested
+    class _48Hours {
+
+        @Test
+        void getNow_getsNow() {
+            assertEquals(LocalDateTime.parse("2023-10-01T12:00:00"), thingy.getNow());
+        }
+
+        @Test
+        void getExactly48HoursAgo() {
+            assertEquals(LocalDateTime.parse("2023-09-29T12:00:00"), thingy.get48HoursAgo());
+        }
+
+        @Test
+        void get1secondLessThan48HoursAgo() {
+            assertEquals(LocalDateTime.parse("2023-09-29T12:00:01"), thingy.get48HoursAgo().plusSeconds(1));
+        }
+
+        @Test
+        void get1secondMoreThan48HoursAgo() {
+            assertEquals(LocalDateTime.parse("2023-09-29T11:59:59"), thingy.get48HoursAgo().minusSeconds(1));
+        }
+    }
+
+
+
+
+
 
 
     // todo   move to nested "extension interest" section?
@@ -632,7 +730,7 @@ class DesiresIteratorThingyTest {
     @CsvSource({"18:00", "19:30"})
     void requestedAny_canFindBothEarlierOrLater(String newTime) {    // todo make LocalTime
         mockOrders(stubOrders(Court.H02, DAY, "18:30", "19:30"));       // todo: orders? or reservations?
-        List<Desire> desires = stubDesires(DAY, ANY, Court.getHardIds());
+        List<Desire> desires = Stubs.stubDesires(DAY, ANY, Court.getHardIds());
 
         Court h02 = Court.H02;
         stubOccupiedExcept(List.of(h02.getCourtId()), h02, LocalTime.parse(newTime), 30L);
@@ -653,7 +751,7 @@ class DesiresIteratorThingyTest {
     @ParameterizedTest
     @EnumSource(value = ExtensionInterest.class, names = {"EARLIER", "LATER"})
     void requestedEarlierOrLater_dontHaveOrders_throws(ExtensionInterest interest) {
-        List<Desire> desires = stubDesires(DAY, interest, Court.getHardIds());
+        List<Desire> desires = Stubs.stubDesires(DAY, interest, Court.getHardIds());
         assertThrows(EarlierOrLaterDesireMustHaveOwnOrderException.class, () -> thingy.doWork(desires));
     }
 
@@ -662,7 +760,7 @@ class DesiresIteratorThingyTest {
     @CsvSource({"30", "60", "90", "120"})
     void requestedAny_noPriorOrders_findsAnyDurationSlotExcept30min(int minutes) {
         mockOrders(new ArrayList<>());
-        List<Desire> desires = stubDesires(DAY, ANY, Court.getClayIds());
+        List<Desire> desires = Stubs.stubDesires(DAY, ANY, Court.getClayIds());
 
         // whatever you ask, there's a booking
         when(fetcher.postTimeInfoBatch(any(), any(), any()))
@@ -690,7 +788,7 @@ class DesiresIteratorThingyTest {
     void requestedEarlier_sameCourtHalfHourEarlierExists_findsInSameCourt(ExtensionInterest earlierOrAny) {
         Court h02 = Court.H02;
         mockOrders(stubOrders(h02, DAY, "17:30", "19:00"));
-        List<Desire> desires = stubDesires(DAY, earlierOrAny, Court.getHardIds());
+        List<Desire> desires = Stubs.stubDesires(DAY, earlierOrAny, Court.getHardIds());
 
         String vacancyAt1700 = "17:00";
         stubOccupiedExcept(List.of(h02.getCourtId()), h02, LocalTime.parse(vacancyAt1700), 30L);
@@ -710,7 +808,7 @@ class DesiresIteratorThingyTest {
     void requestedLater_sameCourtHalfHourLaterExists_findsInSameCourt(ExtensionInterest laterOrAny) {
         Court h02 = Court.H02;
         mockOrders(stubOrders(h02, DAY, "17:30", "19:00"));
-        List<Desire> desires = stubDesires(DAY, laterOrAny, Court.getHardIds());
+        List<Desire> desires = Stubs.stubDesires(DAY, laterOrAny, Court.getHardIds());
 
         String vacancyAt1900 = "19:00";
         stubOccupiedExcept(List.of(h02.getCourtId()), h02, LocalTime.parse(vacancyAt1900), 30L);
@@ -845,7 +943,7 @@ class DesiresIteratorThingyTest {
         Court h02 = Court.H02;
 
         mockOrders(stubOrders(h02, timeFrom, orderDuration));
-        List<Desire> desires = stubDesires(DAY, interest, Court.getHardIds());
+        List<Desire> desires = Stubs.stubDesires(DAY, interest, Court.getHardIds());
 
         LocalTime timeFromVacancy = LocalTime.parse(searchFrom);
         stubOccupiedExcept(Court.getHardIds(), Court.H01, timeFromVacancy, vacancyDuration);
@@ -892,7 +990,7 @@ class DesiresIteratorThingyTest {
     void requestedEarlierOrAny_oneVacancyInNonAdjacentEarlierTime_finds(
             ExtensionInterest interest, long orderDuration, long vacancyDuration, boolean shouldFind) {
 
-        BookingConfigurator configurator = new BookingConfigurator(audioPlayer, fetcher);
+        BookingConfigurator configurator = new BookingConfigurator(audioPlayer, fetcher, CLOCK);
         configurator.setEarlyBird(LocalTime.parse("17:00"));
         thingy = new DesiresIteratorThingy(configurator);
 
@@ -925,7 +1023,7 @@ class DesiresIteratorThingyTest {
     })
     void requestedLaterOrAny_oneVacancyInNonAdjacentLaterTime_finds(
             ExtensionInterest interest, long orderDuration, long vacancyDuration, boolean shouldFind) {
-        BookingConfigurator configurator = new BookingConfigurator(audioPlayer, fetcher);
+        BookingConfigurator configurator = new BookingConfigurator(audioPlayer, fetcher, CLOCK);
         configurator.setEarlyBird(LocalTime.parse("17:00"));
         thingy = new DesiresIteratorThingy(configurator);
 
@@ -937,7 +1035,7 @@ class DesiresIteratorThingyTest {
     private void searchNonAdjacent(String orderFrom, ExtensionInterest interest, long orderDuration, long vacancyDuration, boolean shouldFind, String searchFrom) {
         mockOrders(stubOrders(Court.H02, orderFrom, orderDuration));
 
-        List<Desire> desires = stubDesires(DAY, interest, Court.getNonSquashIds());
+        List<Desire> desires = Stubs.stubDesires(DAY, interest, Court.getNonSquashIds());
 
         List<Long> allCourts = new ArrayList<>(Court.getNonSquashIds());
         LocalTime timeFromVacancy = LocalTime.parse(searchFrom);
@@ -999,18 +1097,6 @@ class DesiresIteratorThingyTest {
         orderConverterMockedStatic.when(() -> SebOrderConverter.toOrders(any())).thenReturn(orders);
     }
 
-    private static List<Desire> stubDesires(String date, ExtensionInterest extensionInterest, List<Long> courtIds) {
-        List<Desire> desires = new ArrayList<>();
-        desires.add(new Desire(LocalDate.parse(date), extensionInterest, courtIds));
-        return desires;
-    }
-
-    private static List<Desire> stubDesiresRecipe(String date, Recipe recipe) {
-        List<Desire> desires = new ArrayList<>();
-        desires.add(new Desire(LocalDate.parse(date), recipe));
-        return desires;
-    }
-
     private static List<Desire> stubDesires(Desire... desires) {
         return new ArrayList<>(List.of(desires));
     }
@@ -1038,6 +1124,10 @@ class DesiresIteratorThingyTest {
 
     private void fetchesTwice() {
         verify(fetcher, times(2)).postTimeInfoBatch(courtsCaptor.capture(), dateCaptor.capture(), timeCaptor.capture());
+    }
+
+    private void fetchesThrice() {
+        verify(fetcher, times(3)).postTimeInfoBatch(courtsCaptor.capture(), dateCaptor.capture(), timeCaptor.capture());
     }
 
     private void fetches4times() {
@@ -1068,12 +1158,12 @@ class DesiresIteratorThingyTest {
     }
 
     private void assertCourtDtosFilteredFor1day() {
-        verify(thingy).findVacancy(any(), courtDtosCaptor.capture());
+        verify(thingy, atLeastOnce()).findVacancy(any(), courtDtosCaptor.capture());
         List<DataInner> dtos = courtDtosCaptor.getValue();
         long count = dtos.stream().map(DataInner::getDate).distinct().count();
         System.out.println("---- count: " + count);
-        boolean onlyToday = count == 1;
+        boolean only1day = count == 1;
 
-        assertTrue(onlyToday);
+        assertTrue(only1day);
     }
 }

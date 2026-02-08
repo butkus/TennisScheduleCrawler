@@ -15,11 +15,11 @@ import java.util.stream.IntStream;
  * | carpet close |   15   |   11   |    7   |    5   |   11   |
  * | carpet far   |   16   |   12   |    8   |    6   |   12   |
  */
-class IndoorDetailedRecipeTest extends AbstractRecipeTest  {
+class IndoorMonFriTest extends AbstractRecipeTest  {
 
     @Override
     Recipe getRecipe() {
-        return new IndoorDetailedRecipe();
+        return new IndoorMonFri();
     }
 
     @Override
