@@ -32,6 +32,21 @@ public class DesiresExplicit {
 //        desires.add(new Desire(LocalDate.parse("2026-02-08"), NONE, IN));
 
 
+        // fixme: 2 different kind of desire finding (or printing) -- example below
+        //   - step 1 done: moved LegacySearch to own class
+        //   - it was necessary because to make 1 printout to be possible,
+        //     several functions calling each other should their return values changed
+        //     (they were not intended to keep score if print out was/wasn't made
+        //     if we need to change several function's return values, it means
+        //     that design in not very OOP.
+        //     so extraction was made
+        //   - step 2: we can now (probably) easily check if prinout was made
+        //     (make a method legacySearch.wasPrinted() or sth like that
+        //   - step 3: do we need to extract newAkaRecipeSearch to own class?
+        //   - step 4: make the single-printing logic
+//●●● New  2026-02-11 19:30  K4 ●●●
+//●●● New  2026-02-11 19:30 - K4 (courtId: 65) ●●●
+
         return desires;
     }
 }

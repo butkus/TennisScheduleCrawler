@@ -163,12 +163,13 @@ class DesiresIteratorThingyTest {
 //       - test vacancy logic (it currently does)
 //       - most of the old tests should be moved to VacancyTest or whatever and tested one-by-one
 //       - currently it's halfway to being an integration test
+//       - NEW: LegacySearch was just created, so some of the tests should go there
 // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //   postPlaceInfoBatch tests  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // todo: all orders fit in 1 day --> fetches once
     // todo: all orders fit in 8 days --> fetches once
-    // todo: all orders fit in 9 days --> feches 2 times
+    // todo: all orders fit in 9 days --> fetches 2 times
     // todo: all orders fit in 16 days --> fetches 2 times
     // todo: all orders fit in 17 days --> fetches 3 times
     // todo  ALL ABOVE DONE
