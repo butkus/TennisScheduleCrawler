@@ -25,7 +25,7 @@ public class LegacySearch {
     private final List<Long> courts;
     private final Order order;
 
-    LocalTime earlyBird;
+    private final LocalTime earlyBird;
     private final Predicate<LocalTime> isBeforeEarlyBird;
     private final Predicate<LocalTime> isAfterLateOwl;
 

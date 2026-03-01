@@ -28,8 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.butkus.tenniscrawler.ExtensionInterest.ANY;
-import static com.butkus.tenniscrawler.ExtensionInterest.NONE;
 import static java.time.ZoneOffset.UTC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -274,39 +272,6 @@ class DesiresIteratorThingyTest {
 // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    // TODO -- 1 -- do not check at all when optimization is in place,
-    //  i.e. postPlaceInfoBatch will determine no free slots and no need for postTimeInfoBatch to search
-    // TODO -- 2 -- reading this test after a long time, it is:
-    //      - not so easily readable (visually distinct blocks would be nice, e.g. precondition, precondition, method call, assertions)
-    //      - after familiarizing, the test looks quite succinct, and readable
-    //      - would be nice to somehow organize the tests better, maybe more nesting, maybe more classes.
-    //      -   so that test code is first class citizen as prod code is (TDD growing pains)
-    @Test
-    void requestedAny_noPriorOrders_nothingExists_searches_4_timesAndDoesNotFind() {
-
-        mockOrders(new ArrayList<>());
-
-        List<Desire> desires = Stubs.stubDesires(DAY, ANY, Court.getClayIds());
-
-        // whatever you ask, there's NO booking
-        when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoOccupied());
-
-        assertDoesNotThrow(() -> thingy.doWork(desires));
-
-        fetches4times();
-        assertFetchedCourts(Court.getClayIds());
-        assertFetchedDate(DAY);
-
-        List<LocalTime> expectedTimes = List.of(
-                LocalTime.parse("18:00"),
-                LocalTime.parse("18:30"),
-                T1900,
-                LocalTime.parse("19:30"));
-        List<LocalTime> actualTimes = timeCaptor.getAllValues();
-        assertEquals(expectedTimes, actualTimes);
-
-        doesNotFind();
-    }
 
 
     @Tag(RECIPE_BASED)
@@ -393,25 +358,6 @@ class DesiresIteratorThingyTest {
             assertVacancyFound(new VacancyFound(id53, LocalDate.parse(day), T1900, T2000));
         }
     }
-
-
-    @Test
-    void requestedAny_noPriorOrders_allYouAskIsVacant_searches_1_timeAndFinds() {
-        mockOrders(new ArrayList<>());
-        List<Desire> desires = Stubs.stubDesires(DAY, ANY, Court.getClayIds());
-
-        // whatever you ask, there's a booking
-        when(fetcher.postTimeInfoBatch(any(), any(), any())).thenAnswer(e -> stubTimeInfo(e.getArgument(1), e.getArgument(2)));
-
-        assertDoesNotThrow(() -> thingy.doWork(desires));
-
-        fetchesOnce();
-        assertFetchedCourts(Court.getClayIds());
-        assertFetchedDate(DAY);
-        assertFetchedTime("18:00");
-        finds();
-    }
-
 
     static Stream<Order> weight4orders() {
         return Stream.of(
@@ -725,26 +671,6 @@ class DesiresIteratorThingyTest {
 
 
 
-    // todo   move to nested "extension interest" section?
-    // todo   maybe also do tests that have earlier, but test asks for LATER -- does not find
-    @ParameterizedTest
-    @CsvSource({"18:00", "19:30"})
-    void requestedAny_canFindBothEarlierOrLater(String newTime) {    // todo make LocalTime
-        mockOrders(stubOrders(Court.H02, DAY, "18:30", "19:30"));       // todo: orders? or reservations?
-        List<Desire> desires = Stubs.stubDesires(DAY, ANY, Court.getHardIds());
-
-        Court h02 = Court.H02;
-        stubOccupiedExcept(List.of(h02.getCourtId()), h02, LocalTime.parse(newTime), 30L);
-
-        assertDoesNotThrow(() -> thingy.doWork(desires));
-
-//        fetchesOnceOrTwice(); // could be many times because searches for earlier, then later. But could be the other way around and search count can change depending on where the vacancy is
-        fetchesAtLeastOnce();
-        assertFetchedCourts(List.of(Court.H02.getCourtId()));
-        assertFetchedDate(DAY);
-        assertFetchedTime(newTime);
-        finds();
-    }
 
 
     // todo leave this test in here or move to DesireOrderPairer? handling logic is in there
@@ -757,90 +683,25 @@ class DesiresIteratorThingyTest {
     }
 
 
-    @ParameterizedTest
-    @CsvSource({"30", "60", "90", "120"})
-    void requestedAny_noPriorOrders_findsAnyDurationSlotExcept30min(int minutes) {
-        mockOrders(new ArrayList<>());
-        List<Desire> desires = Stubs.stubDesires(DAY, ANY, Court.getClayIds());
-
-        // whatever you ask, there's a booking
-        when(fetcher.postTimeInfoBatch(any(), any(), any()))
-                .thenReturn(stubTimeInfo(Court.C01.getCourtId(), LocalDate.parse(DAY), LocalTime.parse("18:00"), minutes));
-
-        assertDoesNotThrow(() -> thingy.doWork(desires));
-
-        if (minutes == 30) {
-            // 30 min slot is too short, we don't want it
-            doesNotFind();
-        } else {
-            // 60, 90, 120 are checked
-            fetchesOnce();
-            assertFetchedCourts(Court.getClayIds());
-            assertFetchedDate(DAY);
-            assertFetchedTime("18:00");
-            finds();
-        }
-    }
-
-
     // adjacent (same court extension)
     @ParameterizedTest
-    @EnumSource(value = ExtensionInterest.class, names = {"EARLIER", "ANY"})
-    void requestedEarlier_sameCourtHalfHourEarlierExists_findsInSameCourt(ExtensionInterest earlierOrAny) {
+    @CsvSource({"EARLIER, 17:00",
+                "LATER, 19:00"})
+    void requestedEarlierOrLater_sameCourtHalfHourEarlierOrLaterExists_findsInSameCourt(
+            ExtensionInterest interest, String vacancyTime) {
         Court h02 = Court.H02;
         mockOrders(stubOrders(h02, DAY, "17:30", "19:00"));
-        List<Desire> desires = Stubs.stubDesires(DAY, earlierOrAny, Court.getHardIds());
+        List<Desire> desires = Stubs.stubDesires(DAY, interest, Court.getHardIds());
 
-        String vacancyAt1700 = "17:00";
-        stubOccupiedExcept(List.of(h02.getCourtId()), h02, LocalTime.parse(vacancyAt1700), 30L);
-
-        assertDoesNotThrow(() -> thingy.doWork(desires));
-
-        fetchesOnce();
-        assertFetchedCourts(List.of(h02.getCourtId()));
-        assertFetchedDate(DAY);
-        assertFetchedTime(vacancyAt1700);
-        finds();
-    }
-
-    // adjacent (same court extension)
-    @ParameterizedTest
-    @EnumSource(value = ExtensionInterest.class, names = {"LATER", "ANY"})
-    void requestedLater_sameCourtHalfHourLaterExists_findsInSameCourt(ExtensionInterest laterOrAny) {
-        Court h02 = Court.H02;
-        mockOrders(stubOrders(h02, DAY, "17:30", "19:00"));
-        List<Desire> desires = Stubs.stubDesires(DAY, laterOrAny, Court.getHardIds());
-
-        String vacancyAt1900 = "19:00";
-        stubOccupiedExcept(List.of(h02.getCourtId()), h02, LocalTime.parse(vacancyAt1900), 30L);
+        stubOccupiedExcept(List.of(h02.getCourtId()), h02, LocalTime.parse(vacancyTime), 30L);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
         fetchesAtLeastOnce();
         assertFetchedCourts(List.of(h02.getCourtId()));
         assertFetchedDate(DAY);
-        assertFetchedTime(vacancyAt1900);
+        assertFetchedTime(vacancyTime);
         finds();
-    }
-
-    // todo: do we need this? it tests if 2 tests work together or if there's conflict.
-    //  If there's conflict, DesireOrderPairer should find it.
-    //  Should this test class care? It's different layer problems, no?
-    //  This class works on a 1 desire (with or without ALREADY CORRECTLY paired order) --> doWork --> finds reservation
-    @Test
-    void requestedAnyOutsideAndNoneInside_have1insideOrder_insideDoesNotSearch_outsideDoesSearch() {
-        mockOrders(stubOrders(Court.H02, DAY, "17:30", "19:00"));
-        List<Desire> desires = stubDesires(
-                new Desire(LocalDate.parse(DAY), NONE, Court.getIndoorIds()),
-                new Desire(LocalDate.parse(DAY), ANY, Court.getOutdoorIds())
-        );
-
-        when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoOccupied());
-
-        assertDoesNotThrow(() -> thingy.doWork(desires));
-        fetches4times();    // does not search for indoors because NONE; searches for brand-new outdoor because ANY
-        assertFetchedCourts(Court.getOutdoorIds());
-        doesNotFind();
     }
 
     // todo marker comment. This test has overlap with DesireOrderPairerTest. But it also checks that H01 and G1 are both searched for.
@@ -890,17 +751,8 @@ class DesiresIteratorThingyTest {
             "EARLIER, 120, 60, false",
             "EARLIER, 120, 90, false",
             "EARLIER, 120, 120, true",
-            "ANY, 60, 60, true",
-            "ANY, 60, 90, true",
-            "ANY, 60, 120, true",
-            "ANY, 90, 60, false",
-            "ANY, 90, 90, true",
-            "ANY, 90, 120, true",
-            "ANY, 120, 60, false",
-            "ANY, 120, 90, false",
-            "ANY, 120, 120, true",
     })
-    void requestedEarlierOrAny_sameCourtNoVacanciesButYesVacanciesInOtherCourts_findsBrandNewSameLengthOrLonger(
+    void requestedEarlier_sameCourtNoVacanciesButYesVacanciesInOtherCourts_findsBrandNewSameLengthOrLonger(
             ExtensionInterest interest, long orderDuration, long vacancyDuration, boolean shouldFind) {
         // todo: csv source is the same as for 'non-adjacent' counterpart. Extract as @MethodSource?
         String timeFrom = "17:30";
@@ -920,17 +772,8 @@ class DesiresIteratorThingyTest {
             "LATER, 120, 60, false",
             "LATER, 120, 90, false",
             "LATER, 120, 120, true",
-            "ANY, 60, 60, true",
-            "ANY, 60, 90, true",
-            "ANY, 60, 120, true",
-            "ANY, 90, 60, false",
-            "ANY, 90, 90, true",
-            "ANY, 90, 120, true",
-            "ANY, 120, 60, false",
-            "ANY, 120, 90, false",
-            "ANY, 120, 120, true",
     })
-    void requestedLaterOrAny_sameCourtNoVacanciesButYesVacanciesInOtherCourts_findsBrandNewSameLengthOrLonger(
+    void requestedLater_sameCourtNoVacanciesButYesVacanciesInOtherCourts_findsBrandNewSameLengthOrLonger(
             ExtensionInterest interest, long orderDuration, long vacancyDuration, boolean shouldFind) {
         String timeFrom = "17:30";
         String searchFrom = LocalTime.parse(timeFrom).plusMinutes(orderDuration).minusMinutes(30).toString();
@@ -978,17 +821,8 @@ class DesiresIteratorThingyTest {
             "EARLIER, 120, 60, false",
             "EARLIER, 120, 90, false",
             "EARLIER, 120, 120, true",
-            "ANY, 60, 60, true",
-            "ANY, 60, 90, true",
-            "ANY, 60, 120, true",
-            "ANY, 90, 60, false",
-            "ANY, 90, 90, true",
-            "ANY, 90, 120, true",
-            "ANY, 120, 60, false",
-            "ANY, 120, 90, false",
-            "ANY, 120, 120, true",
     })
-    void requestedEarlierOrAny_oneVacancyInNonAdjacentEarlierTime_finds(
+    void requestedEarlier_oneVacancyInNonAdjacentEarlierTime_finds(
             ExtensionInterest interest, long orderDuration, long vacancyDuration, boolean shouldFind) {
 
         BookingConfigurator configurator = new BookingConfigurator(audioPlayer, fetcher, CLOCK);
@@ -1012,17 +846,8 @@ class DesiresIteratorThingyTest {
             "LATER, 120, 60, false",
             "LATER, 120, 90, false",
             "LATER, 120, 120, true",
-            "ANY, 60, 60, true",
-            "ANY, 60, 90, true",
-            "ANY, 60, 120, true",
-            "ANY, 90, 60, false",
-            "ANY, 90, 90, true",
-            "ANY, 90, 120, true",
-            "ANY, 120, 60, false",
-            "ANY, 120, 90, false",
-            "ANY, 120, 120, true",
     })
-    void requestedLaterOrAny_oneVacancyInNonAdjacentLaterTime_finds(
+    void requestedLater_oneVacancyInNonAdjacentLaterTime_finds(
             ExtensionInterest interest, long orderDuration, long vacancyDuration, boolean shouldFind) {
         BookingConfigurator configurator = new BookingConfigurator(audioPlayer, fetcher, CLOCK);
         configurator.setEarlyBird(LocalTime.parse("17:00"));

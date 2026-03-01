@@ -94,7 +94,7 @@ class DesireOrderPairerTest {
     @Nested
     class Cat1_moreDesiresThanOrders {
 
-        // NOTE: these desires cloned for each test iteration by new DesireOrderPairTestCase()...build() method
+        // NOTE: these desires are cloned for each test iteration by new DesireOrderPairTestCase()...build() method
         // If we want to move them to the top of root class, we need to ensure cloning or resetting before/after each test
         public static final Desire DESIRE_IN = new Desire(DAY, ANY, Court.getIndoorIds());
         public static final Desire DESIRE_OUT = new Desire(DAY, ANY, Court.getOutdoorIds());

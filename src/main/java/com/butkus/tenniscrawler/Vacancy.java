@@ -58,16 +58,11 @@ public class Vacancy {
         } else if (isLater) {       // todo: later can remain as extension mechanism
             legacySearch.searchForLater();
         } else if (isAny) {         // todo: any SHOULD BE REMOVED (recipe covers all slots).
-            if (orderExists()) {
-                boolean found = legacySearch.searchForEarlier();
-                if (!found) {
-                    legacySearch.searchForLater();
-                }
-            } else {
-                legacySearch.searchForNewReservation();
-            }
+            // todo add unsupported exception
         }
 
+        // todo print found court here
+        //   System.out.printf("●●● New  .....
         return vacancyFound;
     }
 

@@ -44,6 +44,9 @@ public class DesiresExplicit {
         //     (make a method legacySearch.wasPrinted() or sth like that
         //   - step 3: do we need to extract newAkaRecipeSearch to own class?
         //   - step 4: make the single-printing logic
+        //   - step  DONE  4.1: in Vacancy.find() --> remove `isAny` part (with tests first) -- it's no longer necessary, Recipe covers that part.
+        //   - step        4.2: in Vacancy.find() --> make `isEarlier` and `isLater` parts return `VacancyFound` object
+        //   - step        4.3: in the end of Vacancy.find() method, print the thing
 //●●● New  2026-02-11 19:30  K4 ●●●
 //●●● New  2026-02-11 19:30 - K4 (courtId: 65) ●●●
 
