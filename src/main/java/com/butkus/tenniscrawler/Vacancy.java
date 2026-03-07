@@ -71,10 +71,6 @@ public class Vacancy {
     }
 
     private VacancyFound searchForReservationWithRecipe(List<DataInner> courtDtos) {
-        return iterateRecipes(courtDtos);
-    }
-
-    private VacancyFound iterateRecipes(List<DataInner> courtDtos) {
         boolean found = false;
         VacancyFound vacancyFound = null;
         int orderWeight = getOrderWeight();
