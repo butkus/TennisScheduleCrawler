@@ -24,13 +24,14 @@ public class DataTimeInfo {
     @JsonProperty("time")
     private String time;
 
-    public boolean hasDuration(Long minimumAcceptableDuration) {
+    public Long findFirstAcceptableDuration(Long minimumAcceptableDuration) {
         for (AviableDuration aviableDuration : aviableDurations) {
-            if (aviableDuration.getDurationMin() >= minimumAcceptableDuration) {
-                return true;
+            Long duration = aviableDuration.getDurationMin();
+            if (duration >= minimumAcceptableDuration) {
+                return duration;
             }
         }
-        return false;
+        return null;
     }
 
 }

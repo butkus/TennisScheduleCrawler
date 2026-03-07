@@ -232,8 +232,14 @@ class DesiresIteratorThingyTest {
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
         fetchesOncePlaces();    // placeInfoBatch (todo rename. maybe fetchesPlaceOnce()?
-
         fetchesTwice();         // timeInfoBatch  (todo rename. maybe fetchesTimeTwice()?
+
+        // Old way and new way (Recipe-based and ExtensionInterest-based) checks may both be needed
+        // if volatile, placeInfoBatch is not enough, timeInfoBatch also needs calling
+        // this checks that the chime and new court announcement are not done 2 times
+        // assuming chime and new court announcement/printout are done together, this checks them both
+        verify(audioPlayer, times(1)).chimeIfNecessary();
+
         // based on placeInfoBatch response (fullsell 19:30-21:00)
         //   - checks weight 1 (HARD, 19:30), calls timeInfoBatch(HARD, 19:30, 60 mins), does not find. Then,
         //   - does not check weight 2 because (fullsell 19:30-21:00 hard) says there's nothing for it. Then,
@@ -778,7 +784,8 @@ class DesiresIteratorThingyTest {
         List<Desire> desires = Stubs.stubDesires(DAY, interest, Court.getHardIds());
 
         LocalTime timeFromVacancy = LocalTime.parse(searchFrom);
-        stubs.stubOccupiedExcept(Court.getHardIds(), Court.H01, timeFromVacancy, vacancyDuration);
+        Court newCourt = Court.H01;
+        stubs.stubOccupiedExcept(Court.getHardIds(), newCourt, timeFromVacancy, vacancyDuration);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -790,9 +797,9 @@ class DesiresIteratorThingyTest {
 
             assertFetchedDate(DAY);
             assertFetchedTime(searchFrom);
-            finds();
+            assertVacancyFound(new VacancyFound(newCourt.getCourtId(), LocalDate.parse(DAY), LocalTime.parse(searchFrom), LocalTime.parse(searchFrom).plusMinutes(vacancyDuration)));
         } else {
-            doesNotFind();
+            assertVacancyNotFound();
         }
     }
 

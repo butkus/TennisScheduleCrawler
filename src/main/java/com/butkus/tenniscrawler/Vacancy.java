@@ -53,21 +53,14 @@ public class Vacancy {
 
         if (hasRecipe) {
             vacancyFound = searchForReservationWithRecipe(courtDtos);
-        } else if (isEarlier) {     // todo: earlier can remain as extension mechanism
-            legacySearch.searchForEarlier();
-        } else if (isLater) {       // todo: later can remain as extension mechanism
-            legacySearch.searchForLater();
+        } else if (isEarlier) {
+            vacancyFound = legacySearch.searchForEarlier();
+        } else if (isLater) {
+            vacancyFound = legacySearch.searchForLater();
         } else if (isAny) {
             throw new UnsupportedOperationException();
         }
 
-        // todo print found court here
-        //   System.out.printf("●●● New  .....
-        return vacancyFound;
-    }
-
-    private VacancyFound searchForReservationWithRecipe(List<DataInner> courtDtos) {
-        VacancyFound vacancyFound = iterateRecipes(courtDtos);
         if (vacancyFound != null) {
             System.out.printf("●●● New  %s %s - %s (courtId: %s) ●●●\n", day.toString(), vacancyFound.getFrom(), Court.getByCourtId(vacancyFound.getCourtId()), vacancyFound.getCourtId());
             audioPlayer.chimeIfNecessary();
@@ -75,6 +68,10 @@ public class Vacancy {
         }
 
         return vacancyFound;
+    }
+
+    private VacancyFound searchForReservationWithRecipe(List<DataInner> courtDtos) {
+        return iterateRecipes(courtDtos);
     }
 
     private VacancyFound iterateRecipes(List<DataInner> courtDtos) {

@@ -65,7 +65,7 @@ public class LegacySearch {
         boolean found = searchForReservation(getCourtId(), order.getTimeTo(), 30L);
         if (!found) {
             // find brand-new reservation
-            repeatSearch(getOrderToMinus30Min(), ADD_30_MIN, isAfterLateOwl);
+            found = repeatSearch(getOrderToMinus30Min(), ADD_30_MIN, isAfterLateOwl);
         }
 
         if (found) {
@@ -84,15 +84,14 @@ public class LegacySearch {
     private boolean searchForTime(TimeInfoBatchRspDto timeResp, long minimumAcceptableDuration) {
         boolean found = false;
         for (DataTimeInfo datum : timeResp.getData()) {
-            if (datum.hasDuration(minimumAcceptableDuration)) {
+            Long firstAcceptableDuration = datum.findFirstAcceptableDuration(minimumAcceptableDuration);
+            if (firstAcceptableDuration != null) {
                 found = true;
                 dateFound = datum.getDate();
                 timeFound = datum.getTime().substring(0, datum.getTime().length() - 3);
                 courtIdFound = datum.getCourtID();
-                durationFound = minimumAcceptableDuration;
-                String courtNameFound = datum.getCourtName();
-                System.out.println("●●● New  " + dateFound + " " + timeFound + "  " + courtNameFound + " ●●●");
-                audioPlayer.chimeIfNecessary();
+                durationFound = firstAcceptableDuration;
+                break;
             }
         }
         return found;
