@@ -5,9 +5,6 @@ import com.butkus.tenniscrawler.rest.SebOrderConverter;
 import com.butkus.tenniscrawler.rest.orders.Order;
 import com.butkus.tenniscrawler.rest.placeinfobatch.DataInner;
 import com.butkus.tenniscrawler.rest.placeinfobatch.PlaceInfoBatchRspDto;
-import com.butkus.tenniscrawler.rest.timeinfobatch.AviableDuration;
-import com.butkus.tenniscrawler.rest.timeinfobatch.DataTimeInfo;
-import com.butkus.tenniscrawler.rest.timeinfobatch.TimeInfoBatchRspDto;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -76,6 +73,7 @@ class DesiresIteratorThingyTest {
     private DesiresIteratorThingy thingy;
     //    @InjectMocks private DesiresIteratorThingy thingy;
 
+    Stubs stubs;
 
     private MockedStatic<SebOrderConverter> orderConverterMockedStatic;
 
@@ -103,6 +101,7 @@ class DesiresIteratorThingyTest {
         BookingConfigurator configurator = new BookingConfigurator(audioPlayer, fetcher, CLOCK);
         thingy = spy(new DesiresIteratorThingy(configurator));
         when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoFull());
+        stubs = new Stubs(fetcher, LocalDate.parse(DAY));
     }
 
     @AfterEach
@@ -129,26 +128,6 @@ class DesiresIteratorThingyTest {
         return stubOrders(Court.H01, date, timeFrom, timeTo);
     }
 
-    private static TimeInfoBatchRspDto stubTimeInfoOccupied() {
-        return new TimeInfoBatchRspDto().setStatus("success").setData(new ArrayList<>());
-    }
-
-    private static TimeInfoBatchRspDto stubTimeInfo(Long courtId, LocalDate date, LocalTime time, long durationMin) {
-        List<DataTimeInfo> timeInfoData = new ArrayList<>();
-        timeInfoData.add(stubDataTimeInfo(date, time, courtId, durationMin));
-        return new TimeInfoBatchRspDto().setStatus("success").setData(timeInfoData);
-    }
-
-    private static TimeInfoBatchRspDto stubTimeInfo(LocalDate date, LocalTime time) {
-        return stubTimeInfo(1L, date, time, 60L);
-    }
-
-    private static DataTimeInfo stubDataTimeInfo(LocalDate date, LocalTime time, long courtID, long durationMin) {
-        List<AviableDuration> aviableDurations = new ArrayList<>();
-        aviableDurations.add(new AviableDuration().setPrice("100 coins").setCourtID(courtID).setDurationMin(durationMin).setPriceWithDiscount("for you free"));
-        DataTimeInfo dataTimeInfo = new DataTimeInfo().setCourtID(courtID).setDate(date.toString()).setTime(time.toString()).setAviableDurations(aviableDurations);
-        return dataTimeInfo;
-    }
 
 // todo (after finished with postPlaceInfoBatch):
 //  === ITERATOR THINGY SHOULD DO
@@ -222,7 +201,7 @@ class DesiresIteratorThingyTest {
         @Test
         void desiresFor2days_passes1daysDtosToVacancyScanner() {
             // whatever you ask, there's NO booking
-            when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoOccupied());
+            when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(Stubs.stubTimeInfoOccupied());
 
             thingy.doWork(stubDesireForDays(DAY_1, DAY_2));
             assertCourtDtosFilteredFor1day();
@@ -248,7 +227,7 @@ class DesiresIteratorThingyTest {
         // timeInfoBach does tell if aviable duration is 90-min only, or 30+60, or 60+30, or 30+30+30
         // todo: this stubs 20:00-21:00 unequivocally free (60-min-only slot). Need to cover other options too (or make it clear that they are not relevant to cover)
         // todo: this is a bit false because 19:30-20:00 is not accounted for
-        stubOccupiedExcept(List.of(Court.H01.getCourtId()), Court.H01, LocalTime.parse("20:00"), 60L);
+        stubs.stubOccupiedExcept(List.of(Court.H01.getCourtId()), Court.H01, LocalTime.parse("20:00"), 60L);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -674,7 +653,8 @@ class DesiresIteratorThingyTest {
 
 
     // todo leave this test in here or move to DesireOrderPairer? handling logic is in there
-    @Disabled("currently the only test unhappy with a @BeforeEach mock of fetcher.postPlaceInfoBatch(any(), any()). Move to DesireOrderPairerTest instead of fixing")
+    //    currently the only test unhappy with a @BeforeEach mock of fetcher.postPlaceInfoBatch(any(), any()). Move to DesireOrderPairerTest instead of fixing
+    @MockitoSettings(strictness = Strictness.LENIENT)
     @ParameterizedTest
     @EnumSource(value = ExtensionInterest.class, names = {"EARLIER", "LATER"})
     void requestedEarlierOrLater_dontHaveOrders_throws(ExtensionInterest interest) {
@@ -693,7 +673,7 @@ class DesiresIteratorThingyTest {
         mockOrders(stubOrders(h02, DAY, "17:30", "19:00"));
         List<Desire> desires = Stubs.stubDesires(DAY, interest, Court.getHardIds());
 
-        stubOccupiedExcept(List.of(h02.getCourtId()), h02, LocalTime.parse(vacancyTime), 30L);
+        stubs.stubOccupiedExcept(List.of(h02.getCourtId()), h02, LocalTime.parse(vacancyTime), 30L);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -720,7 +700,7 @@ class DesiresIteratorThingyTest {
         );
 
         // whatever you ask, there's a booking
-        when(fetcher.postTimeInfoBatch(any(), any(), any())).thenAnswer(e -> stubTimeInfo(e.getArgument(1), e.getArgument(2)));
+        when(fetcher.postTimeInfoBatch(any(), any(), any())).thenAnswer(e -> Stubs.stubTimeInfo(e.getArgument(1), e.getArgument(2)));
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
         fetchesAtLeastOnce();
@@ -798,7 +778,7 @@ class DesiresIteratorThingyTest {
         List<Desire> desires = Stubs.stubDesires(DAY, interest, Court.getHardIds());
 
         LocalTime timeFromVacancy = LocalTime.parse(searchFrom);
-        stubOccupiedExcept(Court.getHardIds(), Court.H01, timeFromVacancy, vacancyDuration);
+        stubs.stubOccupiedExcept(Court.getHardIds(), Court.H01, timeFromVacancy, vacancyDuration);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -873,7 +853,7 @@ class DesiresIteratorThingyTest {
 
         List<Long> allCourts = new ArrayList<>(Court.getNonSquashIds());
         LocalTime timeFromVacancy = LocalTime.parse(searchFrom);
-        stubOccupiedExcept(allCourts, Court.H02, timeFromVacancy, vacancyDuration);
+        stubs.stubOccupiedExcept(allCourts, Court.H02, timeFromVacancy, vacancyDuration);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -905,15 +885,6 @@ class DesiresIteratorThingyTest {
     /// /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    private void stubOccupiedExcept(List<Long> requestedCourts, Court returnedCourt, LocalTime time, long vacancyDuration) {
-        LocalDate day = LocalDate.parse(DAY);
-        // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
-        when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoOccupied());
-
-        // todo: add validation? requestedCourts and returnedCourt.getCourtId() should be from the same pool, e.g. indoorCourts, H01 or outdoorCourts, G01
-        when(fetcher.postTimeInfoBatch(requestedCourts, day, time))
-                .thenReturn(stubTimeInfo(returnedCourt.getCourtId(), day, time, vacancyDuration));
-    }
 
     private void finds() {
         verify(audioPlayer).chimeIfNecessary();

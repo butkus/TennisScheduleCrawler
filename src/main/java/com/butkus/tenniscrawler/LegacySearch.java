@@ -29,6 +29,11 @@ public class LegacySearch {
     private final Predicate<LocalTime> isBeforeEarlyBird;
     private final Predicate<LocalTime> isAfterLateOwl;
 
+    private Long courtIdFound;
+    private String timeFound;
+    private String dateFound;
+    private Long durationFound;
+
     public LegacySearch(BookingConfigurator bookingConfigurator, Desire desire) {
         this.audioPlayer = bookingConfigurator.getAudioPlayer();
         this.fetcher = bookingConfigurator.getFetcher();
@@ -40,23 +45,33 @@ public class LegacySearch {
         this.isAfterLateOwl = t -> t.isAfter(bookingConfigurator.getLateOwl());
     }
 
-    public boolean searchForEarlier() {
+    public VacancyFound searchForEarlier() {
         // extend existing reservation
-        // todo: does the following have a does-order-exits check? Do we have a test for it?
         boolean found = searchForReservation(getCourtId(), getOrderFromMinus30Min(), 30L);
         if (!found) {
             // find brand-new reservation
             found = repeatSearch(getOrderFromMinus30Min(), SUBTRACT_30_MIN, isBeforeEarlyBird);
         }
-        return found;
+
+        if (found) {
+            return new VacancyFound(courtIdFound, LocalDate.parse(dateFound), LocalTime.parse(timeFound), LocalTime.parse(timeFound).plusMinutes(durationFound));
+        } else {
+            return null;
+        }
     }
 
-    public void searchForLater() {
+    public VacancyFound searchForLater() {
         // extend existing reservation
         boolean found = searchForReservation(getCourtId(), order.getTimeTo(), 30L);
         if (!found) {
             // find brand-new reservation
             repeatSearch(getOrderToMinus30Min(), ADD_30_MIN, isAfterLateOwl);
+        }
+
+        if (found) {
+            return new VacancyFound(courtIdFound, LocalDate.parse(dateFound), LocalTime.parse(timeFound), LocalTime.parse(timeFound).plusMinutes(durationFound));
+        } else {
+            return null;
         }
     }
 
@@ -71,8 +86,12 @@ public class LegacySearch {
         for (DataTimeInfo datum : timeResp.getData()) {
             if (datum.hasDuration(minimumAcceptableDuration)) {
                 found = true;
-                String timeString = datum.getTime().substring(0, datum.getTime().length() - 3);
-                System.out.println("●●● New  " + datum.getDate() + " " + timeString + "  " + datum.getCourtName() + " ●●●");
+                dateFound = datum.getDate();
+                timeFound = datum.getTime().substring(0, datum.getTime().length() - 3);
+                courtIdFound = datum.getCourtID();
+                durationFound = minimumAcceptableDuration;
+                String courtNameFound = datum.getCourtName();
+                System.out.println("●●● New  " + dateFound + " " + timeFound + "  " + courtNameFound + " ●●●");
                 audioPlayer.chimeIfNecessary();
             }
         }
