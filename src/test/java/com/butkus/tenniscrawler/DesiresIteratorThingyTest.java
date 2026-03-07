@@ -731,6 +731,14 @@ class DesiresIteratorThingyTest {
         assertEquals(List.of(Court.G1.getCourtId()), courtsCaptured.get(1));
     }
 
+
+    @Test
+    void requestedAny_throws() {
+        List<Desire> desires = Stubs.stubDesires(DAY, ExtensionInterest.ANY, Court.getHardIds());
+        assertThrows(UnsupportedOperationException.class, () -> thingy.doWork(desires));
+    }
+
+
     /// ///// START OF  === PRESERVE-BOOKING-LENGTH CHANGE ===  ///////////////////////////////////////////////////
     /// /////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -57,8 +57,8 @@ public class Vacancy {
             legacySearch.searchForEarlier();
         } else if (isLater) {       // todo: later can remain as extension mechanism
             legacySearch.searchForLater();
-        } else if (isAny) {         // todo: any SHOULD BE REMOVED (recipe covers all slots).
-            // todo add unsupported exception
+        } else if (isAny) {
+            throw new UnsupportedOperationException();
         }
 
         // todo print found court here
