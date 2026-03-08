@@ -162,31 +162,31 @@ class DesiresIteratorThingyTest {
         @Test
         void desiresSpan1day_fetchesOnce() {
             thingy.doWork(stubDesireForDays(DAY_11));
-            fetchesOncePlaces();
+            fetchesPlaceOnce();
         }
 
         @Test
         void desiresSpan8days_fetchesOnce() {
             thingy.doWork(stubDesireForDays(DAY_11, DAY_18));
-            fetchesOncePlaces();
+            fetchesPlaceOnce();
         }
 
         @Test
         void desiresSpan9days_fetches2times() {
             thingy.doWork(stubDesireForDays(DAY_11, DAY_19));
-            fetchesPlaces(2);
+            fetchesPlace(2);
         }
 
         @Test
         void desiresSpan16days_fetches2times() {
             thingy.doWork(stubDesireForDays(DAY_11, DAY_26));
-            fetchesPlaces(2);
+            fetchesPlace(2);
         }
 
         @Test
         void desiresSpan17days_fetches3times() {
             thingy.doWork(stubDesireForDays(DAY_11, DAY_27));
-            fetchesPlaces(3);
+            fetchesPlace(3);
         }
 
         public List<Desire> stubDesireForDays(String... dates) {
@@ -231,8 +231,8 @@ class DesiresIteratorThingyTest {
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
-        fetchesOncePlaces();    // placeInfoBatch (todo rename. maybe fetchesPlaceOnce()?
-        fetchesTwice();         // timeInfoBatch  (todo rename. maybe fetchesTimeTwice()?
+        fetchesPlaceOnce();
+        fetchesTimeTwice();
 
         // Old way and new way (Recipe-based and ExtensionInterest-based) checks may both be needed
         // if volatile, placeInfoBatch is not enough, timeInfoBatch also needs calling
@@ -268,7 +268,7 @@ class DesiresIteratorThingyTest {
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
-        fetchesOncePlaces();
+        fetchesPlaceOnce();
         assertVacancyNotFound();
     }
 
@@ -284,7 +284,7 @@ class DesiresIteratorThingyTest {
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
-        fetchesOncePlaces();
+        fetchesPlaceOnce();
 
         assertVacancyNotFound();
     }
@@ -683,7 +683,7 @@ class DesiresIteratorThingyTest {
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
-        fetchesAtLeastOnce();
+        fetchesTimeAtLeastOnce();
         assertFetchedCourts(List.of(h02.getCourtId()));
         assertFetchedDate(DAY);
         assertFetchedTime(vacancyTime);
@@ -709,7 +709,7 @@ class DesiresIteratorThingyTest {
         when(fetcher.postTimeInfoBatch(any(), any(), any())).thenAnswer(e -> Stubs.stubTimeInfo(e.getArgument(1), e.getArgument(2)));
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
-        fetchesAtLeastOnce();
+        fetchesTimeAtLeastOnce();
         finds2Vacancies();
 
         List<List<Long>> courtsCaptured = courtsCaptor.getAllValues();
@@ -790,7 +790,7 @@ class DesiresIteratorThingyTest {
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
         if (shouldFind) {
-            fetchesAtLeastOnce();
+            fetchesTimeAtLeastOnce();
             List<List<Long>> courtsCaptured = courtsCaptor.getAllValues();
             assertEquals(List.of(h02.getCourtId()), courtsCaptured.get(0)); // first looks for extension of booking // todo remove? currently works but irrelevant. implementation could do diff things
             assertEquals(Court.getHardIds(), courtsCaptured.get(1));        // next, looks in all desire's courtIds // todo remove? currently works but irrelevant. implementation could do diff things
@@ -865,7 +865,7 @@ class DesiresIteratorThingyTest {
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
         if (shouldFind) {
-            fetchesAtLeastOnce();
+            fetchesTimeAtLeastOnce();
             assertFetchedDate(DAY);
             assertFetchedTime(searchFrom);
             finds();
@@ -913,36 +913,36 @@ class DesiresIteratorThingyTest {
         return new ArrayList<>(List.of(desires));
     }
 
-    private void fetchesAtLeastOnce() {
+    private void fetchesTimeAtLeastOnce() {
         verify(fetcher, atLeastOnce()).postTimeInfoBatch(courtsCaptor.capture(), dateCaptor.capture(), timeCaptor.capture());
     }
 
-    private void fetchesOnce() {
+    private void fetchesTimeOnce() {
         verify(fetcher).postTimeInfoBatch(courtsCaptor.capture(), dateCaptor.capture(), timeCaptor.capture());
     }
 
-    private void fetchesOncePlaces() {
+    private void fetchesPlaceOnce() {
         verify(fetcher).postPlaceInfoBatch(datesCaptor.capture(), placesCaptor.capture());
     }
 
-    private void fetchesPlaces(int invocationCount) {
+    private void fetchesPlace(int invocationCount) {
         verify(fetcher, times(invocationCount)).postPlaceInfoBatch(datesCaptor.capture(), placesCaptor.capture());
     }
 
-    private void fetchesOnceOrTwice() {
+    private void fetchesTimeOnceOrTwice() {
         verify(fetcher, atLeast(1)).postTimeInfoBatch(courtsCaptor.capture(), dateCaptor.capture(), timeCaptor.capture());
         verify(fetcher, atMost(2)).postTimeInfoBatch(courtsCaptor.capture(), dateCaptor.capture(), timeCaptor.capture());
     }
 
-    private void fetchesTwice() {
+    private void fetchesTimeTwice() {
         verify(fetcher, times(2)).postTimeInfoBatch(courtsCaptor.capture(), dateCaptor.capture(), timeCaptor.capture());
     }
 
-    private void fetchesThrice() {
+    private void fetchesTimeThrice() {
         verify(fetcher, times(3)).postTimeInfoBatch(courtsCaptor.capture(), dateCaptor.capture(), timeCaptor.capture());
     }
 
-    private void fetches4times() {
+    private void fetchesTime4times() {
         verify(fetcher, times(4)).postTimeInfoBatch(courtsCaptor.capture(), dateCaptor.capture(), timeCaptor.capture());
     }
 
