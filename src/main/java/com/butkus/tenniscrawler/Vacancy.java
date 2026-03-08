@@ -86,7 +86,7 @@ public class Vacancy {
                     // just below this
                     for (CourtTypeAtHour recipeCourtTypeAtHour : currentRecipeWeightEntry.getValue()) {
                         if (found) break;    // todo: refactor: both "continue and "break" are too much -- IT CAN ALSO BE "break" -- figure out why.
-                        List<Long> recipeIds = recipeCourtTypeAtHour.getCourtType().getIds().stream().map(Court::getCourtId).toList();
+                        List<Long> recipeIds = recipeCourtTypeAtHour.getCourtType().getCourts().stream().map(Court::getCourtId).toList();
                         LocalTime recipeFrom = recipeCourtTypeAtHour.getTime();
 
                         LocalTime recipeTo = recipeFrom.plusMinutes(duration);
@@ -144,12 +144,15 @@ public class Vacancy {
         if (orderExists()) {
             for (Map.Entry<Integer, List<CourtTypeAtHour>> entry : this.recipe.getMap().entrySet()) {
                 for (CourtTypeAtHour courtTypeAtHour : entry.getValue()) {
+
                     LocalTime recipeTimeFrom = courtTypeAtHour.getTime();
-                    Collection<Court> recipeIds = courtTypeAtHour.getCourtType().getIds();
-                    Court orderCourtId = this.order.getCourt();
+                    Collection<Court> recipeCourts = courtTypeAtHour.getCourtType().getCourts();
+
                     LocalTime orderTimeFrom = this.order.getTimeFrom();
+                    Court orderCourtId = this.order.getCourt();
+
                     boolean timeFromMatches = recipeTimeFrom.equals(orderTimeFrom);
-                    boolean courtMatches = recipeIds.contains(orderCourtId);
+                    boolean courtMatches = recipeCourts.contains(orderCourtId);
                     if (timeFromMatches && courtMatches) {
                         return entry.getKey();
                     }

@@ -42,7 +42,7 @@ public abstract class Recipe implements Iterator<Map.Entry<Integer, List<CourtTy
     public List<Long> getCourtIds() {
         return map.values().stream()
                 .flatMap(List::stream)
-                .flatMap(e -> e.getCourtType().getIds().stream())       // fixme: getIds() here actually refer to `Court` type
+                .flatMap(e -> e.getCourtType().getCourts().stream())
                 .map(Court::getCourtId)
                 .distinct()
                 .toList();
@@ -51,7 +51,7 @@ public abstract class Recipe implements Iterator<Map.Entry<Integer, List<CourtTy
     public List<Integer> getCourtTypeIds() {
         return map.values().stream()
                 .flatMap(List::stream)
-                .flatMap(e -> e.getCourtType().getIds().stream())   // fixme: (search for fooFix): `ids` are actually or type `Court`
+                .flatMap(e -> e.getCourtType().getCourts().stream())
                 .map(Court::getCourtType)
                 .distinct()
                 .map(CourtType::getCourtTypeId)
