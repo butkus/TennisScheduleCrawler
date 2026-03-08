@@ -124,10 +124,6 @@ class DesiresIteratorThingyTest {
         return stubOrders(court, DAY, timeFrom, timeTo);
     }
 
-    private static List<Order> stubOrders(String date, String timeFrom, String timeTo) {
-        return stubOrders(Court.H01, date, timeFrom, timeTo);
-    }
-
 
 // todo (after finished with postPlaceInfoBatch):
 //  === ITERATOR THINGY SHOULD DO
@@ -917,10 +913,6 @@ class DesiresIteratorThingyTest {
         verify(fetcher, atLeastOnce()).postTimeInfoBatch(courtsCaptor.capture(), dateCaptor.capture(), timeCaptor.capture());
     }
 
-    private void fetchesTimeOnce() {
-        verify(fetcher).postTimeInfoBatch(courtsCaptor.capture(), dateCaptor.capture(), timeCaptor.capture());
-    }
-
     private void fetchesPlaceOnce() {
         verify(fetcher).postPlaceInfoBatch(datesCaptor.capture(), placesCaptor.capture());
     }
@@ -929,21 +921,8 @@ class DesiresIteratorThingyTest {
         verify(fetcher, times(invocationCount)).postPlaceInfoBatch(datesCaptor.capture(), placesCaptor.capture());
     }
 
-    private void fetchesTimeOnceOrTwice() {
-        verify(fetcher, atLeast(1)).postTimeInfoBatch(courtsCaptor.capture(), dateCaptor.capture(), timeCaptor.capture());
-        verify(fetcher, atMost(2)).postTimeInfoBatch(courtsCaptor.capture(), dateCaptor.capture(), timeCaptor.capture());
-    }
-
     private void fetchesTimeTwice() {
         verify(fetcher, times(2)).postTimeInfoBatch(courtsCaptor.capture(), dateCaptor.capture(), timeCaptor.capture());
-    }
-
-    private void fetchesTimeThrice() {
-        verify(fetcher, times(3)).postTimeInfoBatch(courtsCaptor.capture(), dateCaptor.capture(), timeCaptor.capture());
-    }
-
-    private void fetchesTime4times() {
-        verify(fetcher, times(4)).postTimeInfoBatch(courtsCaptor.capture(), dateCaptor.capture(), timeCaptor.capture());
     }
 
     private void assertFetchedCourts(List<Long> courtIds) {
