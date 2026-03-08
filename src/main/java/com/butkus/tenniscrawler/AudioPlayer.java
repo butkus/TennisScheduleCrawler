@@ -19,7 +19,6 @@ public class AudioPlayer {
     public AudioPlayer(@Value("${app.bell-sound-path}") File bellSound) {
         this.bellSound = bellSound;
         this.played = false;
-        System.out.println("--- AP constructor, initial played = " + played);
     }
 
     public void reset() {

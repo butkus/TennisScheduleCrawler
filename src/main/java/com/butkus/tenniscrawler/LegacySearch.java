@@ -18,7 +18,6 @@ public class LegacySearch {
     public static final TemporalAdjuster ADD_30_MIN = t -> t.plus(30L, MINUTES);
     public static final TemporalAdjuster SUBTRACT_30_MIN = t -> t.minus(30L, MINUTES);
 
-    private final AudioPlayer audioPlayer;
     private final SebFetcher fetcher;
 
     private final LocalDate day;
@@ -27,7 +26,7 @@ public class LegacySearch {
 
     private final LocalTime earlyBird;
     private final Predicate<LocalTime> isBeforeEarlyBird;
-    private final Predicate<LocalTime> isAfterLateOwl;
+    private final Predicate<LocalTime> isAfterNightOwl;
 
     private Long courtIdFound;
     private String timeFound;
@@ -35,14 +34,13 @@ public class LegacySearch {
     private Long durationFound;
 
     public LegacySearch(BookingConfigurator bookingConfigurator, Desire desire) {
-        this.audioPlayer = bookingConfigurator.getAudioPlayer();
         this.fetcher = bookingConfigurator.getFetcher();
         this.day = desire.getDate();
         this.courts = desire.getCourts();
         this.order = desire.getOrder();
         this.earlyBird = bookingConfigurator.getEarlyBird();
         this.isBeforeEarlyBird = t -> t.isBefore(bookingConfigurator.getEarlyBird());
-        this.isAfterLateOwl = t -> t.isAfter(bookingConfigurator.getLateOwl());
+        this.isAfterNightOwl = t -> t.isAfter(bookingConfigurator.getNightOwl());
     }
 
     public VacancyFound searchForEarlier() {
@@ -65,7 +63,7 @@ public class LegacySearch {
         boolean found = searchForReservation(getCourtId(), order.getTimeTo(), 30L);
         if (!found) {
             // find brand-new reservation
-            found = repeatSearch(getOrderToMinus30Min(), ADD_30_MIN, isAfterLateOwl);
+            found = repeatSearch(getOrderToMinus30Min(), ADD_30_MIN, isAfterNightOwl);
         }
 
         if (found) {
@@ -129,10 +127,6 @@ public class LegacySearch {
 
     private boolean orderExists() {
         return this.order != null;
-    }
-
-    public void searchForNewReservation() {
-        repeatSearch(earlyBird, ADD_30_MIN, isAfterLateOwl);
     }
 
 }

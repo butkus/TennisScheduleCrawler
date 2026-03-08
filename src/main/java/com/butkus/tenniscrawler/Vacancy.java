@@ -58,7 +58,7 @@ public class Vacancy {
         } else if (isLater) {
             vacancyFound = legacySearch.searchForLater();
         } else if (isAny) {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("ExtensionInterest.ANY is not supported. Use a Recipe.");
         }
 
         if (vacancyFound != null) {

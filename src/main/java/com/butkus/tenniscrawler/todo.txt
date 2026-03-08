@@ -18,7 +18,7 @@ FEATURES:
         - actually, a gradually degradding favorable thing should be attempted. Floor/ceiling is necessary (for weekday and weekend)
         - but also priority list e.g. I'll do 18:00 if I need to but I'd rather change court/venue to make it 18:30
 
-- ability to have arbitrary from-to time bracket (like we have EARLY_BIRD, LATE_OWL) for weekdays and for weekends (or for any weekday, or even for specific Desire?)
+- ability to have arbitrary from-to time bracket (like we have EARLY_BIRD, NIGHT_OWL) for weekdays and for weekends (or for any weekday, or even for specific Desire?)
 - for <48-hour purchase-only (vs. reserve with ability to cancel) cases. Sometimes they are 90-min- or 120-min- only, because seller decided to not sell in pieces.
      In these cases need to attempt to make 60-, 90-, and 120- minute requests, because they will not appear in 60-min aviable durations
 
@@ -264,5 +264,3 @@ new way:
     - before        65 sec  (all ANY/EARLIER/LATER)
     - intermediate  25 sec  (ANY/EARLIER/LATER for weekends, Recipe for weekdays)
     - after         15 sec  (all Recipe)
-
--- useless line to check pushing to master

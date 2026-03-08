@@ -20,12 +20,11 @@ public class BookingConfigurator {
 
     private LocalTime earlyBird = LocalTime.parse("18:00");
     private LocalTime comfortable = LocalTime.parse("18:30");
-    private LocalTime lateOwl = LocalTime.parse("19:30");
+    private LocalTime nightOwl = LocalTime.parse("19:30");
 
     private final AudioPlayer audioPlayer;
     private final SebFetcher fetcher;
     private final Clock clock;
-
 
     @Autowired
     public BookingConfigurator(AudioPlayer audioPlayer, SebFetcher fetcher, Clock clock) {
