@@ -1,238 +1,58 @@
-
-FEATURES:
-- maybe use placeInfoBatch (1 big half-hour availability json for all dates, all courts)
-    - use it for quick-scan, i.e. to see which days are fully booked
-- use timeInfoBatch for crawling
-    - use to check there are free courts of desired time (e.g. 19:00 weekdays or 17:00 weekends)
-    - if we have ExtensionInterest, see if there is a new court with desired ExtensionInterest (and at least 1 hr time)
-    - if not, make a timeInfoBatch call with held courtID and see if there is 30min availability
-- cache
-    - old cache had
-        - half-hour slot array (from 18:00 till 20:00 I think)
-        - aggregate reservation data
-    - new cache should have
-        - booked time (duration?) -- more flexible than half-hour slots
-        - booked courtID          -- not aggregate, allows implementing proper extension interest
-- extension interest
-    - now only 30 mins extension implemented. Do incrementally earler/later extension aattempts (with floor/ceiling)
-        - actually, a gradually degradding favorable thing should be attempted. Floor/ceiling is necessary (for weekday and weekend)
-        - but also priority list e.g. I'll do 18:00 if I need to but I'd rather change court/venue to make it 18:30
-
-- ability to have arbitrary from-to time bracket (like we have EARLY_BIRD, NIGHT_OWL) for weekdays and for weekends (or for any weekday, or even for specific Desire?)
-- for <48-hour purchase-only (vs. reserve with ability to cancel) cases. Sometimes they are 90-min- or 120-min- only, because seller decided to not sell in pieces.
-     In these cases need to attempt to make 60-, 90-, and 120- minute requests, because they will not appear in 60-min aviable durations
-
-- stdo --> logger
-    - migration to logger
-    - debugMode migration to logger level
-    - log "searching for reservation" with higher level
-    - log REST logs with lower elvel
-
-- first:
-    - add cap for weekends. I don't want my 16:30 LATER desire to yield 18:30 suggestions
-    - clay courts that have priority: courts 1, 5 most in the shade have priority. next, courts 2, 6 have priority because they're next-best courts in shade, etc.
--- later
-    - minikube (mini kubernetes)
+Version history (no real version numbers, just milestones):
+    - version 1
+        - screen scraping via selenium
+        - aggregate reservation data - half-hour slot array (from 18:00 till 20:00 I think)
+    - version 2
+        - extension interest: ANY, EARLIER, LATER
+        - at first 30-min improvements only, later added anytime within 1800-2000
+        - later added earlier/later non-adjacent search
+    - version 3
+        - new website, moved to REST api
+    - version 4
+        - double booking (outside and inside)
+    - version 5
+        - recipe-based searching
+        - Recipe vs. previous version performance improvements
+            - before        65 sec  (all ANY/EARLIER/LATER)
+            - intermediate  25 sec  (ANY/EARLIER/LATER for weekends, Recipe for weekdays)
+            - after         15 sec  (all Recipe)
 
 
 
 
--- Design conflict
-        Currently:
-            - DesireMaker makes desires (and validates for duplicates)
-            - Crawler passes desires to DesireIteratorThingy, which gets all orders, and
-            - passes 1 desire + all orders to Prospect finder (loop)
-            - which does stuff (including matching Order to Desire via Prospect.getOrder())
-        Next:
-            + remove Desire duplication validation from DesireMaker (later, for now should not regress, so it's fine) -- not removed. Added to it, even. Duplication embraced now.
-            + keep validation in DesireOrderPairer. Motivation:
-                - DesireMaker can only check for duplicate Desires (it only knows desires)
-                - DesireOrderPairer can validate
-                    - duplicate Desires
-                    - stray Orders (Orders that are not matched with Desires)
-                    - stray Desires -- ensures proper matching
-                    - multiple Desires and multiple Orders -- finds ambiguous mappings and fails if found
-            + remove Prospect.getOrder() and similar order-inferring logic from Prospect class
-            + nice to have: rename Prospect to Vacancy
-            - maybe: get rid of DesireIteratorThingy? Or merge it with crawler. Crawler only does "do work", kind of too little responsibility.
- -- Next++: adapt booking itself
-        ? make current (single-booking) work strictly -- if inside, then search for inside only -- done?
-        + make double booking simply by allowing another desire for same day with different court ids (may automatically work at this point) -- it did work automatically
-        + search for and remove:  // todo remove redundant desire infra
-        + calendar: make half-circle for 1/2 desires. Or Circle outline for 1/2 and filled-in circle for 2/2
-        - make convenience methods
-            - make 1 entry in DesiresExplicit to make NONE for all day (both court types)
-            - debug mode print desires not like this
-               -- Desire: Desire(date=2025-05-28, extensionInterest=NONE,
-              courts=[1, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 135, 137, 139, 141, 143, 145, 147, 59, 61, 63, 65, 67, 69],
-               order=Order(date=2025-05-28, court=H09, timeFrom=19:30, timeTo=20:30))
-             but like this:
-               -- Desire: Desire(2025-05-28, extensionInterest=NONE, courts=Inside, order=Order(2025-05-28, court=H09, 19:30-20:30))
-            - make calendar from
-                  - ◐ = IN or OUT
-                  - ● means IN+OUT
-                to
-                  - ◐ means IN only, and
-                  - ◑ means OUT only, and
-                  - ● means IN+OUT
-            - for summer, default desire maker with INSIDE = NONE because inside usually easy to get if needed
-        - refactor: move all the stubbing/mocking helper methods from DesireIteratorThingyTest to base class and make it extend it.
- -- Even more Next: nice to haves
-    - for summer, pick clay courts in the shade first
-    - for winter, pick hard first, then carpet. Or maybe remove 2 booking-per-day limit and allow e.g. priority queue:
-        - first new hards, then old hards, not-3-6-9-public ones, carpet ones, finally, if none above found, search for all other courts.
+- Recipe -- [big picture stuff]
+    - ***FIRST*** let's try to describe the rules of the game in 3 levels of detail
+    a) in simple terms, I want this: search for weights, then pick any withing the weight, try to respect duration preference
+    b) more detailed, in order:
+        - let's assume durationPreference = 90, 60
+        - pick weights, in order
+        - within a weight, find any vacancy and take it
+        - if it's of best duration, stop here. we've found our pick. other weight's options don't matter
+        - if, however, duration is 60, keep looking within the same weight for 90-min vacancy
+        - if found, stop here.
+        - if not found, pick next weight and repeat
+    c) order of steps:
+        1. weight -- most important: if we find anything in weight 1, it will be better than anything anywhere
+           - more important than duration or place within a weight
+        2. duration -- 2nd most important: if we find 90 at the bottom of weight 1 it's better than 60 at the top
+        3. first-match: take first item within a weight, find matching vacancy. If found, stop. else iterate further.
 
--- Priority queue:
-    1) enable multiple tiers
-        - Now we have Inside + Outside + All (Outside temporary Clay)
-        - Need support for more
-            - at first: Clay, Outside, Inside, All
-            - later: EarlySummer, LateSummer, Clay, Outside, Inside, All
-                EarlySummer(prefer shady clay), LateSummer(chasing evening light, avoid shade) -- these can be mutually exclusive if hard to implement
-    2) dynamic pairing
-        - make court priority queue
-        - after pairing, check if desire is satisfied
-            - if Outside ANY secured, upgrade initial desire from Outside to Clay, etc.
-            - run pairing again until no further upgrades can be done
-                - can probably just iterate the same desire/day until completion, i.e. don't run pairing again. In that case, probably a good idea to run pairer validation at the end
-        - "convenient" time will need to be better defined, incl. weekday/weekend separation. Reason being:
-            - assuming I have 20:00 Grass. Next preference will be Outside EARLIER
-                - if clay 20:00 (or even 19:30) appears, do I want my Desire be bumped to Clay ANY? Maybe Grass 18:30 is better for me?
-                - at this point I'm just brainstorming. Don't take this as a thought-out instructions.
-                - do I need not a priority queue but priority table (matrix)?
-                    - Grass 20:00 --> Grass 19:30 is obviously an upgrade
-                    - Grass 20:00 --> Clay 20:00 (or 19:30) is an upgrade
-                    - Grass 20:00 --> Clay 21:00. Which one is better?
-            - assume I have 19:00 Grass (early summer, shade is preferred) --> Desire is Clay EARLIER
-                 - also assume that we have categories:
-                    - ShadyClay -- courts 1 and 5 leftmost courts
-                    - SummerClay -- courts 1, 2, 5, 6 -- more or less in shade
-                 - Clay 6  18:30 appears --> upgrade to Desire to SummerClay EARLIER (maybe ANY at thispoint?)
-                 - Clay 5  18:00 appears --> upgrade to Desire ShadyClay EARLIER
-                 - at this point we have secured the best possible court, but maybe it's too early now? what can we do?
-                    - clarify strict, at 30 min intervals -- what is my priority queue for times
-                        - could be linear   e.g. 19:00 is perfect, then 18:30 and 19:30 would be equally next-best and 18:00 with 20:00 equally next-next best
-                        - could be explicit e.g. 19:00 is perfect, then 18:30, then 19:30, then 20:00, then 18:00
-                    - what if it's early summer sunday, not bound by work hours
-                        - I start with 19:00 Grass
-                        - upgrade Desire to ShitClay 18:30, and get the Order for it
-                        - upgrade to SummerClay 17:00, and get it
-                        - at this point I'm at Desire ShadyClay (let's ignore ExtensionInterest for a second), looking to upgrade
-                        - then, these appear
-                            - ShadyClay 15:00
-                            - Grass 18:00
-                            - ShitClay disappears
-                        - do I take the ShadyClay? It's pretty early
-                        - do I keep the SummerClay, which is kinda early as well?
-                        - ShitClay is no more
-                        - Grass starts to look attractive due to convenient time
-                        - courtType-to-time table should sort this and all other priority questions
-                    - NOW VS FUTURE
-                        - Now we have Vacancy which has the following logic:
-                            - if want earlier --> search for earlier, by 30 min increments
-                            - if want later   --> search for later, by 30 min increments
-                            - if want any     --> search for both earlier and later, by 30 min increments
-                        - We could have:
-                            - CascadingVacancy (CascadingDesire sounds better but then we'd need to move vacancy search logic to desire side)
-                            - it would have the logic, allowing to search for courts according to a priority table/matrix/cascading priorities, etc.
-                            - it would not have hardcoded values like earlyBird, LATER/EARLIER, etc.
-                            - rather it would have an ability to search according to a priority list/table/matrix
-                            - the cascading list/table/matrix itself would be defined separately and Cascading Vacancy would just use it
-                            - it could be called Recipe
-                            - well, following the logic, CascadingVacancy could be named Kitchen, but perhaps that's going too far
-                        - Or we could leave names as-is and simply extend ExtensionInterest class to have the cascading behavior
-                            - ExtensionInterest could be renamed to ExtensionRecipe or ExtensionLogic or ExtensionPlan
-                        - should I allow one-time EARLIER/LATER?
-                            - if I do, does it fallback to good-old behavior?
-                            - or perhaps it should work as a Recipe modifier?
-                                - Recipe could stay the same, but EARLIER/LATER enforced. How would it know which court is preferred though?
-                                - a) it could calculate average-per-30-min-slot weight. Hard 1800+1830+1900+1930+2000 / 5 = average weight. And then pick best.
-                                - b) best closest weight from Recipe. e.g. now is 2000 and grass is 10, clay shade is 4, clay summer is 5, clay rest is 7.
-                                    - then LATER would imply clay shade priority, with next fallback clay summer, etc.
-                            - or perhaps EARLIER/LATER becomes a court-time preference modifier?
-                                - regular recipe would have sth like resolvePreference(time)
-                                - extension interest could have forced resolvePreference() value, e.g.
-                                    - LATER = whatever court, just later.
-                                    - LATER+Clay = find later but only if can find clay
+    -  ***NEXT*** if we can make the tests more readable
+        - as uncle Bob says, tests are (can be) documentation. As his bowling result example shows,
+            reading tests (and/or prod code) can be almost the same as reading rules of the game
+        - would be nice to have some of that in prod code and/or in tests
+        - re-watch that episode and see if can apply
+    - current drawbacks
+         So now we have WEIGHT, then DURATION PREFERENCE, then MATCH logic.
+         There's a drawback (let's assume it's weekend. 90 desirable but 60 acceptable):
+           - if 90 is aquired but it is of last weight, and then weight 1 of 60 min appears, should we take it?
+           - currently, we can't
+           - how can we do it?
+                - to cover all cases, looks like we need a full table-worth of classification to fullfill this properly.
+                - this is rather complex logic. To write and maintain (and read)
+                - For now, let's leave it as that. For overrides, let's just replace IndoorRecipe60 with IndoorRecipe90 etc.
 
-
-        - explicit desires will (and should) be rarely needed, but if used, should take precedence
-
-    -- LATER but only by 30 mins -- LITTLE_LATER (good for when I have almost convenient time, but LATER gives me way later)
-    -- obv, same for EARLIER -- LITTLE_EARLIER
-
-
-next:
-    + read all the RECIPE_BASED ***TESTS*** so far.
-    + think of what's missing and document here
-    + read the ***PROD CODE*** so far
-    + think of missing pieces and document here
-    + read the above notes.
-    + combine the findings and refine
-    + ALL ABOVE DONE
-    - NEXT: THIS FROM ABOVE IS WORTH RE-READING WHEN DESIGNING "OVERRIDE" FEATURE
-            - should I allow one-time EARLIER/LATER?
-                - if I do, does it fallback to good-old behavior?
-                - or perhaps it should work as a Recipe modifier?
-                    - Recipe could stay the same, but EARLIER/LATER enforced. How would it know which court is preferred though?
-                    - a) it could calculate average-per-30-min-slot weight. Hard 1800+1830+1900+1930+2000 / 5 = average weight. And then pick best.
-                    - b) best closest weight from Recipe. e.g. now is 2000 and grass is 10, clay shade is 4, clay summer is 5, clay rest is 7.
-                        - then LATER would imply clay shade priority, with next fallback clay summer, etc.
-                - or perhaps EARLIER/LATER becomes a court-time preference modifier?
-                    - regular recipe would have sth like resolvePreference(time)
-                    - extension interest could have forced resolvePreference() value, e.g.
-                        - LATER = whatever court, just later.
-                        - LATER+Clay = find later but only if can find clay
-
-for now:
-    - check what SEB calls are made when reservations/available are loaded
-        - 8 days
-        - all court types
-        - {"excludeCourtName":true,"excludeInfoUrl":true,"places":[2,18,5,20,8],"dates":["2026-01-01","2026-01-02","2026-01-03","2026-01-04","2026-01-05","2026-01-06","2026-01-07","2026-01-08"],"salePoint":11,"sessionToken":"93b25e67d079e4871686c18b02fe62f9"}
-    - use that info (not necessarily as a step 2) to build our solution
-    + fix the todo-comments in searchForReservationWithRecipe() and getOrderWeight()
-    + make DesiresIteratorThingyTest.Durations.NoPriorOrder._90Available_finds() pass
-    + continue with tests
-
-    - [big picture stuff]
-        - ***FIRST*** let's try to describe the rules of the game in 3 levels of detail
-        a) in simple terms, I want this: search for weights, then pick any withing the weight, try to respect duration preference
-        b) more detailed, in order:
-            - let's assume durationPreference = 90, 60
-            - pick weights, in order
-            - within a weight, find any vacancy and take it
-            - if it's of best duration, stop here. we've found our pick. other weight's options don't matter
-            - if, however, duration is 60, keep looking within the same weight for 90-min vacancy
-            - if found, stop here.
-            - if not found, pick next weight and repeat
-        c) order of steps:
-            1. weight -- most important: if we find anything in weight 1, it will be better than anything anywhere
-               - more important than duration or place within a weight
-            2. duration -- 2nd most important: if we find 90 at the bottom of weight 1 it's better than 60 at the top
-            3. first-match: take first item within a weight, find matching vacancy. If found, stop. else iterate further.
-
-        -  ***NEXT*** if we can make the tests more readable
-            - as uncle Bob says, tests are (can be) documentation. As his bowling result example shows,
-                reading tests (and/or prod code) can be almost the same as reading rules of the game
-            - would be nice to have some of that in prod code and/or in tests
-            - re-watch that episode and see if can apply
-
-
-
-
-     So now we have WEIGHT, then DURATION PREFERENCE, then MATCH logic.
-     There's a drawback (let's assume it's weekend. 90 desirable but 60 acceptable):
-       - if 90 is aquired but it is of last weight, and then weight 1 of 60 min appears, should we take it?
-       - currently, we can't
-       - how can we do it?
-            - to cover all cases, looks like we need a full table-worth of classification to fullfill this properly.
-            - this is rather complex logic. To write and maintain (and read)
-            - For now, let's leave it as that. For overrides, let's just replace IndoorRecipe60 with IndoorRecipe90 etc.
-
-todo -- check if desire resolver correcrly assuems that NEW explictit desire overrides NEW implicit one
-
-
--- NOW
+-- placeInfo vs. timeInfo
     - fullsell check
         - K4 at 2026-01-18 at 1800 was only available to book 2-hour-only. Why?
         - let's explain with K4 at 1700 at 1-hour-only because situation changed whilst researching
@@ -243,46 +63,35 @@ todo -- check if desire resolver correcrly assuems that NEW explictit desire ove
             - if you click on 1730, it says "Deja šis laikas yra rezervuotas", even though it is fullsell
             - reason is that when you click on a time, it does a **** timeInfo call **** and finds out the specifics
             - and specifics this time was that 1700-1800 was only sellable as 1 chunk, not by 30-min chunks
-        - let's write some tests
-            - let's no do integration testing. well, would be nice, bet perhaps, let's test units
-            - when within 48 hours
-                - fullsell to be considered as free
-                - every weight, "available" according to PLACEInfo(), to be tested with TIMEInfo()
-                    - "available" means for all required 30-min slots, must be either "free" or "fullsell"
-                    - e.g. for durationPreference of 90 mins, placeInfo() must have 3 consecutive 30-min slots of
-                      either "free" or "fullsell" in order to be considered eligible for timeInfo() check
 
 
--- later:
+-- maybe later:
+    - minikube (mini kubernetes)
     - crawler wrapped
         - how many courts it helped find (add max 1 per day in winter season, max 2 per day in summer (can be 1 indoor and 1 outdoor simultaneously)
-        - most improved/max bookings per reservation -- how many times a reservation was booked, cancelled, rebooked because a better one was found for the same day
-    - sugalvot geresni pavadinima appsui
-    - release notes (maybe not release notes per se, but mark milestones for posterity/curiosity. I think this is a 5th major-is rewrite (recipes)
-
-new way:
-    - before        65 sec  (all ANY/EARLIER/LATER)
-    - intermediate  25 sec  (ANY/EARLIER/LATER for weekends, Recipe for weekdays)
-    - after         15 sec  (all Recipe)
+        - most improved/max bookings per reservation -- how many times a reservation was booked, canceled, rebooked because a better one was found for the same day
+    - better name for the service
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+-- next
+    - Recipe improvements
+        - if I'll decide to move Recipe to ExtensionInterest, Recipe's name can become ExtensionPlan
+        - should I allow one-time EARLIER/LATER?
+            - if I do, does it fallback to good-old behavior?
+            - or perhaps it should work as a Recipe modifier?
+                - Recipe could stay the same, but EARLIER/LATER enforced. How would it know which court is preferred though?
+                - a) it could calculate average-per-30-min-slot weight. Hard 1800+1830+1900+1930+2000 / 5 = average weight. And then pick best.
+                - b) best closest weight from Recipe. e.g. now is 2000 and grass is 10, clay shade is 4, clay summer is 5, clay rest is 7.
+                    - then LATER would imply clay shade priority, with next fallback clay summer, etc.
+            - or perhaps EARLIER/LATER becomes a court-time preference modifier?
+                - regular recipe would have sth like resolvePreference(time)
+                - extension interest could have forced resolvePreference() value, e.g.
+                    - LATER = whatever court, just later.
+                    - LATER+Clay = find later but only if can find clay
+        -- LATER but only by 30 mins -- LITTLE_LATER (good for when I have almost convenient time, but LATER gives me way later)
+        -- obv, same for EARLIER -- LITTLE_EARLIER
 
 
 
-
-
-
+todo -- check if desire resolver correcrly assuems that NEW explictit desire overrides NEW implicit one (probably not adapted for Recipe)
 
