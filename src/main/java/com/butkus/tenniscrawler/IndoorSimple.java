@@ -21,28 +21,28 @@ public class IndoorSimple extends Recipe {
     public static final LocalTime T1930 = LocalTime.parse("19:30");
     public static final LocalTime T2000 = LocalTime.parse("20:00");
 
-    private static final Map<Integer, List<CourtTypeAtHour>> map;
+    private static final Map<Integer, List<CourtGroupAtHour>> map;
     static {
         map = new LinkedHashMap<>();
         map.put(1, List.of(
-                new CourtTypeAtHour(CourtGroup.HARD, T1930)
+                new CourtGroupAtHour(CourtGroup.HARD, T1930)
         ));
         map.put(2, List.of(
-                new CourtTypeAtHour(CourtGroup.HARD, T1900),
-                new CourtTypeAtHour(CourtGroup.CARPET, T1930)
+                new CourtGroupAtHour(CourtGroup.HARD, T1900),
+                new CourtGroupAtHour(CourtGroup.CARPET, T1930)
         ));
         map.put(3, List.of(
-                new CourtTypeAtHour(CourtGroup.HARD, T1830),
-                new CourtTypeAtHour(CourtGroup.HARD, T2000),
-                new CourtTypeAtHour(CourtGroup.CARPET, T1900)
+                new CourtGroupAtHour(CourtGroup.HARD, T1830),
+                new CourtGroupAtHour(CourtGroup.HARD, T2000),
+                new CourtGroupAtHour(CourtGroup.CARPET, T1900)
         ));
         map.put(4, List.of(
-                new CourtTypeAtHour(CourtGroup.HARD, T1800),
-                new CourtTypeAtHour(CourtGroup.CARPET, T1830),
-                new CourtTypeAtHour(CourtGroup.CARPET, T2000)
+                new CourtGroupAtHour(CourtGroup.HARD, T1800),
+                new CourtGroupAtHour(CourtGroup.CARPET, T1830),
+                new CourtGroupAtHour(CourtGroup.CARPET, T2000)
         ));
         map.put(5, List.of(
-                new CourtTypeAtHour(CourtGroup.CARPET, T1800))
+                new CourtGroupAtHour(CourtGroup.CARPET, T1800))
         );
     }
 

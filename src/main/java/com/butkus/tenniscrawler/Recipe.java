@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-public abstract class Recipe implements Iterator<Map.Entry<Integer, List<CourtTypeAtHour>>> {
+public abstract class Recipe implements Iterator<Map.Entry<Integer, List<CourtGroupAtHour>>> {
 
     @Getter
-    private final Map<Integer, List<CourtTypeAtHour>> map;
-    private final Iterator<Map.Entry<Integer, List<CourtTypeAtHour>>> iterator;
+    private final Map<Integer, List<CourtGroupAtHour>> map;
+    private final Iterator<Map.Entry<Integer, List<CourtGroupAtHour>>> iterator;
 
-    Recipe(Map<Integer, List<CourtTypeAtHour>> map) {
+    Recipe(Map<Integer, List<CourtGroupAtHour>> map) {
         this.map = map;
         this.iterator = map.entrySet().iterator();
     }
@@ -25,7 +25,7 @@ public abstract class Recipe implements Iterator<Map.Entry<Integer, List<CourtTy
     }
 
     @Override
-    public Map.Entry<Integer, List<CourtTypeAtHour>> next() {
+    public Map.Entry<Integer, List<CourtGroupAtHour>> next() {
         if (!hasNext()) throw new NoSuchElementException();
 
         return iterator.next();
@@ -35,7 +35,7 @@ public abstract class Recipe implements Iterator<Map.Entry<Integer, List<CourtTy
         return next().getKey();
     }
 
-    public List<CourtTypeAtHour> nextCourtTypeAtHour() {
+    public List<CourtGroupAtHour> nextCourtTypeAtHour() {
         return next().getValue();
     }
 

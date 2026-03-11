@@ -76,7 +76,7 @@ public class Vacancy {
         int orderWeight = getOrderWeight();
 
         while (this.recipe.hasNext() && !found) {
-            Map.Entry<Integer, List<CourtTypeAtHour>> currentRecipeWeightEntry = this.recipe.next();
+            Map.Entry<Integer, List<CourtGroupAtHour>> currentRecipeWeightEntry = this.recipe.next();
             int currentRecipeWeight = currentRecipeWeightEntry.getKey();
             if (currentRecipeWeight < orderWeight) {
                     // just below this
@@ -84,10 +84,10 @@ public class Vacancy {
                     if (found) break;
 
                     // just below this
-                    for (CourtTypeAtHour recipeCourtTypeAtHour : currentRecipeWeightEntry.getValue()) {
+                    for (CourtGroupAtHour recipeCourtGroupAtHour : currentRecipeWeightEntry.getValue()) {
                         if (found) break;    // todo: refactor: both "continue and "break" are too much -- IT CAN ALSO BE "break" -- figure out why.
-                        List<Long> recipeIds = recipeCourtTypeAtHour.getCourtType().getCourts().stream().map(Court::getCourtId).toList();
-                        LocalTime recipeFrom = recipeCourtTypeAtHour.getTime();
+                        List<Long> recipeIds = recipeCourtGroupAtHour.getCourtType().getCourts().stream().map(Court::getCourtId).toList();
+                        LocalTime recipeFrom = recipeCourtGroupAtHour.getTime();
 
                         LocalTime recipeTo = recipeFrom.plusMinutes(duration);
 
@@ -142,11 +142,11 @@ public class Vacancy {
     private int getOrderWeight() {
         int orderWeight = Integer.MAX_VALUE;
         if (orderExists()) {
-            for (Map.Entry<Integer, List<CourtTypeAtHour>> entry : this.recipe.getMap().entrySet()) {
-                for (CourtTypeAtHour courtTypeAtHour : entry.getValue()) {
+            for (Map.Entry<Integer, List<CourtGroupAtHour>> entry : this.recipe.getMap().entrySet()) {
+                for (CourtGroupAtHour courtGroupAtHour : entry.getValue()) {
 
-                    LocalTime recipeTimeFrom = courtTypeAtHour.getTime();
-                    Collection<Court> recipeCourts = courtTypeAtHour.getCourtType().getCourts();
+                    LocalTime recipeTimeFrom = courtGroupAtHour.getTime();
+                    Collection<Court> recipeCourts = courtGroupAtHour.getCourtType().getCourts();
 
                     LocalTime orderTimeFrom = this.order.getTimeFrom();
                     Court orderCourtId = this.order.getCourt();

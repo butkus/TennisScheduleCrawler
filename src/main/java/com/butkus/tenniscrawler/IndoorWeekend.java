@@ -25,84 +25,84 @@ public class IndoorWeekend extends Recipe {
     public static final LocalTime T1930 = LocalTime.parse("19:30");
     public static final LocalTime T2000 = LocalTime.parse("20:00");
 
-    private static final Map<Integer, List<CourtTypeAtHour>> map;
+    private static final Map<Integer, List<CourtGroupAtHour>> map;
     static {
         map = new LinkedHashMap<>();
         map.put(1, List.of(
-                new CourtTypeAtHour(CourtGroup.HARD_CLOSE, T1800)
+                new CourtGroupAtHour(CourtGroup.HARD_CLOSE, T1800)
         ));
         map.put(2, List.of(
-                new CourtTypeAtHour(CourtGroup.HARD_FAR, T1800)
+                new CourtGroupAtHour(CourtGroup.HARD_FAR, T1800)
         ));
         map.put(3, List.of(
-                new CourtTypeAtHour(CourtGroup.CARPET_CLOSE, T1800)
+                new CourtGroupAtHour(CourtGroup.CARPET_CLOSE, T1800)
         ));
         map.put(4, List.of(
-                new CourtTypeAtHour(CourtGroup.CARPET_FAR, T1800)
+                new CourtGroupAtHour(CourtGroup.CARPET_FAR, T1800)
         ));
         map.put(5, List.of(
-                new CourtTypeAtHour(CourtGroup.HARD_CLOSE, T1830)
+                new CourtGroupAtHour(CourtGroup.HARD_CLOSE, T1830)
         ));
         map.put(6, List.of(
-                new CourtTypeAtHour(CourtGroup.HARD_FAR, T1830)
+                new CourtGroupAtHour(CourtGroup.HARD_FAR, T1830)
         ));
         map.put(7, List.of(
-                new CourtTypeAtHour(CourtGroup.CARPET_CLOSE, T1830)
+                new CourtGroupAtHour(CourtGroup.CARPET_CLOSE, T1830)
         ));
         map.put(8, List.of(
-                new CourtTypeAtHour(CourtGroup.CARPET_FAR, T1830)
+                new CourtGroupAtHour(CourtGroup.CARPET_FAR, T1830)
         ));
         map.put(9, List.of(
-                new CourtTypeAtHour(CourtGroup.HARD_CLOSE, T1900)
+                new CourtGroupAtHour(CourtGroup.HARD_CLOSE, T1900)
         ));
         map.put(10, List.of(
-                new CourtTypeAtHour(CourtGroup.HARD_FAR, T1900)
+                new CourtGroupAtHour(CourtGroup.HARD_FAR, T1900)
         ));
         map.put(11, List.of(
-                new CourtTypeAtHour(CourtGroup.CARPET_CLOSE, T1900)
+                new CourtGroupAtHour(CourtGroup.CARPET_CLOSE, T1900)
         ));
         map.put(12, List.of(
-                new CourtTypeAtHour(CourtGroup.CARPET_FAR, T1900)
+                new CourtGroupAtHour(CourtGroup.CARPET_FAR, T1900)
         ));
         map.put(13, List.of(
-                new CourtTypeAtHour(CourtGroup.HARD_CLOSE, T1730)
+                new CourtGroupAtHour(CourtGroup.HARD_CLOSE, T1730)
         ));
         map.put(14, List.of(
-                new CourtTypeAtHour(CourtGroup.HARD_FAR, T1730)
+                new CourtGroupAtHour(CourtGroup.HARD_FAR, T1730)
         ));
         map.put(15, List.of(
-                new CourtTypeAtHour(CourtGroup.CARPET_CLOSE, T1730)
+                new CourtGroupAtHour(CourtGroup.CARPET_CLOSE, T1730)
         ));
         map.put(16, List.of(
-                new CourtTypeAtHour(CourtGroup.CARPET_FAR, T1730)
+                new CourtGroupAtHour(CourtGroup.CARPET_FAR, T1730)
         ));
         map.put(17, List.of(
-                new CourtTypeAtHour(CourtGroup.HARD_CLOSE, T1930)
+                new CourtGroupAtHour(CourtGroup.HARD_CLOSE, T1930)
         ));
         map.put(18, List.of(
-                new CourtTypeAtHour(CourtGroup.HARD_FAR, T1930)
+                new CourtGroupAtHour(CourtGroup.HARD_FAR, T1930)
         ));
         map.put(19, List.of(
-                new CourtTypeAtHour(CourtGroup.CARPET_CLOSE, T1930)
+                new CourtGroupAtHour(CourtGroup.CARPET_CLOSE, T1930)
         ));
         map.put(20, List.of(
-                new CourtTypeAtHour(CourtGroup.CARPET_FAR, T1930)
+                new CourtGroupAtHour(CourtGroup.CARPET_FAR, T1930)
         ));
         map.put(21, List.of(
-                new CourtTypeAtHour(CourtGroup.HARD_CLOSE, T1700),
-                new CourtTypeAtHour(CourtGroup.HARD_CLOSE, T2000)
+                new CourtGroupAtHour(CourtGroup.HARD_CLOSE, T1700),
+                new CourtGroupAtHour(CourtGroup.HARD_CLOSE, T2000)
         ));
         map.put(22, List.of(
-                new CourtTypeAtHour(CourtGroup.HARD_FAR, T1700),
-                new CourtTypeAtHour(CourtGroup.HARD_FAR, T2000)
+                new CourtGroupAtHour(CourtGroup.HARD_FAR, T1700),
+                new CourtGroupAtHour(CourtGroup.HARD_FAR, T2000)
         ));
         map.put(23, List.of(
-                new CourtTypeAtHour(CourtGroup.CARPET_CLOSE, T1700),
-                new CourtTypeAtHour(CourtGroup.CARPET_CLOSE, T2000)
+                new CourtGroupAtHour(CourtGroup.CARPET_CLOSE, T1700),
+                new CourtGroupAtHour(CourtGroup.CARPET_CLOSE, T2000)
         ));
         map.put(24, List.of(
-                new CourtTypeAtHour(CourtGroup.CARPET_FAR, T1700),
-                new CourtTypeAtHour(CourtGroup.CARPET_FAR, T2000)
+                new CourtGroupAtHour(CourtGroup.CARPET_FAR, T1700),
+                new CourtGroupAtHour(CourtGroup.CARPET_FAR, T2000)
         ));
 
     }

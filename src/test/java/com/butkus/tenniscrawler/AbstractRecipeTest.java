@@ -22,32 +22,32 @@ public abstract class AbstractRecipeTest {
         this.recipe = getRecipe();
     }
 
-    abstract List<CourtTypeAtHour> expectedFirst();
+    abstract List<CourtGroupAtHour> expectedFirst();
     @Test
     void getFirst_returnsBestCourts() {
-        List<CourtTypeAtHour> actual = recipe.nextCourtTypeAtHour();
-        List<CourtTypeAtHour> expected = expectedFirst();
+        List<CourtGroupAtHour> actual = recipe.nextCourtTypeAtHour();
+        List<CourtGroupAtHour> expected = expectedFirst();
         assertEquals(expected, actual);
     }
 
-    abstract List<CourtTypeAtHour> expectedSecond();
+    abstract List<CourtGroupAtHour> expectedSecond();
     @Test
     void getSecond() {
         recipe.nextCourtTypeAtHour(); // skip first
 
-        List<CourtTypeAtHour> actual = recipe.nextCourtTypeAtHour();
-        List<CourtTypeAtHour> expected = expectedSecond();
+        List<CourtGroupAtHour> actual = recipe.nextCourtTypeAtHour();
+        List<CourtGroupAtHour> expected = expectedSecond();
         assertEquals(expected, actual);
     }
 
-    abstract List<CourtTypeAtHour> expectedLast();
+    abstract List<CourtGroupAtHour> expectedLast();
     @Test
     void getLast() {
         int skipAllButOne = getWeightsInOrder().size() - 1;
         IntStream.rangeClosed(1, skipAllButOne).forEach(i -> recipe.nextCourtTypeAtHour());     // skip to the last
 
-        List<CourtTypeAtHour> actual = recipe.nextCourtTypeAtHour();
-        List<CourtTypeAtHour> expected = expectedLast();
+        List<CourtGroupAtHour> actual = recipe.nextCourtTypeAtHour();
+        List<CourtGroupAtHour> expected = expectedLast();
         assertEquals(expected, actual);
     }
 

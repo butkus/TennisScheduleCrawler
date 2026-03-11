@@ -23,20 +23,20 @@ class OutdoorOnlyRecipeTest extends AbstractRecipeTest {
     }
 
     @Override
-    List<CourtTypeAtHour> expectedFirst() {
-        return List.of(new CourtTypeAtHour(CLAY_SUMMER, LocalTime.parse("19:00")));
+    List<CourtGroupAtHour> expectedFirst() {
+        return List.of(new CourtGroupAtHour(CLAY_SUMMER, LocalTime.parse("19:00")));
     }
 
     @Override
-    List<CourtTypeAtHour> expectedSecond() {
-        return List.of(new CourtTypeAtHour(CLAY_SUMMER, LocalTime.parse("19:30")));
+    List<CourtGroupAtHour> expectedSecond() {
+        return List.of(new CourtGroupAtHour(CLAY_SUMMER, LocalTime.parse("19:30")));
     }
 
     @Override
-    List<CourtTypeAtHour> expectedLast() {
+    List<CourtGroupAtHour> expectedLast() {
         return List.of(
-                new CourtTypeAtHour(GRASS, LocalTime.parse("18:00")),
-                new CourtTypeAtHour(GRASS, LocalTime.parse("20:00")));
+                new CourtGroupAtHour(GRASS, LocalTime.parse("18:00")),
+                new CourtGroupAtHour(GRASS, LocalTime.parse("20:00")));
     }
 
     @Override

@@ -21,22 +21,22 @@ class IndoorSimpleTest extends AbstractRecipeTest {
     }
 
     @Override
-    List<CourtTypeAtHour> expectedFirst() {
-        return List.of(new CourtTypeAtHour(HARD, LocalTime.parse("19:30")));
+    List<CourtGroupAtHour> expectedFirst() {
+        return List.of(new CourtGroupAtHour(HARD, LocalTime.parse("19:30")));
     }
 
     @Override
-    List<CourtTypeAtHour> expectedSecond() {
+    List<CourtGroupAtHour> expectedSecond() {
         return List.of(
-                new CourtTypeAtHour(CourtGroup.HARD, LocalTime.parse("19:00")),
-                new CourtTypeAtHour(CourtGroup.CARPET, LocalTime.parse("19:30"))
+                new CourtGroupAtHour(CourtGroup.HARD, LocalTime.parse("19:00")),
+                new CourtGroupAtHour(CourtGroup.CARPET, LocalTime.parse("19:30"))
         );
     }
 
     @Override
-    List<CourtTypeAtHour> expectedLast() {
+    List<CourtGroupAtHour> expectedLast() {
         return List.of(
-                new CourtTypeAtHour(CourtGroup.CARPET, LocalTime.parse("18:00")));
+                new CourtGroupAtHour(CourtGroup.CARPET, LocalTime.parse("18:00")));
     }
 
     @Override

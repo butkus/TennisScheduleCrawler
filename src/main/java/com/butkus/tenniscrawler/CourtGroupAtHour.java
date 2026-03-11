@@ -7,7 +7,7 @@ import java.time.LocalTime;
 
 @Data
 @RequiredArgsConstructor
-public class CourtTypeAtHour {
+public class CourtGroupAtHour {
 
     private final CourtGroup courtType;
     private final LocalTime time;
