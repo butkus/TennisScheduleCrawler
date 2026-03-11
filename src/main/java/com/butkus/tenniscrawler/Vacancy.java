@@ -86,8 +86,8 @@ public class Vacancy {
                     // just below this
                     for (CourtGroupAtHour recipeCourtGroupAtHour : currentRecipeWeightEntry.getValue()) {
                         if (found) break;    // todo: refactor: both "continue and "break" are too much -- IT CAN ALSO BE "break" -- figure out why.
-                        List<Long> recipeIds = recipeCourtGroupAtHour.getCourtType().getCourts().stream().map(Court::getCourtId).toList();
-                        LocalTime recipeFrom = recipeCourtGroupAtHour.getTime();
+                        List<Long> recipeIds = recipeCourtGroupAtHour.courtType().getCourts().stream().map(Court::getCourtId).toList();
+                        LocalTime recipeFrom = recipeCourtGroupAtHour.time();
 
                         LocalTime recipeTo = recipeFrom.plusMinutes(duration);
 
@@ -145,8 +145,8 @@ public class Vacancy {
             for (Map.Entry<Integer, List<CourtGroupAtHour>> entry : this.recipe.getMap().entrySet()) {
                 for (CourtGroupAtHour courtGroupAtHour : entry.getValue()) {
 
-                    LocalTime recipeTimeFrom = courtGroupAtHour.getTime();
-                    Collection<Court> recipeCourts = courtGroupAtHour.getCourtType().getCourts();
+                    LocalTime recipeTimeFrom = courtGroupAtHour.time();
+                    Collection<Court> recipeCourts = courtGroupAtHour.courtType().getCourts();
 
                     LocalTime orderTimeFrom = this.order.getTimeFrom();
                     Court orderCourtId = this.order.getCourt();

@@ -91,8 +91,8 @@ public abstract class AbstractRecipeTest {
             var timeToCourtTypes = new HashMap<LocalTime, Set<CourtGroup>>();
             for (var listOfCourtTypeAtHour : recipe.getMap().values()) {
                 for (var courtTypeAtHour : listOfCourtTypeAtHour) {
-                    var time = courtTypeAtHour.getTime();
-                    var type = courtTypeAtHour.getCourtType();
+                    var time = courtTypeAtHour.time();
+                    var type = courtTypeAtHour.courtType();
                     Set<CourtGroup> courtGroupSet = timeToCourtTypes.computeIfAbsent(time, k -> new HashSet<>());
                     courtGroupSet.add(type);
                 }
