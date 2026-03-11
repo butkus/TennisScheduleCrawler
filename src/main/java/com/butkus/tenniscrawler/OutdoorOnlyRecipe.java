@@ -37,37 +37,37 @@ public class OutdoorOnlyRecipe extends Recipe {
     static {
         map = new LinkedHashMap<>();
         map.put(2, List.of(
-                new CourtTypeAtHour(CourtTypeCustom.CLAY_SUMMER, T1900)
+                new CourtTypeAtHour(CourtGroup.CLAY_SUMMER, T1900)
         ));
         map.put(3, List.of(
-                new CourtTypeAtHour(CourtTypeCustom.CLAY_SUMMER, T1930)
+                new CourtTypeAtHour(CourtGroup.CLAY_SUMMER, T1930)
         ));
         map.put(4, List.of(
-                new CourtTypeAtHour(CourtTypeCustom.CLAY_SUMMER, T1830),
-                new CourtTypeAtHour(CourtTypeCustom.CLAY_REST, T1900)
+                new CourtTypeAtHour(CourtGroup.CLAY_SUMMER, T1830),
+                new CourtTypeAtHour(CourtGroup.CLAY_REST, T1900)
         ));
         map.put(5, List.of(
-                new CourtTypeAtHour(CourtTypeCustom.CLAY_SUMMER, T1800),
-                new CourtTypeAtHour(CourtTypeCustom.CLAY_SUMMER, T2000),
-                new CourtTypeAtHour(CourtTypeCustom.CLAY_REST, T1930)
+                new CourtTypeAtHour(CourtGroup.CLAY_SUMMER, T1800),
+                new CourtTypeAtHour(CourtGroup.CLAY_SUMMER, T2000),
+                new CourtTypeAtHour(CourtGroup.CLAY_REST, T1930)
         ));
         map.put(6, List.of(
-                new CourtTypeAtHour(CourtTypeCustom.CLAY_REST, T1830)
+                new CourtTypeAtHour(CourtGroup.CLAY_REST, T1830)
         ));
         map.put(7, List.of(
-                new CourtTypeAtHour(CourtTypeCustom.CLAY_REST, T1800),
-                new CourtTypeAtHour(CourtTypeCustom.CLAY_REST, T2000),
-                new CourtTypeAtHour(CourtTypeCustom.GRASS, T1900)
+                new CourtTypeAtHour(CourtGroup.CLAY_REST, T1800),
+                new CourtTypeAtHour(CourtGroup.CLAY_REST, T2000),
+                new CourtTypeAtHour(CourtGroup.GRASS, T1900)
         ));
         map.put(8, List.of(
-                new CourtTypeAtHour(CourtTypeCustom.GRASS, T1930)
+                new CourtTypeAtHour(CourtGroup.GRASS, T1930)
         ));
         map.put(9, List.of(
-                new CourtTypeAtHour(CourtTypeCustom.GRASS, T1830)
+                new CourtTypeAtHour(CourtGroup.GRASS, T1830)
         ));
         map.put(10, List.of(
-                new CourtTypeAtHour(CourtTypeCustom.GRASS, T1800),
-                new CourtTypeAtHour(CourtTypeCustom.GRASS, T2000)
+                new CourtTypeAtHour(CourtGroup.GRASS, T1800),
+                new CourtTypeAtHour(CourtGroup.GRASS, T2000)
         ));
     }
 

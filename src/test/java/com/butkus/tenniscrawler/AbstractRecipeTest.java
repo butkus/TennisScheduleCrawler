@@ -88,13 +88,13 @@ public abstract class AbstractRecipeTest {
         // each table column (time) has all 3 court types represented
         @Test
         void allTableCellsFilledOut() {
-            var timeToCourtTypes = new HashMap<LocalTime, Set<CourtTypeCustom>>();
+            var timeToCourtTypes = new HashMap<LocalTime, Set<CourtGroup>>();
             for (var listOfCourtTypeAtHour : recipe.getMap().values()) {
                 for (var courtTypeAtHour : listOfCourtTypeAtHour) {
                     var time = courtTypeAtHour.getTime();
                     var type = courtTypeAtHour.getCourtType();
-                    Set<CourtTypeCustom> courtTypeCustomSet = timeToCourtTypes.computeIfAbsent(time, k -> new HashSet<>());
-                    courtTypeCustomSet.add(type);
+                    Set<CourtGroup> courtGroupSet = timeToCourtTypes.computeIfAbsent(time, k -> new HashSet<>());
+                    courtGroupSet.add(type);
                 }
             }
             for (var entry : timeToCourtTypes.entrySet()) {

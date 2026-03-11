@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
-public enum CourtTypeCustom {
+public enum CourtGroup {
     GRASS("grass", List.of(Court.G1, Court.G2)),
     CLAY_SUMMER("clay summer", List.of(Court.C01, Court.C02, Court.C05, Court.C06)),
     CLAY_REST("clay rest", List.of(Court.C03, Court.C04, Court.C07, Court.C08, Court.C09, Court.C10)),

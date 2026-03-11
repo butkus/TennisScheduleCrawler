@@ -3,7 +3,7 @@ package com.butkus.tenniscrawler;
 import java.time.LocalTime;
 import java.util.List;
 
-import static com.butkus.tenniscrawler.CourtTypeCustom.HARD;
+import static com.butkus.tenniscrawler.CourtGroup.HARD;
 
 /**
  * Example table (for visualization purposes):
@@ -28,15 +28,15 @@ class IndoorSimpleTest extends AbstractRecipeTest {
     @Override
     List<CourtTypeAtHour> expectedSecond() {
         return List.of(
-                new CourtTypeAtHour(CourtTypeCustom.HARD, LocalTime.parse("19:00")),
-                new CourtTypeAtHour(CourtTypeCustom.CARPET, LocalTime.parse("19:30"))
+                new CourtTypeAtHour(CourtGroup.HARD, LocalTime.parse("19:00")),
+                new CourtTypeAtHour(CourtGroup.CARPET, LocalTime.parse("19:30"))
         );
     }
 
     @Override
     List<CourtTypeAtHour> expectedLast() {
         return List.of(
-                new CourtTypeAtHour(CourtTypeCustom.CARPET, LocalTime.parse("18:00")));
+                new CourtTypeAtHour(CourtGroup.CARPET, LocalTime.parse("18:00")));
     }
 
     @Override

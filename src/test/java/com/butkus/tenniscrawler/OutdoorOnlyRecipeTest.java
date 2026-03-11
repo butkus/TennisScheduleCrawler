@@ -3,8 +3,8 @@ package com.butkus.tenniscrawler;
 import java.time.LocalTime;
 import java.util.List;
 
-import static com.butkus.tenniscrawler.CourtTypeCustom.CLAY_SUMMER;
-import static com.butkus.tenniscrawler.CourtTypeCustom.GRASS;
+import static com.butkus.tenniscrawler.CourtGroup.CLAY_SUMMER;
+import static com.butkus.tenniscrawler.CourtGroup.GRASS;
 
 /**
  * Example table (for visualization purposes):

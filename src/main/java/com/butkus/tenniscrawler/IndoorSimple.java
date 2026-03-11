@@ -25,24 +25,24 @@ public class IndoorSimple extends Recipe {
     static {
         map = new LinkedHashMap<>();
         map.put(1, List.of(
-                new CourtTypeAtHour(CourtTypeCustom.HARD, T1930)
+                new CourtTypeAtHour(CourtGroup.HARD, T1930)
         ));
         map.put(2, List.of(
-                new CourtTypeAtHour(CourtTypeCustom.HARD, T1900),
-                new CourtTypeAtHour(CourtTypeCustom.CARPET, T1930)
+                new CourtTypeAtHour(CourtGroup.HARD, T1900),
+                new CourtTypeAtHour(CourtGroup.CARPET, T1930)
         ));
         map.put(3, List.of(
-                new CourtTypeAtHour(CourtTypeCustom.HARD, T1830),
-                new CourtTypeAtHour(CourtTypeCustom.HARD, T2000),
-                new CourtTypeAtHour(CourtTypeCustom.CARPET, T1900)
+                new CourtTypeAtHour(CourtGroup.HARD, T1830),
+                new CourtTypeAtHour(CourtGroup.HARD, T2000),
+                new CourtTypeAtHour(CourtGroup.CARPET, T1900)
         ));
         map.put(4, List.of(
-                new CourtTypeAtHour(CourtTypeCustom.HARD, T1800),
-                new CourtTypeAtHour(CourtTypeCustom.CARPET, T1830),
-                new CourtTypeAtHour(CourtTypeCustom.CARPET, T2000)
+                new CourtTypeAtHour(CourtGroup.HARD, T1800),
+                new CourtTypeAtHour(CourtGroup.CARPET, T1830),
+                new CourtTypeAtHour(CourtGroup.CARPET, T2000)
         ));
         map.put(5, List.of(
-                new CourtTypeAtHour(CourtTypeCustom.CARPET, T1800))
+                new CourtTypeAtHour(CourtGroup.CARPET, T1800))
         );
     }
 

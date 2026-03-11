@@ -9,7 +9,7 @@ import java.time.LocalTime;
 @RequiredArgsConstructor
 public class CourtTypeAtHour {
 
-    private final CourtTypeCustom courtType;
+    private final CourtGroup courtType;
     private final LocalTime time;
 
 }
