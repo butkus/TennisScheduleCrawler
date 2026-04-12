@@ -62,9 +62,10 @@ public class Vacancy {
         }
 
         if (vacancyFound != null) {
-            System.out.printf("●●● New  %s %s - %s (courtId: %s) ●●●\n", day.toString(), vacancyFound.getFrom(), Court.getByCourtId(vacancyFound.getCourtId()), vacancyFound.getCourtId());
+            System.out.printf("●●● New  %s %s - %s (courtId: %s)  -->  improves %s %s (courtId: %s)\n",
+                    day.toString(), vacancyFound.getFrom(), Court.getByCourtId(vacancyFound.getCourtId()), vacancyFound.getCourtId(),
+                    order.getTimeFrom(), order.getCourt(), order.getCourt().getCourtId());
             audioPlayer.chimeIfNecessary();
-            // todo should print what found and what order it improves.
         }
 
         return vacancyFound;
