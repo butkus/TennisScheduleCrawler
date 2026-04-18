@@ -67,7 +67,7 @@ public enum Court {
 
 
     private final Long courtId;
-    private final String courtName;
+    private final String courtName;     // can't change values, they are used to find the order, e.g. Result.paslPavadinimas = 'SEB 08'
     private final CourtType courtType;
 
     public static List<Long> getIds() {

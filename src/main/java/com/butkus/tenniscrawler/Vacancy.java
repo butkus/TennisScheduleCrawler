@@ -62,13 +62,22 @@ public class Vacancy {
         }
 
         if (vacancyFound != null) {
-            System.out.printf("●●● New  %s %s - %s (courtId: %s)  -->  improves %s %s (courtId: %s)\n",
-                    day.toString(), vacancyFound.getFrom(), Court.getByCourtId(vacancyFound.getCourtId()), vacancyFound.getCourtId(),
-                    order.getTimeFrom(), order.getCourt(), order.getCourt().getCourtId());
+            printNewVacancy(vacancyFound);
             audioPlayer.chimeIfNecessary();
         }
 
         return vacancyFound;
+    }
+
+    private void printNewVacancy(VacancyFound vacancyFound) {
+        if (order == null) {
+            System.out.printf("●●● New  %s (%s) %s - %s%n",
+                    day.toString(), day.getDayOfWeek(), vacancyFound.getFrom(), Court.getByCourtId(vacancyFound.getCourtId()).getCourtName());
+        } else {
+            System.out.printf("●●● Upgrade  %s (%s) %s - %s  <--  improves %s %s%n",
+                    day.toString(), day.getDayOfWeek(), vacancyFound.getFrom(), Court.getByCourtId(vacancyFound.getCourtId()).getCourtName(),
+                    order.getTimeFrom(), order.getCourt().getCourtName());
+        }
     }
 
     private VacancyFound searchForReservationWithRecipe(List<DataInner> courtDtos) {
