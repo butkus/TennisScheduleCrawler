@@ -74,6 +74,14 @@ Version history (no real version numbers, just milestones):
 - bla
 
 -- next
+    - optimize/refactor
+        - search for:
+            // todo (after finished with postPlaceInfoBatch):
+        - Vacancy
+        - DesireItaratorThingy
+        - DesireItaratorThingyTest
+            - as considered earlier, it has become a lot like integration test.
+            - should move tests where they belong and test one unit at a time
     - Recipe improvements
         - if I'll decide to move Recipe to ExtensionInterest, Recipe's name can become ExtensionPlan
         - should I allow one-time EARLIER/LATER?
