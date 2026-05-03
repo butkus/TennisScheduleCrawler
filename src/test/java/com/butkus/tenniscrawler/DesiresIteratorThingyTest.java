@@ -188,7 +188,7 @@ class DesiresIteratorThingyTest {
         public List<Desire> stubDesireForDays(String... dates) {
             List<Desire> desires = new ArrayList<>();
             for (String date : dates) {
-                desires.add(new Desire(LocalDate.parse(date), OutdoorOnlyRecipe::new));
+                desires.add(new Desire(LocalDate.parse(date), OutdoorRecipeForTesting::new));
             }
             return desires;
         }
@@ -259,7 +259,7 @@ class DesiresIteratorThingyTest {
     @Test
     void noPriorOrders_OutdoorRecipe_nothingExists_doesNotFind() throws Exception {
         mockOrders(new ArrayList<>());
-        List<Desire> desires = Stubs.stubDesiresRecipe(DAY, OutdoorOnlyRecipe::new);
+        List<Desire> desires = Stubs.stubDesiresRecipe(DAY, OutdoorRecipeForTesting::new);
         when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoFull());
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
@@ -291,7 +291,7 @@ class DesiresIteratorThingyTest {
     void noPriorOrders_bestCourtIsFree_finds() throws Exception {
         mockOrders(new ArrayList<>());
         String day = DAY_11;
-        List<Desire> desires = Stubs.stubDesiresRecipe(day, OutdoorOnlyRecipe::new);
+        List<Desire> desires = Stubs.stubDesiresRecipe(day, OutdoorRecipeForTesting::new);
         when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1900free());
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
@@ -314,7 +314,7 @@ class DesiresIteratorThingyTest {
             mockOrders(new ArrayList<>());
 
             String day = DAY_11;
-            List<Desire> desires = Stubs.stubDesiresRecipe(day, OutdoorOnlyRecipe::new);
+            List<Desire> desires = Stubs.stubDesiresRecipe(day, OutdoorRecipeForTesting::new);
 
             when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1830free());
 
@@ -329,7 +329,7 @@ class DesiresIteratorThingyTest {
             mockOrders(new ArrayList<>());
 
             String day = DAY_11;
-            List<Desire> desires = Stubs.stubDesiresRecipe(day, OutdoorOnlyRecipe::new);
+            List<Desire> desires = Stubs.stubDesiresRecipe(day, OutdoorRecipeForTesting::new);
 
             when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay10at1900free());
 
@@ -379,7 +379,7 @@ class DesiresIteratorThingyTest {
     @MethodSource("weight4orders")
     void hasOrderOfWeight4_existsVacancyOfWeight5_doesNotFind(Order order) throws Exception {
         mockOrders(List.of(order));
-        List<Desire> desires = Stubs.stubDesiresRecipe(DAY_11, OutdoorOnlyRecipe::new);
+        List<Desire> desires = Stubs.stubDesiresRecipe(DAY_11, OutdoorRecipeForTesting::new);
 
         // weight 5: Clay 1 at 18:00
         when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1800free());
@@ -394,7 +394,7 @@ class DesiresIteratorThingyTest {
     @MethodSource("weight4orders")
     void hasOrderOfWeight4_existsAnotherVacancyOfWeight4_doesNotFind(Order order) throws Exception {
         mockOrders(List.of(order));
-        List<Desire> desires = Stubs.stubDesiresRecipe(DAY_11, OutdoorOnlyRecipe::new);
+        List<Desire> desires = Stubs.stubDesiresRecipe(DAY_11, OutdoorRecipeForTesting::new);
 
         // weight 4: Clay 10 at 19:00
         when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay10at1900free());
@@ -410,7 +410,7 @@ class DesiresIteratorThingyTest {
     void hasOrderOfWeight4_existsVacancyOfWeight3_finds(Order order) throws Exception {
         mockOrders(List.of(order));
         String day = DAY_11;
-        List<Desire> desires = Stubs.stubDesiresRecipe(day, OutdoorOnlyRecipe::new);
+        List<Desire> desires = Stubs.stubDesiresRecipe(day, OutdoorRecipeForTesting::new);
 
         // weight 3: Clay 1 at 19:30
         when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1930free());
@@ -427,7 +427,7 @@ class DesiresIteratorThingyTest {
     void hasOrderOfWeight4_existsVacancyOfWeight2_finds(Order order) throws Exception {
         mockOrders(List.of(order));
         String day = DAY_11;
-        List<Desire> desires = Stubs.stubDesiresRecipe(day, OutdoorOnlyRecipe::new);
+        List<Desire> desires = Stubs.stubDesiresRecipe(day, OutdoorRecipeForTesting::new);
 
         // weight 2: Clay 1 at 19:00
         when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1900free());
@@ -445,7 +445,7 @@ class DesiresIteratorThingyTest {
     void hasOrderOfWeight4_existsVacancyOfWeight2and3_sameCourtType_finds2InAnyOrder(PlaceInfoBatchRspDto placeInfoBatchRspDto) {
         String day = DAY_11;
         mockOrders(List.of(new Order(LocalDate.parse(day), Court.C01, T1830, T1930)));
-        List<Desire> desires = Stubs.stubDesiresRecipe(day, OutdoorOnlyRecipe::new);
+        List<Desire> desires = Stubs.stubDesiresRecipe(day, OutdoorRecipeForTesting::new);
 
         when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(placeInfoBatchRspDto);
 
@@ -468,7 +468,7 @@ class DesiresIteratorThingyTest {
     void hasOrderOfWeight8_existsVacancyOfWeight6and7_differentCourtTypes_finds6InAnyOrder(PlaceInfoBatchRspDto placeInfoBatchRspDto) {
         String day = DAY_11;
         mockOrders(List.of(new Order(LocalDate.parse(day), Court.G1, T1930, T2030)));
-        List<Desire> desires = Stubs.stubDesiresRecipe(day, OutdoorOnlyRecipe::new);
+        List<Desire> desires = Stubs.stubDesiresRecipe(day, OutdoorRecipeForTesting::new);
 
         when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(placeInfoBatchRspDto);
 
@@ -499,7 +499,7 @@ class DesiresIteratorThingyTest {
             @Test
             void _30Available_doesNotFind() throws Exception {
                 mockOrders(new ArrayList<>());
-                List<Desire> desires = Stubs.stubDesiresRecipe(TODAY, OutdoorOnlyRecipe::new);
+                List<Desire> desires = Stubs.stubDesiresRecipe(TODAY, OutdoorRecipeForTesting::new);
                 when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1800has30minFree());
 
                 assertDoesNotThrow(() -> thingy.doWork(desires));
@@ -511,7 +511,7 @@ class DesiresIteratorThingyTest {
             @Test
             void _60Available_finds() throws Exception {
                 mockOrders(new ArrayList<>());
-                List<Desire> desires = Stubs.stubDesiresRecipe(TODAY, OutdoorOnlyRecipe::new);
+                List<Desire> desires = Stubs.stubDesiresRecipe(TODAY, OutdoorRecipeForTesting::new);
                 when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1800free());
 
                 assertDoesNotThrow(() -> thingy.doWork(desires));
@@ -522,7 +522,7 @@ class DesiresIteratorThingyTest {
             @Test
             void _90Available_finds() throws Exception {
                 mockOrders(new ArrayList<>());
-                List<Desire> desires = Stubs.stubDesiresRecipe(TODAY, OutdoorOnlyRecipe::new);
+                List<Desire> desires = Stubs.stubDesiresRecipe(TODAY, OutdoorRecipeForTesting::new);
                 when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1930has90minFree());
 
                 assertDoesNotThrow(() -> thingy.doWork(desires));
@@ -535,7 +535,7 @@ class DesiresIteratorThingyTest {
             @MethodSource("_90and60available_sameWeight_picks90inAnyOrder_args")
             void _90and60available_sameWeight_picks90inAnyOrder(PlaceInfoBatchRspDto dtoStub, VacancyFound vacancyFoundExpected) {
                 mockOrders(new ArrayList<>());
-                List<Desire> desires = Stubs.stubDesiresRecipe(TODAY, OutdoorOnlyRecipe::new);
+                List<Desire> desires = Stubs.stubDesiresRecipe(TODAY, OutdoorRecipeForTesting::new);
                 when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(dtoStub);
 
                 assertDoesNotThrow(() -> thingy.doWork(desires));
@@ -553,7 +553,7 @@ class DesiresIteratorThingyTest {
             @Test
             void _120Available_finds90() throws Exception {
                 mockOrders(new ArrayList<>());
-                List<Desire> desires = Stubs.stubDesiresRecipe(TODAY, OutdoorOnlyRecipe::new);
+                List<Desire> desires = Stubs.stubDesiresRecipe(TODAY, OutdoorRecipeForTesting::new);
                 when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay09at1930has120minFree());
 
                 assertDoesNotThrow(() -> thingy.doWork(desires));
@@ -571,7 +571,7 @@ class DesiresIteratorThingyTest {
             @BeforeEach
             void setUp() {
                 mockOrders(List.of(new Order(LocalDate.parse(TODAY), Court.G1, T1800, T1900)));       // last weight
-                desires = Stubs.stubDesiresRecipe(TODAY, OutdoorOnlyRecipe::new);
+                desires = Stubs.stubDesiresRecipe(TODAY, OutdoorRecipeForTesting::new);
             }
 
             @Test
@@ -598,7 +598,7 @@ class DesiresIteratorThingyTest {
             @BeforeEach
             void setUp() {
                 mockOrders(List.of(new Order(LocalDate.parse(TODAY), Court.G1, T1800, T1930)));       // last weight
-                desires = Stubs.stubDesiresRecipe(TODAY, OutdoorOnlyRecipe::new);
+                desires = Stubs.stubDesiresRecipe(TODAY, OutdoorRecipeForTesting::new);
             }
 
             @Test

@@ -133,14 +133,14 @@ class DesireMakerTest {
         void exist_2Periodic_2Explicit_explicitOnesAreSelected() {
             List<Desire> explicitDesires = makeDesires(
                     new Desire(LocalDate.parse("2023-12-28"), IndoorMonFri::new),
-                    new Desire(LocalDate.parse("2023-12-28"), OutdoorOnlyRecipe::new));
+                    new Desire(LocalDate.parse("2023-12-28"), OutdoorRecipeForTesting::new));
             desiresExplicitMockedStatic.when(DesiresExplicit::makeExplicitDesires).thenReturn(explicitDesires);
 
             List<Desire> expected = new ArrayList<>(explicitDesires);
 
             List<Desire> actual = desireMaker
                     .addExplicitDesires()
-                    .addNextInAndOut(1, DayOfWeek.THURSDAY, IndoorMonFri::new, OutdoorOnlyRecipe::new)
+                    .addNextInAndOut(1, DayOfWeek.THURSDAY, IndoorMonFri::new, OutdoorRecipeForTesting::new)
                     .make();
 
             assertEquals(expected, actual);

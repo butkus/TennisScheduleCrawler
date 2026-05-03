@@ -47,7 +47,7 @@ class DesireOrderPairerTest {
     public static final LocalTime TIME_1900 = LocalTime.parse("19:00");
 
     public static final Supplier<Recipe> INDOOR_RECIPE = IndoorSimple::new;
-    public static final Supplier<Recipe> OUTDOOR_RECIPE = OutdoorOnlyRecipe::new;
+    public static final Supplier<Recipe> OUTDOOR_RECIPE = OutdoorRecipeForTesting::new;
 
     @ParameterizedTest
     @MethodSource("orderMatchesDesire_byDayAndCourt_args")

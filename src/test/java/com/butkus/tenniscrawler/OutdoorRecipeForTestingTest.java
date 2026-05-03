@@ -15,11 +15,11 @@ import static com.butkus.tenniscrawler.CourtGroup.GRASS;
  * | clay summer  |    5   |    4   |    2   |    3   |    5   |
  * | clay rest    |    7   |    6   |    4   |    5   |    7   |
  */
-class OutdoorOnlyRecipeTest extends AbstractRecipeTest {
+class OutdoorRecipeForTestingTest extends AbstractRecipeTest {
 
     @Override
     Recipe getRecipe() {
-        return new OutdoorOnlyRecipe();
+        return new OutdoorRecipeForTesting();
     }
 
     @Override
