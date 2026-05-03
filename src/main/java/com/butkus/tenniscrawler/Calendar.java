@@ -48,6 +48,8 @@ public class Calendar {
         System.out.println(">> Artimiausios rezervacijos:");
         printOrderIfExists(orders, 0);
         printOrderIfExists(orders, 1);
+        printOrderIfExists(orders, 2);
+        printOrderIfExists(orders, 3);
 
         System.out.println();
         for (String lineByLine : bothMonths) {
