@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.butkus.tenniscrawler.ExtensionInterest.ANY;
-import static com.butkus.tenniscrawler.ExtensionInterest.EARLIER;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
@@ -124,8 +123,8 @@ class DesireMakerTest {
         @Test
         void exist_3PeriodicDesires_hasSameCategory_throws() {
             Executable periodicDesires = () -> desireMaker
-                    .addNextInAndOut(1, DayOfWeek.THURSDAY)
-                    .addNext(1, DayOfWeek.THURSDAY)
+                    .addNextInAndOut(1, DayOfWeek.THURSDAY, IndoorMonFri::new, IndoorMonFri::new)
+                    .addNext(1, DayOfWeek.THURSDAY, IndoorMonFri::new)
                     .make();
             assertThrows(DuplicateDesiresException.class, periodicDesires);
         }
@@ -133,15 +132,15 @@ class DesireMakerTest {
         @Test
         void exist_2Periodic_2Explicit_explicitOnesAreSelected() {
             List<Desire> explicitDesires = makeDesires(
-                    new Desire(LocalDate.parse("2023-12-28"), EARLIER, Court.getIndoorIds()),
-                    new Desire(LocalDate.parse("2023-12-28"), EARLIER, Court.getOutdoorIds()));
+                    new Desire(LocalDate.parse("2023-12-28"), IndoorMonFri::new),
+                    new Desire(LocalDate.parse("2023-12-28"), OutdoorOnlyRecipe::new));
             desiresExplicitMockedStatic.when(DesiresExplicit::makeExplicitDesires).thenReturn(explicitDesires);
 
             List<Desire> expected = new ArrayList<>(explicitDesires);
 
             List<Desire> actual = desireMaker
                     .addExplicitDesires()
-                    .addNextInAndOut(1, DayOfWeek.THURSDAY)
+                    .addNextInAndOut(1, DayOfWeek.THURSDAY, IndoorMonFri::new, OutdoorOnlyRecipe::new)
                     .make();
 
             assertEquals(expected, actual);

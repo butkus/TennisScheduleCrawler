@@ -108,5 +108,3 @@ Next:
     - MyDesireBuilder -- keep or replace with lombok's @Builder?
     - DesireOrderPairTestCase: make cloning entirely witin Desire
         - it is currently ok, but only because Recipe is not touched. Still, Desire should be always created valid.
-
-assertNotSame(actual.get(0).getRecipe(), actual.get(1).getRecipe(), "Recipes should not be the same instance");

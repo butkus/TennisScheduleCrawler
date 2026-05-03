@@ -58,13 +58,17 @@ public class DesireMaker {
             List<Desire> out = new ArrayList<>();
             for (Desire desire : daysDesires) {
                 // todo this works as long as addNext(count, dayOfWeek, DESIRE draft) is PRIVATE, i.e. only indoor/outdoor is possible to request. Later, specific court-id-subset verification will be needed
-                if (desire.getCourts().equals(Court.getIndoorIds())) in.add(desire);
-                if (desire.getCourts().equals(Court.getOutdoorIds())) out.add(desire);
+                if (sameElements(desire.getCourts(), Court.getIndoorIds())) in.add(desire);
+                if (sameElements(desire.getCourts(), Court.getOutdoorIds())) out.add(desire);
             }
             LocalDate date = daysDesires.get(0).getDate();
             if (in.size() > 1) throw new DuplicateDesiresException(date + " contains > 1 indoor desires");
             if (out.size() > 1) throw new DuplicateDesiresException(date + " contains > 1 outdoor desires");
         }
+    }
+
+    private static boolean sameElements(List<Long> list1, List<Long> list2) {
+        return list1.size() == list2.size() && new HashSet<>(list1).containsAll(list2);
     }
 
     public DesireMaker addExplicitDesires() {
@@ -80,9 +84,9 @@ public class DesireMaker {
         return this;
     }
 
-    public DesireMaker addNextInAndOut(int count, DayOfWeek dayOfWeek) {
-        MyDesireBuilder indoorDesireDraft = new MyDesireBuilder().courts(Court.getIndoorIds());
-        MyDesireBuilder outdoorDesireDraft = new MyDesireBuilder().courts(Court.getOutdoorIds());
+    public DesireMaker addNextInAndOut(int count, DayOfWeek dayOfWeek, Supplier<Recipe> indoorRecipeSupplier, Supplier<Recipe> outdoorRecipeSupplier) {
+        MyDesireBuilder indoorDesireDraft = new MyDesireBuilder().recipeSupplier(indoorRecipeSupplier);
+        MyDesireBuilder outdoorDesireDraft = new MyDesireBuilder().recipeSupplier(outdoorRecipeSupplier);
         addNext(count, dayOfWeek, indoorDesireDraft);
         addNext(count, dayOfWeek, outdoorDesireDraft);
         return this;
