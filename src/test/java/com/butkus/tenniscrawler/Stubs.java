@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -27,9 +28,9 @@ public class Stubs {
         return desires;
     }
 
-    static List<Desire> stubDesiresRecipe(String date, Recipe recipe) {
+    static List<Desire> stubDesiresRecipe(String date, Supplier<Recipe> recipeSupplier) {
         List<Desire> desires = new ArrayList<>();
-        desires.add(new Desire(LocalDate.parse(date), recipe));
+        desires.add(new Desire(LocalDate.parse(date), recipeSupplier));
         return desires;
     }
 

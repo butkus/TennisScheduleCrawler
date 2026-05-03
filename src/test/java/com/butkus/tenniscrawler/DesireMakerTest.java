@@ -14,8 +14,7 @@ import java.util.List;
 
 import static com.butkus.tenniscrawler.ExtensionInterest.ANY;
 import static com.butkus.tenniscrawler.ExtensionInterest.EARLIER;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
 
@@ -177,6 +176,23 @@ class DesireMakerTest {
 
     private static List<Desire> makeDesires(Desire... desires) {
         return new ArrayList<>(Arrays.asList(desires));
+    }
+
+    // todo change the default clock for this class OFF OF 2023-12-24T12:35:00.00Z because of many adjacent holidays that confuse writing new tests as isHoliday check will ommit periodic desires
+    @Test
+    void periodicDesiresHaveUniteratedRecipes() {
+        List<Desire> actual = desireMaker.addNext(2, DayOfWeek.THURSDAY, IndoorMonFri::new).make();
+        boolean allIteratorsIntact = actual.stream().noneMatch(e -> e.getRecipe().isIteratorTampered());
+        assertTrue(allIteratorsIntact);
+
+        Desire first = actual.get(0);
+        Desire second = actual.get(1);
+
+        first.getRecipe().next();
+        assertTrue(first.getRecipe().isIteratorTampered());
+        assertFalse(second.getRecipe().isIteratorTampered());
+
+        assertNotSame(first.getRecipe(), second.getRecipe());   // Redundant. I temporarily left it here to remind myself that I didn't need to add Recipe#isIteratioTampered(). assertNotSame checks it fine.
     }
 
 }

@@ -7,6 +7,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.function.Supplier;
 
 @AllArgsConstructor
 @Builder(toBuilder = true)
@@ -24,9 +25,27 @@ public class Desire {
     private Recipe recipe;
 
 
-    public Desire(LocalDate date, Recipe recipe) {
+
+
+
+    // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // todo with this approach, I am using lombok's @Builder but augmenting with my own logic
+    //      - This leaves lombok's toBuilder() possible to call -- but that would be incorrect
+    //      - find a way to construct this with all-native lombok features
+    //          - also, calling "build()" on an incomplete builder, should yield an error (e.g. either list of courts must be provided, or a recipe)
+    //      - or remove lombok's @Builder completely
+    //   read  https://projectlombok.org/features/Builder
+
+    // MADE A NEW MyDesireBuilder CLASS. SAME CONSIDERATIONS ABOVE STILL APPLY.
+
+    // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+    public Desire(LocalDate date, Supplier<Recipe> recipeSupplier) {
         this.date = date;
-        this.recipe = recipe;
+        this.recipe = recipeSupplier.get();
 
         this.courts = recipe.getCourtIds(); // todo after OLD way is decomissioned, this.courts will be redundant (it is alredy now, but kept for backward compatibility)
     }

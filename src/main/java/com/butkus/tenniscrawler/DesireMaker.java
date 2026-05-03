@@ -7,6 +7,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -72,16 +73,16 @@ public class DesireMaker {
     }
 
     public DesireMaker addNextInAndClay(int count, DayOfWeek dayOfWeek) {
-        Desire indoorDesireDraft = new Desire(getNow(), Court.getIndoorIds());
-        Desire clayDesireDraft = new Desire(getNow(), Court.getClayIds());
+        MyDesireBuilder indoorDesireDraft = new MyDesireBuilder().courts(Court.getIndoorIds());
+        MyDesireBuilder clayDesireDraft = new MyDesireBuilder().courts(Court.getClayIds());
         addNext(count, dayOfWeek, indoorDesireDraft);
         addNext(count, dayOfWeek, clayDesireDraft);
         return this;
     }
 
     public DesireMaker addNextInAndOut(int count, DayOfWeek dayOfWeek) {
-        Desire indoorDesireDraft = new Desire(getNow(), Court.getIndoorIds());
-        Desire outdoorDesireDraft = new Desire(getNow(), Court.getOutdoorIds());
+        MyDesireBuilder indoorDesireDraft = new MyDesireBuilder().courts(Court.getIndoorIds());
+        MyDesireBuilder outdoorDesireDraft = new MyDesireBuilder().courts(Court.getOutdoorIds());
         addNext(count, dayOfWeek, indoorDesireDraft);
         addNext(count, dayOfWeek, outdoorDesireDraft);
         return this;
@@ -89,12 +90,22 @@ public class DesireMaker {
 
     // todo make it season-specific. Summer -- default outdoors (+ maybe indoors). Winter -- indoors
     public DesireMaker addNext(int count, DayOfWeek dayOfWeek) {
-        Desire regularDesireDraft = new Desire(getNow(), Court.getIndoorIds());  // todo write a test  // fixme: (ctrl-f FOO1 for 2 identical comments): related
+        MyDesireBuilder regularDesireDraft = new MyDesireBuilder().courts(Court.getIndoorIds());  // todo write a test  // fixme: (ctrl-f FOO1 for 2 identical comments): related
         return addNext(count, dayOfWeek, regularDesireDraft);
     }
 
-    public DesireMaker addNext(int count, DayOfWeek dayOfWeek, Recipe recipe) {
-        Desire regularDesireDraft = new Desire(getNow(), recipe);
+    // COPY-PASTE FROM THE METHOD BELOW. SAME LOGIC APPLIES
+    // FIXME: MUST MAKE PRIVATE FOR THOSE REASONS
+    // if we make this public, DesireOrderPairer and possibly DesireMaker would need extra tests, because
+    // currently maker can  add via addNext() and addNextInAndOut() which limit periodic desires to
+    //   - one-per-day
+    //   - 2 per day -- exactly 1 indoor (all indoor courts) and 1 outdoor (all outdoor courts)
+    // if we allow arbitrary court sets, extra tests and handling is needed.
+    // e.g.
+    //   - 2 specific courts in the shade outdoors + all indoors
+    //   - 2 in shade + all outdoors (there's overlap, should fail, or handle in priority order)
+    public DesireMaker addNext(int count, DayOfWeek dayOfWeek, Supplier<Recipe> recipeSupplier) {
+        MyDesireBuilder regularDesireDraft = new MyDesireBuilder().recipeSupplier(recipeSupplier);
         return addNext(count, dayOfWeek, regularDesireDraft);
     }
 
@@ -106,20 +117,20 @@ public class DesireMaker {
     // e.g.
     //   - 2 specific courts in the shade outdoors + all indoors
     //   - 2 in shade + all outdoors (there's overlap, should fail, or handle in priority order)
-    private DesireMaker addNext(int count, DayOfWeek dayOfWeek, Desire draft) {
+    private DesireMaker addNext(int count, DayOfWeek dayOfWeek, MyDesireBuilder draft) {
         LocalDate startDate = getNow();
         List<Desire> result = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             LocalDate next = startDate.with(TemporalAdjusters.next(dayOfWeek));
-            result.add(cloneWithDateChange(draft, next));
+            result.add(finalizeDraftAndBuild(draft, next));
             startDate = next;
         }
         this.periodicDesires.addAll(result);
         return this;
     }
 
-    private static Desire cloneWithDateChange(Desire desire, LocalDate date) {
-        return desire.toBuilder().date(date).build();
+    private static Desire finalizeDraftAndBuild(MyDesireBuilder myDesireBuilder, LocalDate date) {
+        return myDesireBuilder.date(date).build();
     }
 
     private LocalDate getNow() {

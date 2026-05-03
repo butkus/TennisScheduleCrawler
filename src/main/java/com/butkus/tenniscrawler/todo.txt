@@ -98,10 +98,15 @@ Version history (no real version numbers, just milestones):
                     - LATER+Clay = find later but only if can find clay
         -- LATER but only by 30 mins -- LITTLE_LATER (good for when I have almost convenient time, but LATER gives me way later)
         -- obv, same for EARLIER -- LITTLE_EARLIER
-        -- random change to validate new token
-        -- another change
 
 
 
 todo -- check if desire resolver correcrly assuems that NEW explictit desire overrides NEW implicit one (probably not adapted for Recipe)
 
+
+Next:
+    - MyDesireBuilder -- keep or replace with lombok's @Builder?
+    - DesireOrderPairTestCase: make cloning entirely witin Desire
+        - it is currently ok, but only because Recipe is not touched. Still, Desire should be always created valid.
+
+assertNotSame(actual.get(0).getRecipe(), actual.get(1).getRecipe(), "Recipes should not be the same instance");

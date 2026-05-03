@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static com.butkus.tenniscrawler.ExtensionInterest.ANY;
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,8 +46,8 @@ class DesireOrderPairerTest {
     public static final LocalTime TIME_1800 = LocalTime.parse("18:00");
     public static final LocalTime TIME_1900 = LocalTime.parse("19:00");
 
-    public static final Recipe INDOOR_RECIPE = new IndoorSimple();
-    public static final Recipe OUTDOOR_RECIPE = new OutdoorOnlyRecipe();
+    public static final Supplier<Recipe> INDOOR_RECIPE = IndoorSimple::new;
+    public static final Supplier<Recipe> OUTDOOR_RECIPE = OutdoorOnlyRecipe::new;
 
     @ParameterizedTest
     @MethodSource("orderMatchesDesire_byDayAndCourt_args")

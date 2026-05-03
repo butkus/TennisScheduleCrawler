@@ -24,6 +24,9 @@ public class DesireOrderPairTestCase {
         return this;
     }
 
+    /**
+     * Ok cloning method ONLY BECAUSE used for pairing with Order only. No iteration of Recipe is performed.
+     */
     private Desire cloneDesire(Desire desire) {
         Desire clone = desire.toBuilder().build();
         desire = clone;

@@ -60,14 +60,14 @@ class VacancyTest {
             @ParameterizedTest
             @CsvSource({DAY_1, DAY_2, DAY_3})
             void today_tomorrow_dayAfterTomorrow_isVolatile(String day) {
-                Desire desire = new Desire(LocalDate.parse(day), new IndoorWeekend());
+                Desire desire = new Desire(LocalDate.parse(day), IndoorWeekend::new);
                 Vacancy vacancy = new Vacancy(desire, configurator);
                 assertTrue(vacancy.isVolatile());
             }
 
             @Test
             void day3AfterToday_notVolatile() {
-                Desire desire = new Desire(LocalDate.parse(DAY_4), new IndoorWeekend());
+                Desire desire = new Desire(LocalDate.parse(DAY_4), IndoorWeekend::new);
                 Vacancy vacancy = new Vacancy(desire, configurator);
                 assertFalse(vacancy.isVolatile());
             }

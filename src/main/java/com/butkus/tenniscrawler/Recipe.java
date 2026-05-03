@@ -13,6 +13,9 @@ public abstract class Recipe implements Iterator<Map.Entry<Integer, List<CourtGr
     private final Map<Integer, List<CourtGroupAtHour>> map;
     private final Iterator<Map.Entry<Integer, List<CourtGroupAtHour>>> iterator;
 
+    @Getter
+    private boolean isIteratorTampered = false;
+
     Recipe(Map<Integer, List<CourtGroupAtHour>> map) {
         this.map = map;
         this.iterator = map.entrySet().iterator();
@@ -27,6 +30,8 @@ public abstract class Recipe implements Iterator<Map.Entry<Integer, List<CourtGr
     @Override
     public Map.Entry<Integer, List<CourtGroupAtHour>> next() {
         if (!hasNext()) throw new NoSuchElementException();
+
+        isIteratorTampered = true;
 
         return iterator.next();
     }
