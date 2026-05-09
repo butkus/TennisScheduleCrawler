@@ -17,8 +17,9 @@ public enum CourtGroup {
     HARD("hard", Constants.ALL_HARD_COURTS),
     CARPET("carpet", List.of(Court.K1, Court.K2, Court.K3, Court.K4, Court.K5, Court.K6)),
 
-    HARD_CLOSE("hard close", Constants.HARD_CLOSE_COURTS),
-    HARD_FAR("hard far", Constants.HARD_FAR_COURTS),
+    HARD_GOOD("hard good", Constants.HARD_GOOD_COURTS),
+    HARD_MEH("hard meh", Constants.HARD_MEH_COURTS),
+    HARD_BAD("hard bad", Constants.HARD_BAD_COURTS),
     CARPET_CLOSE("carpet close", Constants.CARPET_CLOSE_COURTS),
     CARPET_FAR("carpet far", Constants.CARPET_FAR_COURTS);
 
@@ -27,8 +28,9 @@ public enum CourtGroup {
 
     private static class Constants {
         static final List<Court> ALL_HARD_COURTS;
-        static final List<Court> HARD_CLOSE_COURTS;
-        static final List<Court> HARD_FAR_COURTS;
+        static final List<Court> HARD_GOOD_COURTS;
+        static final List<Court> HARD_MEH_COURTS;
+        static final List<Court> HARD_BAD_COURTS;
         static final List<Court> CARPET_CLOSE_COURTS;
         static final List<Court> CARPET_FAR_COURTS;
 
@@ -57,31 +59,33 @@ public enum CourtGroup {
             ALL_HARD_COURTS.add(Court.H21);
             ALL_HARD_COURTS.add(Court.HCC);
 
-            HARD_CLOSE_COURTS = new ArrayList<>();
-            HARD_CLOSE_COURTS.add(Court.H03);
-            HARD_CLOSE_COURTS.add(Court.H06);
-            HARD_CLOSE_COURTS.add(Court.H09);
-            HARD_CLOSE_COURTS.add(Court.H11);
-            HARD_CLOSE_COURTS.add(Court.H12);
-            HARD_CLOSE_COURTS.add(Court.H14);
-            HARD_CLOSE_COURTS.add(Court.H15);
-            HARD_CLOSE_COURTS.add(Court.H16);
-            HARD_CLOSE_COURTS.add(Court.H17);
-            HARD_CLOSE_COURTS.add(Court.H18);
-            HARD_CLOSE_COURTS.add(Court.H19);
-            HARD_CLOSE_COURTS.add(Court.H20);
-            HARD_CLOSE_COURTS.add(Court.H21);
+            HARD_GOOD_COURTS = new ArrayList<>();
+            HARD_GOOD_COURTS.add(Court.H02);
+            HARD_GOOD_COURTS.add(Court.H03);
+            HARD_GOOD_COURTS.add(Court.H11);
+            HARD_GOOD_COURTS.add(Court.H12);
+            HARD_GOOD_COURTS.add(Court.H14);
+            HARD_GOOD_COURTS.add(Court.H15);
+            HARD_GOOD_COURTS.add(Court.H16);
+            HARD_GOOD_COURTS.add(Court.H17);
+            HARD_GOOD_COURTS.add(Court.H18);
+            HARD_GOOD_COURTS.add(Court.H19);
+            HARD_GOOD_COURTS.add(Court.H20);
+            HARD_GOOD_COURTS.add(Court.H21);
 
-            HARD_FAR_COURTS = new ArrayList<>();
-            HARD_FAR_COURTS.add(Court.H01);
-            HARD_FAR_COURTS.add(Court.H02);
-            HARD_FAR_COURTS.add(Court.H04);
-            HARD_FAR_COURTS.add(Court.H05);
-            HARD_FAR_COURTS.add(Court.H07);
-            HARD_FAR_COURTS.add(Court.H08);
-            HARD_FAR_COURTS.add(Court.H10);
-            HARD_FAR_COURTS.add(Court.H13);
-            HARD_FAR_COURTS.add(Court.HCC);
+            HARD_MEH_COURTS = new ArrayList<>();
+            HARD_MEH_COURTS.add(Court.H10);
+            HARD_MEH_COURTS.add(Court.H13);
+            HARD_MEH_COURTS.add(Court.HCC);
+
+            HARD_BAD_COURTS = new ArrayList<>();
+            HARD_BAD_COURTS.add(Court.H01);
+            HARD_BAD_COURTS.add(Court.H04);
+            HARD_BAD_COURTS.add(Court.H05);
+            HARD_BAD_COURTS.add(Court.H06);
+            HARD_BAD_COURTS.add(Court.H07);
+            HARD_BAD_COURTS.add(Court.H08);
+            HARD_BAD_COURTS.add(Court.H09);
 
             CARPET_CLOSE_COURTS = new ArrayList<>();
             CARPET_CLOSE_COURTS.add(Court.K2);

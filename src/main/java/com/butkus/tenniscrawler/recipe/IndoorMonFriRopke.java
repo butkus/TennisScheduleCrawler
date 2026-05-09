@@ -30,10 +30,10 @@ public class IndoorMonFriRopke extends Recipe {
     static {
         map = new LinkedHashMap<>();
         map.put(1, List.of(
-                new CourtGroupAtHour(CourtGroup.HARD_CLOSE, T1930)
+                new CourtGroupAtHour(CourtGroup.HARD_GOOD, T1930)
         ));
         map.put(2, List.of(
-                new CourtGroupAtHour(CourtGroup.HARD_FAR, T1930)
+                new CourtGroupAtHour(CourtGroup.HARD_MEH, T1930)
         ));
         map.put(3, List.of(
                 new CourtGroupAtHour(CourtGroup.CARPET_CLOSE, T1930)
@@ -42,10 +42,10 @@ public class IndoorMonFriRopke extends Recipe {
                 new CourtGroupAtHour(CourtGroup.CARPET_FAR, T1930)
         ));
         map.put(5, List.of(
-                new CourtGroupAtHour(CourtGroup.HARD_CLOSE, T1900)
+                new CourtGroupAtHour(CourtGroup.HARD_GOOD, T1900)
         ));
         map.put(6, List.of(
-                new CourtGroupAtHour(CourtGroup.HARD_FAR, T1900)
+                new CourtGroupAtHour(CourtGroup.HARD_MEH, T1900)
         ));
         map.put(7, List.of(
                 new CourtGroupAtHour(CourtGroup.CARPET_CLOSE, T1900)
@@ -54,12 +54,12 @@ public class IndoorMonFriRopke extends Recipe {
                 new CourtGroupAtHour(CourtGroup.CARPET_FAR, T1900)
         ));
         map.put(9, List.of(
-                new CourtGroupAtHour(CourtGroup.HARD_CLOSE, T1830),
-                new CourtGroupAtHour(CourtGroup.HARD_CLOSE, T2000)
+                new CourtGroupAtHour(CourtGroup.HARD_GOOD, T1830),
+                new CourtGroupAtHour(CourtGroup.HARD_GOOD, T2000)
         ));
         map.put(10, List.of(
-                new CourtGroupAtHour(CourtGroup.HARD_FAR, T1830),
-                new CourtGroupAtHour(CourtGroup.HARD_FAR, T2000)
+                new CourtGroupAtHour(CourtGroup.HARD_MEH, T1830),
+                new CourtGroupAtHour(CourtGroup.HARD_MEH, T2000)
         ));
         map.put(11, List.of(
                 new CourtGroupAtHour(CourtGroup.CARPET_CLOSE, T1830),
@@ -70,10 +70,10 @@ public class IndoorMonFriRopke extends Recipe {
                 new CourtGroupAtHour(CourtGroup.CARPET_FAR, T2000)
         ));
         map.put(13, List.of(
-                new CourtGroupAtHour(CourtGroup.HARD_CLOSE, T1800)
+                new CourtGroupAtHour(CourtGroup.HARD_GOOD, T1800)
         ));
         map.put(14, List.of(
-                new CourtGroupAtHour(CourtGroup.HARD_FAR, T1800)
+                new CourtGroupAtHour(CourtGroup.HARD_MEH, T1800)
         ));
         map.put(15, List.of(
                 new CourtGroupAtHour(CourtGroup.CARPET_CLOSE, T1800)

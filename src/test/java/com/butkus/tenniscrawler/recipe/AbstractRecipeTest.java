@@ -87,7 +87,7 @@ public abstract class AbstractRecipeTest {
             assertInstanceOf(LinkedHashMap.class, recipe.getMap());
         }
 
-        // each table column (time) has all 3 court types represented
+        // each table column (time) has all eligible court types represented
         @Test
         void allTableCellsFilledOut() {
             var timeToCourtTypes = new HashMap<LocalTime, Set<CourtGroup>>();
@@ -100,7 +100,7 @@ public abstract class AbstractRecipeTest {
                 }
             }
             for (var entry : timeToCourtTypes.entrySet()) {
-                assertEquals(getCourtCategoryCount(), entry.getValue().size(), "Time " + entry.getKey() + " does not have 3 unique court types");
+                assertEquals(getCourtCategoryCount(), entry.getValue().size(), "Time " + entry.getKey() + " does not have all eligible unique court types");
             }
         }
 

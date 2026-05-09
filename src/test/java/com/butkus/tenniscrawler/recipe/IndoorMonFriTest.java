@@ -14,10 +14,11 @@ import java.util.stream.IntStream;
 
  *                |  18:00 |  18:30 |  19:00 |  19:30 |  20:00 |
  * |--------------|--------|--------|--------|--------|--------|
- * | hard close   |   13   |    9   |    3   |    1   |    9   |
- * | hard far     |   14   |   10   |    4   |    2   |   10   |
- * | carpet close |   15   |   11   |    7   |    5   |   11   |
- * | carpet far   |   16   |   12   |    8   |    6   |   12   |
+ * | hard good    |   21   |   16   |    3   |    1   |    9   |
+ * | hard meh     |   22   |   17   |    4   |    2   |   10   |
+ * | carpet close |   23   |   18   |    7   |    5   |   11   |
+ * | carpet far   |   24   |   19   |    8   |    6   |   12   |
+ * | hard bad     |   25   |   20   |   14   |   13   |   15   |
  */
 class IndoorMonFriTest extends AbstractRecipeTest {
 
@@ -28,29 +29,29 @@ class IndoorMonFriTest extends AbstractRecipeTest {
 
     @Override
     List<CourtGroupAtHour> expectedFirst() {
-        return List.of(new CourtGroupAtHour(CourtGroup.HARD_CLOSE, LocalTime.parse("19:30")));
+        return List.of(new CourtGroupAtHour(CourtGroup.HARD_GOOD, LocalTime.parse("19:30")));
     }
 
     @Override
     List<CourtGroupAtHour> expectedSecond() {
-        return List.of(new CourtGroupAtHour(CourtGroup.HARD_FAR, LocalTime.parse("19:30")));
+        return List.of(new CourtGroupAtHour(CourtGroup.HARD_MEH, LocalTime.parse("19:30")));
     }
 
     @Override
     List<CourtGroupAtHour> expectedLast() {
-        return List.of(new CourtGroupAtHour(CourtGroup.CARPET_FAR, LocalTime.parse("18:00")));
+        return List.of(new CourtGroupAtHour(CourtGroup.HARD_BAD, LocalTime.parse("18:00")));
     }
 
     @Override
     List<Integer> getWeightsInOrder() {
         List<Integer> weights = new ArrayList<>();
-        IntStream.rangeClosed(1, 16).forEach(weights::add);
+        IntStream.rangeClosed(1, 25).forEach(weights::add);
         return weights;
     }
 
     @Override
     Integer getCourtCategoryCount() {
-        return 4;
+        return 5;
     }
 
     @Override

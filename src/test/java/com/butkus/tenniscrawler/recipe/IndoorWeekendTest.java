@@ -28,12 +28,12 @@ class IndoorWeekendTest extends AbstractRecipeTest {
 
     @Override
     List<CourtGroupAtHour> expectedFirst() {
-        return List.of(new CourtGroupAtHour(CourtGroup.HARD_CLOSE, LocalTime.parse("18:00")));
+        return List.of(new CourtGroupAtHour(CourtGroup.HARD_GOOD, LocalTime.parse("18:00")));
     }
 
     @Override
     List<CourtGroupAtHour> expectedSecond() {
-        return List.of(new CourtGroupAtHour(CourtGroup.HARD_FAR, LocalTime.parse("18:00")));
+        return List.of(new CourtGroupAtHour(CourtGroup.HARD_MEH, LocalTime.parse("18:00")));
     }
 
     @Override
