@@ -108,12 +108,12 @@ Next:
     - Recipe alterations
         - OutdoorMonFri --> ?
         + IndoorMonFri
-            - left as-is
-            - added new IndoorMonFriRopke
+            + left as-is
+            + added new IndoorMonFriRopke
         - OutdoorWeekend --> make dates more towards 1800
-        - IndoorWeekend  -->
-                - change SEB 06 and SEB 09 to HARD_FAR (and others that make you blind because of fitness center lights)
-                - rename HARD_FAR to sth else? HARD_MEH? HARD_BAD
+        + IndoorWeekend  -->
+                + change SEB 06 and SEB 09 to HARD_FAR (and others that make you blind because of fitness center lights)
+                + rename HARD_FAR to sth else? HARD_MEH? HARD_BAD
         - 90-min versions of recipes for tournaments
             - maybe simply make a setting/flag?
         - make ropke 1930-only, no other times in table

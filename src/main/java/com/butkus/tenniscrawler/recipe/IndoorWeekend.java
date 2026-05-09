@@ -13,10 +13,11 @@ import java.util.Map;
 
  *                |  17:00 |  17:30 |  18:00 |  18:30 |  19:00 |  19:30 |  20:00 |
  * |--------------|--------|--------|--------|--------|--------|--------|--------|
- * | hard close   |   21   |   13   |    1   |    5   |    9   |   17   |   21   |
- * | hard far     |   22   |   14   |    2   |    6   |   10   |   18   |   22   |
- * | carpet close |   23   |   15   |    3   |    7   |   11   |   19   |   23   |
- * | carpet far   |   24   |   16   |    4   |    8   |   12   |   20   |   24   |
+ * | hard good    |   26   |   13   |    1   |    5   |    9   |   20   |   26   |
+ * | hard meh     |   27   |   14   |    2   |    6   |   10   |   21   |   27   |
+ * | carpet close |   28   |   15   |    3   |    7   |   11   |   22   |   28   |
+ * | carpet far   |   29   |   16   |    4   |    8   |   12   |   23   |   29   |
+ * | hard bad     |   30   |   24   |   17   |   18   |   19   |   25   |   30   |
  */
 public class IndoorWeekend extends Recipe {
 
@@ -80,42 +81,58 @@ public class IndoorWeekend extends Recipe {
                 new CourtGroupAtHour(CourtGroup.CARPET_FAR, T1730)
         ));
         map.put(17, List.of(
-                new CourtGroupAtHour(CourtGroup.HARD_GOOD, T1930)
+                new CourtGroupAtHour(CourtGroup.HARD_BAD, T1800)
         ));
         map.put(18, List.of(
-                new CourtGroupAtHour(CourtGroup.HARD_MEH, T1930)
+                new CourtGroupAtHour(CourtGroup.HARD_BAD, T1830)
         ));
         map.put(19, List.of(
-                new CourtGroupAtHour(CourtGroup.CARPET_CLOSE, T1930)
+                new CourtGroupAtHour(CourtGroup.HARD_BAD, T1900)
         ));
         map.put(20, List.of(
-                new CourtGroupAtHour(CourtGroup.CARPET_FAR, T1930)
+                new CourtGroupAtHour(CourtGroup.HARD_GOOD, T1930)
         ));
         map.put(21, List.of(
+                new CourtGroupAtHour(CourtGroup.HARD_MEH, T1930)
+        ));
+        map.put(22, List.of(
+                new CourtGroupAtHour(CourtGroup.CARPET_CLOSE, T1930)
+        ));
+        map.put(23, List.of(
+                new CourtGroupAtHour(CourtGroup.CARPET_FAR, T1930)
+        ));
+        map.put(24, List.of(
+                new CourtGroupAtHour(CourtGroup.HARD_BAD, T1730)
+        ));
+        map.put(25, List.of(
+                new CourtGroupAtHour(CourtGroup.HARD_BAD, T1930)
+        ));
+        map.put(26, List.of(
                 new CourtGroupAtHour(CourtGroup.HARD_GOOD, T1700),
                 new CourtGroupAtHour(CourtGroup.HARD_GOOD, T2000)
         ));
-        map.put(22, List.of(
+        map.put(27, List.of(
                 new CourtGroupAtHour(CourtGroup.HARD_MEH, T1700),
                 new CourtGroupAtHour(CourtGroup.HARD_MEH, T2000)
         ));
-        map.put(23, List.of(
+        map.put(28, List.of(
                 new CourtGroupAtHour(CourtGroup.CARPET_CLOSE, T1700),
                 new CourtGroupAtHour(CourtGroup.CARPET_CLOSE, T2000)
         ));
-        map.put(24, List.of(
+        map.put(29, List.of(
                 new CourtGroupAtHour(CourtGroup.CARPET_FAR, T1700),
                 new CourtGroupAtHour(CourtGroup.CARPET_FAR, T2000)
         ));
-
+        map.put(30, List.of(
+                new CourtGroupAtHour(CourtGroup.HARD_BAD, T1700),
+                new CourtGroupAtHour(CourtGroup.HARD_BAD, T2000)
+        ));
     }
 
     public IndoorWeekend() {
         super(map);
     }
 
-
-    // FIXME: return List.of(90, 60);   --> i have fixed it already w/o tests. do I need tests? It's tested separately.
     @Override
     public List<Integer> getDurationPreference() {
         return List.of(90, 60);
