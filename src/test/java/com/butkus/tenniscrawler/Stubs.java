@@ -67,8 +67,7 @@ public class Stubs {
         return timeString;
     }
 
-    // todo rename to mockStub? mock? it does both, but arguably mocking is more important
-    public void stubOccupiedExcept(List<Long> requestedCourts, Court returnedCourt, LocalTime time, long vacancyDuration) {
+    public void mockStubOccupiedExcept(List<Long> requestedCourts, Court returnedCourt, LocalTime time, long vacancyDuration) {
         // in mocking, last mock matters. So, all are made to be empty, but then, if second mock is more specific, only second one will be in effect.
         when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(stubTimeInfoOccupied());
 

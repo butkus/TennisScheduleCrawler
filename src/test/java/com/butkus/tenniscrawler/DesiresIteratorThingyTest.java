@@ -223,7 +223,7 @@ class DesiresIteratorThingyTest {
         // timeInfoBach does tell if aviable duration is 90-min only, or 30+60, or 60+30, or 30+30+30
         // todo: this stubs 20:00-21:00 unequivocally free (60-min-only slot). Need to cover other options too (or make it clear that they are not relevant to cover)
         // todo: this is a bit false because 19:30-20:00 is not accounted for
-        stubs.stubOccupiedExcept(List.of(Court.H01.getCourtId()), Court.H01, LocalTime.parse("20:00"), 60L);
+        stubs.mockStubOccupiedExcept(List.of(Court.H01.getCourtId()), Court.H01, LocalTime.parse("20:00"), 60L);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -258,7 +258,7 @@ class DesiresIteratorThingyTest {
         List<Desire> desires = Stubs.stubDesiresRecipe(DAY, OutdoorRecipeForTesting::new);
         when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1900free_then_Clay02at1930free_today());
 
-        stubs.stubOccupiedExcept(List.of(Court.C01.getCourtId()), Court.C01, LocalTime.parse("19:00"), 60L);
+        stubs.mockStubOccupiedExcept(List.of(Court.C01.getCourtId()), Court.C01, LocalTime.parse("19:00"), 60L);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -703,7 +703,7 @@ class DesiresIteratorThingyTest {
         mockOrders(stubOrders(h02, DAY, "17:30", "19:00"));
         List<Desire> desires = Stubs.stubDesires(DAY, interest, Court.getHardIds());
 
-        stubs.stubOccupiedExcept(List.of(h02.getCourtId()), h02, LocalTime.parse(vacancyTime), 30L);
+        stubs.mockStubOccupiedExcept(List.of(h02.getCourtId()), h02, LocalTime.parse(vacancyTime), 30L);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -809,7 +809,7 @@ class DesiresIteratorThingyTest {
 
         LocalTime timeFromVacancy = LocalTime.parse(searchFrom);
         Court newCourt = Court.H01;
-        stubs.stubOccupiedExcept(Court.getHardIds(), newCourt, timeFromVacancy, vacancyDuration);
+        stubs.mockStubOccupiedExcept(Court.getHardIds(), newCourt, timeFromVacancy, vacancyDuration);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 
@@ -884,7 +884,7 @@ class DesiresIteratorThingyTest {
 
         List<Long> allCourts = new ArrayList<>(Court.getNonSquashIds());
         LocalTime timeFromVacancy = LocalTime.parse(searchFrom);
-        stubs.stubOccupiedExcept(allCourts, Court.H02, timeFromVacancy, vacancyDuration);
+        stubs.mockStubOccupiedExcept(allCourts, Court.H02, timeFromVacancy, vacancyDuration);
 
         assertDoesNotThrow(() -> thingy.doWork(desires));
 

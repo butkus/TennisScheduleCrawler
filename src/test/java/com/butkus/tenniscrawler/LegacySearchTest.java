@@ -49,7 +49,7 @@ class LegacySearchTest {
         Desire desire = stubDesireForOrder(Court.C01, T1900, T2000, ExtensionInterest.EARLIER);
         LegacySearch search = new LegacySearch(bookingConfigurator, desire);
 
-        stubs.stubOccupiedExcept(List.of(Court.C01.getCourtId()), Court.C01, T1830, 30L);
+        stubs.mockStubOccupiedExcept(List.of(Court.C01.getCourtId()), Court.C01, T1830, 30L);
 
         VacancyFound expected = new VacancyFound(Court.C01.getCourtId(), TODAY, T1830, T1900);
         VacancyFound actual = search.searchForEarlier();
@@ -61,7 +61,7 @@ class LegacySearchTest {
         Desire desire = stubDesireForOrder(Court.C01, T1800, T1900, ExtensionInterest.LATER);
         LegacySearch search = new LegacySearch(bookingConfigurator, desire);
 
-        stubs.stubOccupiedExcept(List.of(Court.C01.getCourtId()), Court.C01, T1900, 30L);
+        stubs.mockStubOccupiedExcept(List.of(Court.C01.getCourtId()), Court.C01, T1900, 30L);
 
         VacancyFound expected = new VacancyFound(Court.C01.getCourtId(), TODAY, T1900, T1930);
         VacancyFound actual = search.searchForLater();
