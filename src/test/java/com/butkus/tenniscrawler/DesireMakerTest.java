@@ -1,7 +1,7 @@
 package com.butkus.tenniscrawler;
 
 import com.butkus.tenniscrawler.recipe.IndoorMonFri;
-import com.butkus.tenniscrawler.recipe.OutdoorRecipeForTesting;
+import com.butkus.tenniscrawler.recipe.OutdoorForTesting;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -135,14 +135,14 @@ class DesireMakerTest {
         void exist_2Periodic_2Explicit_explicitOnesAreSelected() {
             List<Desire> explicitDesires = makeDesires(
                     new Desire(LocalDate.parse("2023-12-28"), IndoorMonFri::new),
-                    new Desire(LocalDate.parse("2023-12-28"), OutdoorRecipeForTesting::new));
+                    new Desire(LocalDate.parse("2023-12-28"), OutdoorForTesting::new));
             desiresExplicitMockedStatic.when(DesiresExplicit::makeExplicitDesires).thenReturn(explicitDesires);
 
             List<Desire> expected = new ArrayList<>(explicitDesires);
 
             List<Desire> actual = desireMaker
                     .addExplicitDesires()
-                    .addNextInAndOut(1, DayOfWeek.THURSDAY, IndoorMonFri::new, OutdoorRecipeForTesting::new)
+                    .addNextInAndOut(1, DayOfWeek.THURSDAY, IndoorMonFri::new, OutdoorForTesting::new)
                     .make();
 
             assertEquals(expected, actual);

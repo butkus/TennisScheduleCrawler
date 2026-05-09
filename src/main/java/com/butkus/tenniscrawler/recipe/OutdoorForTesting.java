@@ -17,7 +17,7 @@ import java.util.Map;
  * | clay summer  |    5   |    4   |    2   |    3   |    5   |
  * | clay rest    |    7   |    6   |    4   |    5   |    7   |
  */
-public class OutdoorRecipeForTesting extends Recipe {
+public class OutdoorForTesting extends Recipe {
 
     public static final LocalTime T1800 = LocalTime.parse("18:00");
     public static final LocalTime T1830 = LocalTime.parse("18:30");
@@ -63,7 +63,7 @@ public class OutdoorRecipeForTesting extends Recipe {
         ));
     }
 
-    public OutdoorRecipeForTesting() {
+    public OutdoorForTesting() {
         super(map);
     }
 

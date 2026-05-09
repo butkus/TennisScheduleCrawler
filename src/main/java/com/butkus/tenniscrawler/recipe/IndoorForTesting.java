@@ -16,7 +16,7 @@ import java.util.Map;
  * | hard         |    4   |    3   |    2   |    1   |    3   |
  * | carpet       |    5   |    4   |    3   |    2   |    4   |
  */
-public class IndoorSimple extends Recipe {
+public class IndoorForTesting extends Recipe {
 
     public static final LocalTime T1800 = LocalTime.parse("18:00");
     public static final LocalTime T1830 = LocalTime.parse("18:30");
@@ -49,7 +49,7 @@ public class IndoorSimple extends Recipe {
         );
     }
 
-    public IndoorSimple() {
+    public IndoorForTesting() {
         super(map);
     }
 

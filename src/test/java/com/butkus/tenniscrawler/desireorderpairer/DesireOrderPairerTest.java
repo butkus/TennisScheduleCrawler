@@ -1,8 +1,8 @@
 package com.butkus.tenniscrawler.desireorderpairer;
 
 import com.butkus.tenniscrawler.*;
-import com.butkus.tenniscrawler.recipe.IndoorSimple;
-import com.butkus.tenniscrawler.recipe.OutdoorRecipeForTesting;
+import com.butkus.tenniscrawler.recipe.IndoorForTesting;
+import com.butkus.tenniscrawler.recipe.OutdoorForTesting;
 import com.butkus.tenniscrawler.recipe.Recipe;
 import com.butkus.tenniscrawler.rest.orders.Order;
 import org.junit.jupiter.api.Nested;
@@ -49,8 +49,8 @@ class DesireOrderPairerTest {
     public static final LocalTime TIME_1800 = LocalTime.parse("18:00");
     public static final LocalTime TIME_1900 = LocalTime.parse("19:00");
 
-    public static final Supplier<Recipe> INDOOR_RECIPE = IndoorSimple::new;
-    public static final Supplier<Recipe> OUTDOOR_RECIPE = OutdoorRecipeForTesting::new;
+    public static final Supplier<Recipe> INDOOR_RECIPE = IndoorForTesting::new;
+    public static final Supplier<Recipe> OUTDOOR_RECIPE = OutdoorForTesting::new;
 
     @ParameterizedTest
     @MethodSource("orderMatchesDesire_byDayAndCourt_args")

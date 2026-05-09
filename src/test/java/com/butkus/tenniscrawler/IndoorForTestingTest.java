@@ -1,6 +1,6 @@
 package com.butkus.tenniscrawler;
 
-import com.butkus.tenniscrawler.recipe.IndoorSimple;
+import com.butkus.tenniscrawler.recipe.IndoorForTesting;
 import com.butkus.tenniscrawler.recipe.Recipe;
 
 import java.time.LocalTime;
@@ -16,11 +16,11 @@ import static com.butkus.tenniscrawler.CourtGroup.HARD;
  * | hard         |    4   |    3   |    2   |    1   |    3   |
  * | carpet       |    5   |    4   |    3   |    2   |    4   |
  */
-class IndoorSimpleTest extends AbstractRecipeTest {
+class IndoorForTestingTest extends AbstractRecipeTest {
 
     @Override
     Recipe getRecipe() {
-        return new IndoorSimple();
+        return new IndoorForTesting();
     }
 
     @Override

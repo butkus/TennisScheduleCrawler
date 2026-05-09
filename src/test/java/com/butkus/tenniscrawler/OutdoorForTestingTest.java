@@ -1,6 +1,6 @@
 package com.butkus.tenniscrawler;
 
-import com.butkus.tenniscrawler.recipe.OutdoorRecipeForTesting;
+import com.butkus.tenniscrawler.recipe.OutdoorForTesting;
 import com.butkus.tenniscrawler.recipe.Recipe;
 
 import java.time.LocalTime;
@@ -18,11 +18,11 @@ import static com.butkus.tenniscrawler.CourtGroup.GRASS;
  * | clay summer  |    5   |    4   |    2   |    3   |    5   |
  * | clay rest    |    7   |    6   |    4   |    5   |    7   |
  */
-class OutdoorRecipeForTestingTest extends AbstractRecipeTest {
+class OutdoorForTestingTest extends AbstractRecipeTest {
 
     @Override
     Recipe getRecipe() {
-        return new OutdoorRecipeForTesting();
+        return new OutdoorForTesting();
     }
 
     @Override
