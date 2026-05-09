@@ -1,6 +1,6 @@
 package com.butkus.tenniscrawler;
 
-import com.butkus.tenniscrawler.recipe.IndoorMonFri;
+import com.butkus.tenniscrawler.recipe.IndoorMonFriRopke;
 import com.butkus.tenniscrawler.recipe.IndoorWeekend;
 import com.butkus.tenniscrawler.recipe.OutdoorWeekend;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +71,7 @@ public class Crawler {
         DesireMaker desireMaker = new DesireMaker(CLOCK);
         List<Desire> inputs = desireMaker
                 .addExplicitDesires()
-                .addNext(12, WEDNESDAY, IndoorMonFri::new)
+                .addNext(12, WEDNESDAY, IndoorMonFriRopke::new)
                 .addNextInAndOut(12, SUNDAY, IndoorWeekend::new, OutdoorWeekend::new)
                 .make();
         desiresThingy.doWork(inputs);

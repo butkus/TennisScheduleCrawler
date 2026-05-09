@@ -107,7 +107,9 @@ todo -- check if desire resolver correcrly assuems that NEW explictit desire ove
 Next:
     - Recipe alterations
         - OutdoorMonFri --> ?
-        - IndoorMonFri  --> ?
+        + IndoorMonFri
+            - left as-is
+            - added new IndoorMonFriRopke
         - OutdoorWeekend --> make dates more towards 1800
         - IndoorWeekend  -->
                 - change SEB 06 and SEB 09 to HARD_FAR (and others that make you blind because of fitness center lights)

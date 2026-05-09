@@ -13,10 +13,10 @@ import java.util.Map;
 
  *                |  18:00 |  18:30 |  19:00 |  19:30 |  20:00 |
  * |--------------|--------|--------|--------|--------|--------|
- * | hard close   |   13   |    9   |    3   |    1   |    9   |
- * | hard far     |   14   |   10   |    4   |    2   |   10   |
- * | carpet close |   15   |   11   |    7   |    5   |   11   |
- * | carpet far   |   16   |   12   |    8   |    6   |   12   |
+ * | hard close   |   13   |    9   |    5   |    1   |    9   |
+ * | hard far     |   14   |   10   |    6   |    2   |   10   |
+ * | carpet close |   15   |   11   |    7   |    3   |   11   |
+ * | carpet far   |   16   |   12   |    8   |    4   |   12   |
  */
 public class IndoorMonFriRopke extends Recipe {
 
@@ -36,16 +36,16 @@ public class IndoorMonFriRopke extends Recipe {
                 new CourtGroupAtHour(CourtGroup.HARD_FAR, T1930)
         ));
         map.put(3, List.of(
-                new CourtGroupAtHour(CourtGroup.HARD_CLOSE, T1900)
-        ));
-        map.put(4, List.of(
-                new CourtGroupAtHour(CourtGroup.HARD_FAR, T1900)
-        ));
-        map.put(5, List.of(
                 new CourtGroupAtHour(CourtGroup.CARPET_CLOSE, T1930)
         ));
-        map.put(6, List.of(
+        map.put(4, List.of(
                 new CourtGroupAtHour(CourtGroup.CARPET_FAR, T1930)
+        ));
+        map.put(5, List.of(
+                new CourtGroupAtHour(CourtGroup.HARD_CLOSE, T1900)
+        ));
+        map.put(6, List.of(
+                new CourtGroupAtHour(CourtGroup.HARD_FAR, T1900)
         ));
         map.put(7, List.of(
                 new CourtGroupAtHour(CourtGroup.CARPET_CLOSE, T1900)
