@@ -1,5 +1,6 @@
 package com.butkus.tenniscrawler;
 
+import com.butkus.tenniscrawler.recipe.Recipe;
 import com.butkus.tenniscrawler.rest.orders.Order;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

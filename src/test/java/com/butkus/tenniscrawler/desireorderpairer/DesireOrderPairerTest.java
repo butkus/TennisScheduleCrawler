@@ -1,6 +1,9 @@
 package com.butkus.tenniscrawler.desireorderpairer;
 
 import com.butkus.tenniscrawler.*;
+import com.butkus.tenniscrawler.recipe.IndoorSimple;
+import com.butkus.tenniscrawler.recipe.OutdoorRecipeForTesting;
+import com.butkus.tenniscrawler.recipe.Recipe;
 import com.butkus.tenniscrawler.rest.orders.Order;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

@@ -1,5 +1,8 @@
-package com.butkus.tenniscrawler;
+package com.butkus.tenniscrawler.recipe;
 
+import com.butkus.tenniscrawler.Court;
+import com.butkus.tenniscrawler.CourtGroupAtHour;
+import com.butkus.tenniscrawler.CourtType;
 import lombok.Getter;
 
 import java.util.Iterator;

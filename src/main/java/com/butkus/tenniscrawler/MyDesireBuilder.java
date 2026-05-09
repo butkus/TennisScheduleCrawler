@@ -1,5 +1,6 @@
 package com.butkus.tenniscrawler;
 
+import com.butkus.tenniscrawler.recipe.Recipe;
 import lombok.Data;
 import lombok.experimental.Accessors;
 

@@ -1,5 +1,6 @@
 package com.butkus.tenniscrawler;
 
+import com.butkus.tenniscrawler.recipe.Recipe;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;

@@ -1,5 +1,6 @@
 package com.butkus.tenniscrawler;
 
+import com.butkus.tenniscrawler.recipe.Recipe;
 import com.butkus.tenniscrawler.rest.SebFetcher;
 import com.butkus.tenniscrawler.rest.timeinfobatch.AviableDuration;
 import com.butkus.tenniscrawler.rest.timeinfobatch.DataTimeInfo;

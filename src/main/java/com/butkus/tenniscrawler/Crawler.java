@@ -1,5 +1,8 @@
 package com.butkus.tenniscrawler;
 
+import com.butkus.tenniscrawler.recipe.IndoorMonFri;
+import com.butkus.tenniscrawler.recipe.IndoorWeekend;
+import com.butkus.tenniscrawler.recipe.OutdoorWeekend;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;

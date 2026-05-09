@@ -1,5 +1,7 @@
 package com.butkus.tenniscrawler;
 
+import com.butkus.tenniscrawler.recipe.IndoorSimple;
+import com.butkus.tenniscrawler.recipe.OutdoorRecipeForTesting;
 import com.butkus.tenniscrawler.rest.SebFetcher;
 import com.butkus.tenniscrawler.rest.SebOrderConverter;
 import com.butkus.tenniscrawler.rest.orders.Order;

@@ -1,4 +1,7 @@
-package com.butkus.tenniscrawler;
+package com.butkus.tenniscrawler.recipe;
+
+import com.butkus.tenniscrawler.CourtGroup;
+import com.butkus.tenniscrawler.CourtGroupAtHour;
 
 import java.time.LocalTime;
 import java.util.LinkedHashMap;

@@ -1,5 +1,6 @@
 package com.butkus.tenniscrawler;
 
+import com.butkus.tenniscrawler.recipe.IndoorWeekend;
 import com.butkus.tenniscrawler.rest.SebFetcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;

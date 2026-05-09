@@ -1,5 +1,8 @@
 package com.butkus.tenniscrawler;
 
+import com.butkus.tenniscrawler.recipe.OutdoorWeekend;
+import com.butkus.tenniscrawler.recipe.Recipe;
+
 import java.time.LocalTime;
 import java.util.List;
 
