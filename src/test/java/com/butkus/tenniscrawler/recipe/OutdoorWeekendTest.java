@@ -1,7 +1,7 @@
-package com.butkus.tenniscrawler;
+package com.butkus.tenniscrawler.recipe;
 
-import com.butkus.tenniscrawler.recipe.OutdoorWeekend;
-import com.butkus.tenniscrawler.recipe.Recipe;
+import com.butkus.tenniscrawler.Court;
+import com.butkus.tenniscrawler.CourtGroupAtHour;
 
 import java.time.LocalTime;
 import java.util.List;

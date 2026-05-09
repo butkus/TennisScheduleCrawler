@@ -1,7 +1,8 @@
-package com.butkus.tenniscrawler;
+package com.butkus.tenniscrawler.recipe;
 
-import com.butkus.tenniscrawler.recipe.IndoorWeekend;
-import com.butkus.tenniscrawler.recipe.Recipe;
+import com.butkus.tenniscrawler.Court;
+import com.butkus.tenniscrawler.CourtGroup;
+import com.butkus.tenniscrawler.CourtGroupAtHour;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.stream.IntStream;
  * | carpet close |   23   |   15   |    3   |    7   |   11   |   19   |   23   |
  * | carpet far   |   24   |   16   |    4   |    8   |   12   |   20   |   24   |
  */
-class IndoorWeekendTest extends AbstractRecipeTest  {
+class IndoorWeekendTest extends AbstractRecipeTest {
 
     @Override
     Recipe getRecipe() {

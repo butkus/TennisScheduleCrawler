@@ -1,6 +1,7 @@
-package com.butkus.tenniscrawler;
+package com.butkus.tenniscrawler.recipe;
 
-import com.butkus.tenniscrawler.recipe.Recipe;
+import com.butkus.tenniscrawler.CourtGroup;
+import com.butkus.tenniscrawler.CourtGroupAtHour;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
