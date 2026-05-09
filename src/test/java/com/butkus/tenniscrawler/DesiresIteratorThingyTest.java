@@ -249,6 +249,34 @@ class DesiresIteratorThingyTest {
         assertVacancyFound(new VacancyFound(Court.H01.getCourtId(), LocalDate.parse(DAY), T2000, T2100));
     }
 
+
+    // todo marker comment. this is a derivative of the above test. most considerations probably apply
+    @Tag(RECIPE_BASED)
+    @Test
+    void desireToday_WhenPlaceInfoFindsVacancy_ThenTimeInfoCalled_butOnlyOnce() throws Exception {
+        mockOrders(new ArrayList<>());
+        List<Desire> desires = Stubs.stubDesiresRecipe(DAY, OutdoorRecipeForTesting::new);
+        when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfoClay01at1900free_then_Clay02at1930free_today());
+
+        stubs.stubOccupiedExcept(List.of(Court.C01.getCourtId()), Court.C01, LocalTime.parse("19:00"), 60L);
+
+        assertDoesNotThrow(() -> thingy.doWork(desires));
+
+        fetchesPlaceOnce();     // finds a volatile vacancy
+        fetchesTimeOnce();      // makes 1 legacy search to confirm, and finds
+
+        verify(audioPlayer, times(1)).chimeIfNecessary();
+
+        // based on placeInfoBatch response (fullsell 19:00-20:00 -- and later 19:30-20:30)
+        //   - checks weight 1 (SUMMER, 19:00), calls timeInfoBatch(SUMMER, 19:00, 60 mins), and finds.
+        //   - should not check weight 3 - placeInfo has it, but we've already found a match
+        assertThat(timeCaptor.getAllValues()).containsExactly(T1900);
+        assertThat(dateCaptor.getAllValues()).containsExactly(LocalDate.parse(DAY));
+        assertThat(courtsCaptor.getAllValues()).containsExactly(List.of(44L));
+
+        assertVacancyFound(new VacancyFound(Court.C01.getCourtId(), LocalDate.parse(DAY), T1900, T2000));
+    }
+
 //   postPlaceInfoBatch tests  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -923,6 +951,10 @@ class DesiresIteratorThingyTest {
 
     private void fetchesTimeTwice() {
         verify(fetcher, times(2)).postTimeInfoBatch(courtsCaptor.capture(), dateCaptor.capture(), timeCaptor.capture());
+    }
+
+    private void fetchesTimeOnce() {
+        verify(fetcher, times(1)).postTimeInfoBatch(courtsCaptor.capture(), dateCaptor.capture(), timeCaptor.capture());
     }
 
     private void assertFetchedCourts(List<Long> courtIds) {

@@ -115,6 +115,7 @@ public class Vacancy {
                                     boolean found2 = legacySearch.searchForReservation(List.of(courtId), recipeFrom, MINUTES.between(recipeFrom, recipeTo));
                                     if (found2) {
                                         vacancyFound = new VacancyFound(courtId, day, recipeFrom, recipeTo);
+                                        break;
                                     } else {
                                         found = false;
                                         // do not break;
@@ -124,8 +125,6 @@ public class Vacancy {
                                     break;  // todo: refactor: both "continue and "break" are too much
                                 }
 
-//                                vacancyFound = new VacancyFound(courtId, day, recipeFrom, recipeTo);
-//                                break;  // todo: refactor: both "continue and "break" are too much
                             }
                         }
                     }

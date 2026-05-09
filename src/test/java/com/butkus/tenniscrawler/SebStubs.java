@@ -321,6 +321,71 @@ public class SebStubs {
         return PlaceInfoBatchRspDto.fromJson(json);
     }
 
+    public static PlaceInfoBatchRspDto stubPlaceInfoClay01at1900free_then_Clay02at1930free_today() throws Exception {
+        String json = """
+                {
+                  "status": "success",
+                  "data": [
+                    {
+                      "place": 5,
+                      "data": [
+                        [
+                          {
+                            "courtID": 44,
+                            "date": "2023-10-01",
+                            "timetable": {
+                              "19:00:00": {
+                                "from": "19:00:00",
+                                "to": "19:30:00",
+                                "status": "free"
+                              },
+                              "19:30:00": {
+                                "from": "19:30:00",
+                                "to": "20:00:00",
+                                "status": "free"
+                              },
+                              "20:00:00": {
+                                "from": "20:00:00",
+                                "to": "20:30:00",
+                                "status": "full"
+                              }
+                
+                            }
+                          },
+                          {
+                            "courtID": 45,
+                            "date": "2023-10-01",
+                            "timetable": {
+                              "19:00:00": {
+                                "from": "19:00:00",
+                                "to": "19:30:00",
+                                "status": "full"
+                              },
+                              "19:30:00": {
+                                "from": "19:30:00",
+                                "to": "20:00:00",
+                                "status": "free"
+                              },
+                              "20:00:00": {
+                                "from": "20:00:00",
+                                "to": "20:30:00",
+                                "status": "free"
+                              }
+                
+                            }
+                          }
+                        ]
+                
+                      ]
+                    }
+                  ]
+                }
+                """;
+
+        return PlaceInfoBatchRspDto.fromJson(json);
+    }
+
+
     public static PlaceInfoBatchRspDto stubPlaceInfoClay01at1900free_then_Clay02at1930free() throws Exception {
         String json = """
                 {

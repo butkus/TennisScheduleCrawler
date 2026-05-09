@@ -105,6 +105,10 @@ todo -- check if desire resolver correcrly assuems that NEW explictit desire ove
 
 
 Next:
+    - OutdoorWeekend --> make dates more towards 1800
+    - IndoorWeekend  -->
+            - change SEB 06 and SEB 09 to HARD_FAR (and others that make you blind because of fitness center lights)
+            - rename HARD_FAR to sth else? HARD_MEH? HARD_BAD
     - MyDesireBuilder -- keep or replace with lombok's @Builder?
     - DesireOrderPairTestCase: make cloning entirely witin Desire
         - it is currently ok, but only because Recipe is not touched. Still, Desire should be always created valid.
