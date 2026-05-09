@@ -116,6 +116,7 @@ Next:
                 - rename HARD_FAR to sth else? HARD_MEH? HARD_BAD
         - 90-min versions of recipes for tournaments
             - maybe simply make a setting/flag?
+        - make ropke 1930-only, no other times in table
     - MyDesireBuilder -- keep or replace with lombok's @Builder?
     - DesireOrderPairTestCase: make cloning entirely witin Desire
         - it is currently ok, but only because Recipe is not touched. Still, Desire should be always created valid.

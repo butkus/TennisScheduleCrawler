@@ -14,10 +14,11 @@ import java.util.stream.IntStream;
 
  *                |  18:00 |  18:30 |  19:00 |  19:30 |  20:00 |
  * |--------------|--------|--------|--------|--------|--------|
- * | hard close   |   13   |    9   |    5   |    1   |    9   |
- * | hard far     |   14   |   10   |    6   |    2   |   10   |
- * | carpet close |   15   |   11   |    7   |    3   |   11   |
- * | carpet far   |   16   |   12   |    8   |    4   |   12   |
+ * | hard good    |   21   |   16   |    6   |    1   |   10   |
+ * | hard meh     |   22   |   17   |    7   |    2   |   11   |
+ * | carpet close |   23   |   18   |    8   |    3   |   12   |
+ * | carpet far   |   24   |   19   |    9   |    4   |   13   |
+ * | hard bad     |   25   |   20   |   14   |    5   |   15   |
  */
 class IndoorMonFriRopkeTest extends AbstractRecipeTest {
 
@@ -38,19 +39,19 @@ class IndoorMonFriRopkeTest extends AbstractRecipeTest {
 
     @Override
     List<CourtGroupAtHour> expectedLast() {
-        return List.of(new CourtGroupAtHour(CourtGroup.CARPET_FAR, LocalTime.parse("18:00")));
+        return List.of(new CourtGroupAtHour(CourtGroup.HARD_BAD, LocalTime.parse("18:00")));
     }
 
     @Override
     List<Integer> getWeightsInOrder() {
         List<Integer> weights = new ArrayList<>();
-        IntStream.rangeClosed(1, 16).forEach(weights::add);
+        IntStream.rangeClosed(1, 25).forEach(weights::add);
         return weights;
     }
 
     @Override
     Integer getCourtCategoryCount() {
-        return 4;
+        return 5;
     }
 
     @Override
