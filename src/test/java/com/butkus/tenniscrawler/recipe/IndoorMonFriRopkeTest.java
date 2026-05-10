@@ -5,7 +5,6 @@ import com.butkus.tenniscrawler.CourtGroup;
 import com.butkus.tenniscrawler.CourtGroupAtHour;
 
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -44,9 +43,7 @@ class IndoorMonFriRopkeTest extends AbstractRecipeTest {
 
     @Override
     List<Integer> getWeightsInOrder() {
-        List<Integer> weights = new ArrayList<>();
-        IntStream.rangeClosed(1, 25).forEach(weights::add);
-        return weights;
+        return IntStream.rangeClosed(1, 25).boxed().toList();
     }
 
     @Override

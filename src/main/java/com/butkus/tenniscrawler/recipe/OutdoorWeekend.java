@@ -11,14 +11,16 @@ import java.util.Map;
 /**
  * Example table (for visualization purposes):
 
- *                |  18:00 |  18:30 |  19:00 |  19:30 |  20:00 |
- * |--------------|--------|--------|--------|--------|--------|
- * | grass        |   10   |    9   |    7   |    8   |   10   |
- * | clay summer  |    5   |    4   |    2   |    3   |    5   |
- * | clay rest    |    7   |    6   |    4   |    5   |    7   |
+ *                |  17:00 |  17:30 |  18:00 |  18:30 |  19:00 |  19:30 |  20:00 |
+ * |--------------|--------|--------|--------|--------|--------|--------|--------|
+ * | clay summer  |   13   |    5   |    1   |    2   |    7   |   13   |   16   |
+ * | clay rest    |   14   |    6   |    3   |    4   |    8   |   14   |   17   |
+ * | grass        |   15   |   11   |    9   |   10   |   12   |   15   |   18   |
  */
 public class OutdoorWeekend extends Recipe {
 
+    public static final LocalTime T1700 = LocalTime.parse("17:00");
+    public static final LocalTime T1730 = LocalTime.parse("17:30");
     public static final LocalTime T1800 = LocalTime.parse("18:00");
     public static final LocalTime T1830 = LocalTime.parse("18:30");
     public static final LocalTime T1900 = LocalTime.parse("19:00");
@@ -28,37 +30,61 @@ public class OutdoorWeekend extends Recipe {
     private static final Map<Integer, List<CourtGroupAtHour>> map;
     static {
         map = new LinkedHashMap<>();
+        map.put(1, List.of(
+                new CourtGroupAtHour(CourtGroup.CLAY_SUMMER, T1800)
+        ));
         map.put(2, List.of(
-                new CourtGroupAtHour(CourtGroup.CLAY_SUMMER, T1900)
+                new CourtGroupAtHour(CourtGroup.CLAY_SUMMER, T1830)
         ));
         map.put(3, List.of(
-                new CourtGroupAtHour(CourtGroup.CLAY_SUMMER, T1930)
+                new CourtGroupAtHour(CourtGroup.CLAY_REST, T1800)
         ));
         map.put(4, List.of(
-                new CourtGroupAtHour(CourtGroup.CLAY_SUMMER, T1830),
-                new CourtGroupAtHour(CourtGroup.CLAY_REST, T1900)
-        ));
-        map.put(5, List.of(
-                new CourtGroupAtHour(CourtGroup.CLAY_SUMMER, T1800),
-                new CourtGroupAtHour(CourtGroup.CLAY_SUMMER, T2000),
-                new CourtGroupAtHour(CourtGroup.CLAY_REST, T1930)
-        ));
-        map.put(6, List.of(
                 new CourtGroupAtHour(CourtGroup.CLAY_REST, T1830)
         ));
+        map.put(5, List.of(
+                new CourtGroupAtHour(CourtGroup.CLAY_SUMMER, T1730)
+        ));
+        map.put(6, List.of(
+                new CourtGroupAtHour(CourtGroup.CLAY_REST, T1730)
+        ));
         map.put(7, List.of(
-                new CourtGroupAtHour(CourtGroup.CLAY_REST, T1800),
-                new CourtGroupAtHour(CourtGroup.CLAY_REST, T2000),
-                new CourtGroupAtHour(CourtGroup.GRASS, T1900)
+                new CourtGroupAtHour(CourtGroup.CLAY_SUMMER, T1900)
         ));
         map.put(8, List.of(
-                new CourtGroupAtHour(CourtGroup.GRASS, T1930)
+                new CourtGroupAtHour(CourtGroup.CLAY_REST, T1900)
         ));
         map.put(9, List.of(
-                new CourtGroupAtHour(CourtGroup.GRASS, T1830)
+                new CourtGroupAtHour(CourtGroup.GRASS, T1800)
         ));
         map.put(10, List.of(
-                new CourtGroupAtHour(CourtGroup.GRASS, T1800),
+                new CourtGroupAtHour(CourtGroup.GRASS, T1830)
+        ));
+        map.put(11, List.of(
+                new CourtGroupAtHour(CourtGroup.GRASS, T1730)
+        ));
+        map.put(12, List.of(
+                new CourtGroupAtHour(CourtGroup.GRASS, T1900)
+        ));
+        map.put(13, List.of(
+                new CourtGroupAtHour(CourtGroup.CLAY_SUMMER, T1700),
+                new CourtGroupAtHour(CourtGroup.CLAY_SUMMER, T1930)
+        ));
+        map.put(14, List.of(
+                new CourtGroupAtHour(CourtGroup.CLAY_REST, T1700),
+                new CourtGroupAtHour(CourtGroup.CLAY_REST, T1930)
+        ));
+        map.put(15, List.of(
+                new CourtGroupAtHour(CourtGroup.GRASS, T1700),
+                new CourtGroupAtHour(CourtGroup.GRASS, T1930)
+        ));
+        map.put(16, List.of(
+                new CourtGroupAtHour(CourtGroup.CLAY_SUMMER, T2000)
+        ));
+        map.put(17, List.of(
+                new CourtGroupAtHour(CourtGroup.CLAY_REST, T2000)
+        ));
+        map.put(18, List.of(
                 new CourtGroupAtHour(CourtGroup.GRASS, T2000)
         ));
     }
