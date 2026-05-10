@@ -118,6 +118,14 @@ Next:
 
         - 90-min versions of recipes for tournaments
             - maybe simply make a setting/flag?
+    - prioritization within CourtGroup
+        - e.g. currently
+            CLAY_SUMMER("clay summer", List.of(Court.C01, Court.C02, Court.C05, Court.C06)),
+        - there's no prioritization and changing order of those won't help.
+        - the way it works is that dto of court availability comes in and I check piece by piece
+            - in Vacancy this line
+                for (DataInner courtDto : courtDtos) ...
+            - whatever order SEB returns courts availability (it returns in ascending order) is the order we check availability within a CourtGroup
     - MyDesireBuilder -- keep or replace with lombok's @Builder?
     - DesireOrderPairTestCase: make cloning entirely witin Desire
         - it is currently ok, but only because Recipe is not touched. Still, Desire should be always created valid.
