@@ -22,6 +22,7 @@ import java.util.Map;
 public class IndoorWeekend extends Recipe {
 
     public static final LocalTime T1700 = LocalTime.parse("17:00");
+
     public static final LocalTime T1730 = LocalTime.parse("17:30");
     public static final LocalTime T1800 = LocalTime.parse("18:00");
     public static final LocalTime T1830 = LocalTime.parse("18:30");
@@ -29,7 +30,13 @@ public class IndoorWeekend extends Recipe {
     public static final LocalTime T1930 = LocalTime.parse("19:30");
     public static final LocalTime T2000 = LocalTime.parse("20:00");
 
+    @Override
+    public List<Integer> getDurationPreference() {
+        return List.of(90, 60);
+    }
+
     private static final Map<Integer, List<CourtGroupAtHour>> map;
+
     static {
         map = new LinkedHashMap<>();
         map.put(1, List.of(
@@ -133,8 +140,4 @@ public class IndoorWeekend extends Recipe {
         super(map);
     }
 
-    @Override
-    public List<Integer> getDurationPreference() {
-        return List.of(90, 60);
-    }
 }

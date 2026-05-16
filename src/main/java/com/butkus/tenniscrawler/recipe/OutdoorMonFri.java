@@ -25,7 +25,13 @@ public class OutdoorMonFri extends Recipe {
     public static final LocalTime T1930 = LocalTime.parse("19:30");
     public static final LocalTime T2000 = LocalTime.parse("20:00");
 
+    @Override
+    public List<Integer> getDurationPreference() {
+        return List.of(90, 60);
+    }
+
     private static final Map<Integer, List<CourtGroupAtHour>> map;
+
     static {
         map = new LinkedHashMap<>();
         map.put(1, List.of(
@@ -79,8 +85,4 @@ public class OutdoorMonFri extends Recipe {
         super(map);
     }
 
-    @Override
-    public List<Integer> getDurationPreference() {
-        return List.of(90, 60);
-    }
 }
