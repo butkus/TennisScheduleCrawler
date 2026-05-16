@@ -154,7 +154,11 @@ class DesiresIteratorThingyTest {
 
         @BeforeEach
         void setUp() throws Exception {
-            when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfo7Days());
+            Clock clockDay11 = Clock.fixed(Instant.parse("2023-10-11T12:00:00Z"), UTC);
+            BookingConfigurator configurator = new BookingConfigurator(audioPlayer, fetcher, clockDay11);
+            thingy = spy(new DesiresIteratorThingy(configurator));
+
+            when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfo7Days1800to1900free());
         }
 
         @Test
@@ -187,24 +191,26 @@ class DesiresIteratorThingyTest {
             fetchesPlace(3);
         }
 
-        public List<Desire> stubDesireForDays(String... dates) {
-            List<Desire> desires = new ArrayList<>();
-            for (String date : dates) {
-                desires.add(new Desire(LocalDate.parse(date), OutdoorForTesting::new));
-            }
-            return desires;
+    }
+
+
+    public List<Desire> stubDesireForDays(String... dates) {
+        List<Desire> desires = new ArrayList<>();
+        for (String date : dates) {
+            desires.add(new Desire(LocalDate.parse(date), OutdoorForTesting::new));
         }
+        return desires;
+    }
 
+    @Test
+    void desiresFor2days_passes1daysDtosToVacancyScanner() throws Exception {
+        when(fetcher.postPlaceInfoBatch(any(), any())).thenReturn(SebStubs.stubPlaceInfo7Days1800to1900free());
+        // whatever you ask, there's NO booking
+        when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(Stubs.stubTimeInfoOccupied());
 
-        @Test
-        void desiresFor2days_passes1daysDtosToVacancyScanner() {
-            // whatever you ask, there's NO booking
-            when(fetcher.postTimeInfoBatch(any(), any(), any())).thenReturn(Stubs.stubTimeInfoOccupied());
-
-            thingy.doWork(stubDesireForDays(DAY_1, DAY_2));
-            assertCourtDtosFilteredFor1day();
-            // todo check that that 1 day is today
-        }
+        thingy.doWork(stubDesireForDays(DAY_1, DAY_2));
+        assertCourtDtosFilteredFor1day();
+        // todo check that that 1 day is today
     }
 
 

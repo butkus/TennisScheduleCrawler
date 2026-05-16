@@ -22,7 +22,6 @@ import java.util.Map;
 public class IndoorWeekend extends Recipe {
 
     public static final LocalTime T1700 = LocalTime.parse("17:00");
-
     public static final LocalTime T1730 = LocalTime.parse("17:30");
     public static final LocalTime T1800 = LocalTime.parse("18:00");
     public static final LocalTime T1830 = LocalTime.parse("18:30");

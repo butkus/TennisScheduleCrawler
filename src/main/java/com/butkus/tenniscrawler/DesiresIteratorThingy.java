@@ -34,7 +34,7 @@ public class DesiresIteratorThingy {
         configurator.resetAudioPlayer();
         SebFetcher fetcher = configurator.getFetcher();
 
-        LocalDate min = LocalDate.now();
+        LocalDate min = LocalDate.now(configurator.getClock());
         LocalDate max = desires.stream().map(Desire::getDate).max(Comparator.naturalOrder()).orElseThrow(() -> new RuntimeException("no max date found"));
         OrdersRspDto ordersDto = fetcher.getOrders(min.toString(), max.toString());
         List<Order> orders = SebOrderConverter.toOrders(ordersDto);

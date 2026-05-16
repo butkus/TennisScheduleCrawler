@@ -46,7 +46,7 @@ public class SebStubs {
         return PlaceInfoBatchRspDto.fromJson(json);
     }
 
-    public static PlaceInfoBatchRspDto stubPlaceInfo7Days() throws Exception {
+    public static PlaceInfoBatchRspDto stubPlaceInfo7Days1800to1900free() throws Exception {
         String json = """
                 {
                   "status": "success",
