@@ -130,4 +130,5 @@ Next:
     - MyDesireBuilder -- keep or replace with lombok's @Builder?
     - DesireOrderPairTestCase: make cloning entirely witin Desire
         - it is currently ok, but only because Recipe is not touched. Still, Desire should be always created valid.
-    -- decide if still relevant todo comment: if "bandyti parduoti", order will have "sab_parduodamas":1
+    -- decide if still relevant to-do comment: if "bandyti parduoti", order will have "sab_parduodamas":1
+    -- if 2 ordeers are place same day same court (it courrenlty says DuplicateOrdersException: More than 1 indoor Order for 2025-10-29) -- ignore that day
