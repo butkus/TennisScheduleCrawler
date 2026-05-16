@@ -34,12 +34,10 @@ public class DesiresIteratorThingy {
         configurator.resetAudioPlayer();
         SebFetcher fetcher = configurator.getFetcher();
 
-        LocalDate min = desires.stream().map(Desire::getDate).min(Comparator.naturalOrder()).orElseThrow(() -> new RuntimeException("no min date found"));
+        LocalDate min = LocalDate.now();
         LocalDate max = desires.stream().map(Desire::getDate).max(Comparator.naturalOrder()).orElseThrow(() -> new RuntimeException("no max date found"));
         OrdersRspDto ordersDto = fetcher.getOrders(min.toString(), max.toString());
         List<Order> orders = SebOrderConverter.toOrders(ordersDto);
-
-        // todo if "bandyti parduoti", order will have "sab_parduodamas":1
 
         DesireOrderPairer pairer = new DesireOrderPairer(desires, orders);
         pairer.pair();
