@@ -41,7 +41,7 @@ class DesireMakerTest {
 
     @BeforeEach
     void setUp() {
-        Clock clock = Clock.fixed(Instant.parse("2023-12-24T12:35:00.00Z"), ZoneId.of("Europe/Vilnius"));       // 2023-12-24 is Sunday
+        Clock clock = Clock.fixed(Instant.parse("2026-06-01T12:35:00.00Z"), ZoneId.of("Europe/Vilnius"));       // 2026-06-01 is Monday
         desireMaker = spy(new DesireMaker(clock));
         desiresExplicitMockedStatic = mockStatic(DesiresExplicit.class);
     }
@@ -53,34 +53,46 @@ class DesireMakerTest {
 
     @Test
     void getNext1Thursday() {
-        List<Desire> expected = makeDesires(new Desire("2023-12-28")); // thursday
+        List<Desire> expected = makeDesires(new Desire("2026-06-04")); // Thursday
         List<Desire> actual = desireMaker.addNext(1, DayOfWeek.THURSDAY).make();
         assertEquals(expected, actual);
     }
 
     @Test
-    void getNext5Thursdays() {
+    void getNext3Thursdays() {
         List<Desire> expected = makeDesires(
-                new Desire("2023-12-28"),
-                new Desire("2024-01-04"),
-                new Desire("2024-01-11"),
-                new Desire("2024-01-18"),
-                new Desire("2024-01-25"));
-        List<Desire> actual = desireMaker.addNext(5, DayOfWeek.THURSDAY).make();
+                new Desire("2026-06-04"),
+                new Desire("2026-06-11"),
+                new Desire("2026-06-18"));
+        List<Desire> actual = desireMaker.addNext(3, DayOfWeek.THURSDAY).make();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void getNext1Monday_todayIsMonday_returnsToday() {
+        List<Desire> expected = makeDesires(new Desire("2026-06-01")); // today
+        List<Desire> actual = desireMaker.addNext(1, DayOfWeek.MONDAY).make();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void getNext2Mondays_todayIsMonday_returnsToday_andNextMonday() {
+        List<Desire> expected = makeDesires(new Desire("2026-06-01"), new Desire("2026-06-08"));
+        List<Desire> actual = desireMaker.addNext(2, DayOfWeek.MONDAY).make();
         assertEquals(expected, actual);
     }
 
     @Test
     void explicitWednesdayAndThursday_andImplicitWednesdayAndThursdayAndSunday_makes3DesiresSorted() {
         List<Desire> stubbedExplicit = makeDesires(
-                new Desire("2023-12-27", ExtensionInterest.EARLIER), // wed
-                new Desire("2023-12-28", ExtensionInterest.LATER)); // thu
+                new Desire("2026-06-03", ExtensionInterest.EARLIER), // wed
+                new Desire("2026-06-04", ExtensionInterest.LATER)); // thu
         desiresExplicitMockedStatic.when(DesiresExplicit::makeExplicitDesires).thenReturn(stubbedExplicit);
 
         List<Desire> expected = makeDesires(
-                new Desire("2023-12-27", ExtensionInterest.EARLIER), // wed
-                new Desire("2023-12-28", ExtensionInterest.LATER), // thu
-                new Desire("2023-12-31", ANY)); // sun
+                new Desire("2026-06-03", ExtensionInterest.EARLIER), // wed
+                new Desire("2026-06-04", ExtensionInterest.LATER), // thu
+                new Desire("2026-06-07", ANY)); // sun
 
         List<Desire> actual = desireMaker
                 .addExplicitDesires()
@@ -96,11 +108,11 @@ class DesireMakerTest {
 
         @Test
         void exist_1Explicit_1Periodic_sameCategory_doesNotThrow_becauseExplicitOneIsSelected() {
-            List<Desire> nextThursday = makeDesires(new Desire("2023-12-28", ExtensionInterest.LATER));
+            List<Desire> nextThursday = makeDesires(new Desire("2026-06-04", ExtensionInterest.LATER));
             desiresExplicitMockedStatic.when(DesiresExplicit::makeExplicitDesires).thenReturn(nextThursday);
 
             // LATER is to verify that explicit is taken; periodic would be ANY
-            List<Desire> expected = makeDesires(new Desire("2023-12-28", ExtensionInterest.LATER));
+            List<Desire> expected = makeDesires(new Desire("2026-06-04", ExtensionInterest.LATER));
 
             List<Desire> actualExplicitThenPeriodic = desireMaker.addExplicitDesires().addNext(1, DayOfWeek.THURSDAY).make();
             assertEquals(expected, actualExplicitThenPeriodic);
@@ -113,8 +125,8 @@ class DesireMakerTest {
         @Test
         void exist_2_explicitDesires_HasSameCategory_throws() {
             List<Desire> explicitDesires = makeDesires(
-                    new Desire(LocalDate.parse("2023-12-28"), ANY, Court.getIndoorIds()),
-                    new Desire(LocalDate.parse("2023-12-28"), ANY, Court.getIndoorIds()));
+                    new Desire(LocalDate.parse("2026-06-07"), ANY, Court.getIndoorIds()),
+                    new Desire(LocalDate.parse("2026-06-07"), ANY, Court.getIndoorIds()));
             desiresExplicitMockedStatic.when(DesiresExplicit::makeExplicitDesires).thenReturn(explicitDesires);
 
             Executable makeExplicit = () -> desireMaker.addExplicitDesires().make();
@@ -134,8 +146,8 @@ class DesireMakerTest {
         @Test
         void exist_2Periodic_2Explicit_explicitOnesAreSelected() {
             List<Desire> explicitDesires = makeDesires(
-                    new Desire(LocalDate.parse("2023-12-28"), IndoorMonFri::new),
-                    new Desire(LocalDate.parse("2023-12-28"), OutdoorForTesting::new));
+                    new Desire(LocalDate.parse("2026-06-04"), IndoorMonFri::new),
+                    new Desire(LocalDate.parse("2026-06-04"), OutdoorForTesting::new));
             desiresExplicitMockedStatic.when(DesiresExplicit::makeExplicitDesires).thenReturn(explicitDesires);
 
             List<Desire> expected = new ArrayList<>(explicitDesires);
@@ -154,6 +166,13 @@ class DesireMakerTest {
     class Holidays {
 
         // todo in calendar: make holiday bookings visible that they're on holiday
+
+
+        @BeforeEach
+        void setUp() {
+            Clock clock = Clock.fixed(Instant.parse("2023-12-24T12:35:00.00Z"), ZoneId.of("Europe/Vilnius"));       // 2023-12-24 is Sunday
+            desireMaker = spy(new DesireMaker(clock));
+        }
 
         @Test
         void periodicDesiresSkipHolidayButExplicitDesiresDoNot() {

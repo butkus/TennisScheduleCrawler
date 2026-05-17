@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -123,19 +122,9 @@ public class DesireMaker {
     //   - 2 specific courts in the shade outdoors + all indoors
     //   - 2 in shade + all outdoors (there's overlap, should fail, or handle in priority order)
     private DesireMaker addNext(int count, DayOfWeek dayOfWeek, MyDesireBuilder draft) {
-        LocalDate startDate = getNow();
-        List<Desire> result = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            LocalDate next = startDate.with(TemporalAdjusters.next(dayOfWeek));
-            result.add(finalizeDraftAndBuild(draft, next));
-            startDate = next;
-        }
+        List<Desire> result = new PeriodicDesireMaker(count, dayOfWeek, draft, clock).make();
         this.periodicDesires.addAll(result);
         return this;
-    }
-
-    private static Desire finalizeDraftAndBuild(MyDesireBuilder myDesireBuilder, LocalDate date) {
-        return myDesireBuilder.date(date).build();
     }
 
     private LocalDate getNow() {
